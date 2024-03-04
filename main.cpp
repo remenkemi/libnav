@@ -13,7 +13,7 @@ int main()
 		std::string in_raw;
 		std::getline(std::cin, in_raw);
 		
-		std::string in_proc = dbg::strip(in_raw, ' ');
+		std::string in_proc = strutils::strip(in_raw, ' ');
 
 		std::vector<std::string> line_split = strutils::str_split(in_proc, ' ');
 		std::string cmd_name = line_split[0];

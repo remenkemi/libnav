@@ -138,6 +138,14 @@ namespace strutils
 		return "W" + str_mag_var;
 	}
 
+	/*
+		Function: str_split
+		Description: splits the string by a designated character
+		@param in: input string
+		@param sep: separator
+		@Return: vector of strings
+	*/
+
 	inline std::vector<std::string> str_split(std::string in, char sep)
 	{
 		std::stringstream s(in);
@@ -151,4 +159,29 @@ namespace strutils
 
 		return out;
 	}
+
+	/*
+		Function: strip
+		Description: removes a designated character from the start and end of the string
+		@param in: input string
+		@param sep: separator
+		@Return: vector of strings
+	*/
+
+	inline std::string strip(std::string& in, char tgt)
+    {
+        size_t i_first = 0;
+        size_t i_last = in.length()-1;
+
+        while(in[i_first] == tgt)
+        {
+            i_first++;
+        }
+        while(in[i_last] == tgt)
+        {
+            i_last--;
+        }
+
+        return in.substr(i_first, i_last - i_first + 1);
+    }
 }

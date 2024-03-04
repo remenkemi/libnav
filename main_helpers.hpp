@@ -53,24 +53,6 @@ namespace dbg
         }
     };
 
-
-    inline std::string strip(std::string& in, char tgt) // Move to str_utils
-    {
-        size_t i_first = 0;
-        size_t i_last = in.length()-1;
-
-        while(in[i_first] == tgt)
-        {
-            i_first++;
-        }
-        while(in[i_last] == tgt)
-        {
-            i_last--;
-        }
-
-        return in.substr(i_first, i_last - i_first + 1);
-    }
-
     typedef void (*cmd)(Avionics*, std::vector<std::string>&);
 
 
