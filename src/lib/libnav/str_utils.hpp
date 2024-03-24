@@ -10,6 +10,19 @@
 
 namespace strutils
 {
+	inline bool is_numeric(std::string& s)
+	{
+		for(auto i: s)
+        {
+            if(std::isalpha(i))
+            {
+                return false;
+            }
+        }
+
+		return true;
+	}
+
 	inline std::string double_to_str(double num, uint8_t precision)
 	{
 		std::stringstream s;

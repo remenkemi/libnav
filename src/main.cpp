@@ -28,6 +28,9 @@ int main()
 		{
 			std::cout << "Invalid command name\n";
 		}
+
+
+		avncs.update();
 	}
 	
 	return 0;

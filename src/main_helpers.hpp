@@ -5,8 +5,8 @@
 #include "lib/libnav/awy_db.hpp"
 
 
-double AC_LAT_DEF = 30.483511600;
-double AC_LON_DEF = -86.525094875;
+double AC_LAT_DEF = 45.588670483;
+double AC_LON_DEF = -122.598150383;
 
 
 namespace dbg
@@ -23,11 +23,16 @@ namespace dbg
         libnav::AwyDB* awy_db;
         libnav::NavDB* db;
 
+        std::unordered_map<std::string, std::string> env_vars;
+
 
         Avionics(std::string apt_dat, std::string custom_apt, std::string custom_rnw,
             std::string fix_data, std::string navaid_data, std::string awy_data, 
             double def_lat=AC_LAT_DEF, double def_lon=AC_LON_DEF)
         {
+            env_vars["ac_lat"] = strutils::double_to_str(def_lat, 8);
+            env_vars["ac_lon"] = strutils::double_to_str(def_lon, 8);
+
             ac_lat = def_lat;
             ac_lon = def_lon;
 
@@ -43,6 +48,11 @@ namespace dbg
             (void)ret;
         }
 
+        void update()
+        {
+            update_pos();
+        }
+
         ~Avionics()
         {
             delete awy_db;
@@ -51,16 +61,41 @@ namespace dbg
             navaid_db_ptr.reset();
             arpt_db_ptr.reset();
         }
+
+    private:
+        void update_pos()
+        {
+            bool lat_valid = strutils::is_numeric(env_vars["ac_lat"]);
+            bool lon_valid = strutils::is_numeric(env_vars["ac_lon"]);
+            
+            if(lon_valid && lat_valid)
+            {
+                ac_lat = std::stod(env_vars["ac_lat"]);
+                ac_lon = std::stod(env_vars["ac_lon"]);
+            }
+        }
     };
 
     typedef void (*cmd)(Avionics*, std::vector<std::string>&);
 
+
+    inline void set_var(Avionics* av, std::vector<std::string>& in)
+    {
+        if(in.size() != 2)
+        {
+            std::cout << "Command expects 2 arguments\n";
+            return;
+        }
+
+        av->env_vars[in[0]] = in[1];
+    }
 
     inline void display_poi_info(Avionics* av, std::vector<std::string>& in)
     {
         if(in.size() < 1)
         {
             std::cout << "Too few arguments provided\n";
+            return;
         }
 
         std::string poi_id = in[0];
@@ -116,6 +151,7 @@ namespace dbg
         if(in.size() != 3)
         {
             std::cout << "Command expects 3 arguments: <airway name> <entry point> <exit point>\n";
+            return;
         }
 
         std::vector<libnav::awy_point_t> tmp;
@@ -140,6 +176,7 @@ namespace dbg
     }
 
     std::unordered_map<std::string, cmd> cmd_map = {
+        {"set", set_var},
         {"poinfo", display_poi_info}, 
         {"get_path", get_path},
         {"quit", quit}
