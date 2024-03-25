@@ -39,7 +39,7 @@ namespace libnav
 		XP_NAV_ILS_DME = 18
 	};
 
-	enum navaid_types 
+	enum class NavaidType 
 	{
 		NAV_NONE = 0,
 		NAV_WAYPOINT = 1,
@@ -56,7 +56,9 @@ namespace libnav
 	};
 
 
-	navaid_type_t xp_type_to_libnav(navaid_type_t tp);
+	NavaidType xp_type_to_libnav(navaid_type_t tp);
+
+	NavaidType make_composite(NavaidType tp1, NavaidType tp2);
 
 
 	struct navaid_entry_t
@@ -67,7 +69,7 @@ namespace libnav
 
 	struct waypoint_entry_t
 	{
-		navaid_type_t type;
+		NavaidType type;
 		geo::point pos;
 		std::string area_code;
 		navaid_entry_t* navaid = nullptr;
@@ -115,20 +117,18 @@ namespace libnav
 
 		bool is_wpt(std::string id);
 
-		bool is_navaid_of_type(std::string id, navaid_type_t type);
+		bool is_navaid_of_type(std::string id, NavaidType type);
 
 		// get_wpt_data returns 0 if waypoint is not in the database. 
 		// Otherwise, returns number of items written to out.
 		int get_wpt_data(std::string id, std::vector<waypoint_entry_t>* out, 
-			std::string area_code="", navaid_type_t type=NAV_NONE);
+			std::string area_code="", NavaidType type=NavaidType::NAV_NONE);
 
 		void reset();
 
 		~NavaidDB();
 
 	private:
-		int comp_types[NAV_ILS_DME + 1];
-		int max_comp = NAV_ILS_DME;
 		std::string sim_wpt_db_path;
 		std::string sim_navaid_db_path;
 
@@ -151,7 +151,7 @@ namespace libnav
 	};
 
 
-	std::string navaid_to_str(int navaid_type);
+	std::string navaid_to_str(NavaidType navaid_type);
 
 	void sort_wpt_entry_by_dist(std::vector<waypoint_entry_t>* vec, geo::point p);
 
