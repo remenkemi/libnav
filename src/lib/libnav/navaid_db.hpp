@@ -10,6 +10,7 @@
 #include <string>
 #include <sstream>
 #include "geo_utils.hpp"
+#include "common.hpp"
 
 
 namespace libnav
@@ -101,9 +102,12 @@ namespace libnav
 	{
 	public:
 
+		DbErr err_code;
+
+
 		NavaidDB(std::string wpt_path, std::string navaid_path);
 
-		bool is_loaded();
+		DbErr is_loaded();
 
 		bool load_waypoints();
 

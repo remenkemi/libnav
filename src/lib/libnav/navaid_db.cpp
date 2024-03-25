@@ -59,28 +59,46 @@ namespace libnav
 	{
 		// Pre-defined stuff
 
+		err_code = DbErr::ERR_NONE;
+
 		comp_types[NAV_ILS_FULL] = 1;
 		comp_types[NAV_VOR_DME] = 1;
 		comp_types[NAV_ILS_DME] = 1;
-
-		navaid_entries = new navaid_entry_t[NAVAID_ENTRY_CACHE_SZ];
-		n_navaid_entries = 0;
-		assert(navaid_entries != nullptr);
 
 		// Paths
 
 		sim_wpt_db_path = wpt_path;
 		sim_navaid_db_path = navaid_path;
 
-		wpt_loaded = std::async(std::launch::async, [](NavaidDB* db) -> bool {return db->load_waypoints(); }, this);
-		navaid_loaded = std::async(std::launch::async, [](NavaidDB* db) -> bool {return db->load_navaids(); }, this);
+
+		navaid_entries = new navaid_entry_t[NAVAID_ENTRY_CACHE_SZ];
+		n_navaid_entries = 0;
+
+		if(navaid_entries == nullptr)
+		{
+			err_code = DbErr::BAD_ALLOC;
+		}
+		else
+		{
+			wpt_loaded = std::async(std::launch::async, [](NavaidDB* db) -> bool {return db->load_waypoints(); }, this);
+			navaid_loaded = std::async(std::launch::async, [](NavaidDB* db) -> bool {return db->load_navaids(); }, this);
+		}
 	}
 
 	// Public member functions:
 
-	bool NavaidDB::is_loaded()
+	DbErr NavaidDB::is_loaded()
 	{
-		return wpt_loaded.get() && navaid_loaded.get();
+		if(err_code == DbErr::ERR_NONE && (wpt_loaded.get() && navaid_loaded.get()))
+		{
+			err_code = DbErr::SUCCESS;
+		}
+		else
+		{
+			err_code = DbErr::FILE_NOT_FOUND;
+		}
+
+		return err_code;
 	}
 
 	void NavaidDB::reset()

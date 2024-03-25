@@ -13,9 +13,14 @@ namespace libnav
 		arpt_db = arpt_ptr;
 	}
 
-	bool NavDB::is_loaded()
+	DbErr NavDB::is_arpt_loaded()
 	{
-		return arpt_db->is_loaded() && navaid_db->is_loaded();
+		return arpt_db->is_loaded();
+	}
+
+	DbErr NavDB::is_navaid_loaded()
+	{
+		return navaid_db->is_loaded();
 	}
 
 	// Wrappers around ArptDB member functions.

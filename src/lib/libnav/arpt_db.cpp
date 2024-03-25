@@ -21,23 +21,34 @@ namespace libnav
 	ArptDB::ArptDB(std::string sim_arpt_path, std::string custom_arpt_path, 
 		std::string custom_rnw_path)
 	{
+		err_code = DbErr::ERR_NONE;
+
 		sim_arpt_db_path = sim_arpt_path;
 		custom_arpt_db_path = custom_arpt_path;
 		custom_rnw_db_path = custom_rnw_path;
 
-		if (!does_db_exist(custom_arpt_db_path, custom_arpt_db_sign) || !does_db_exist(custom_rnw_db_path, custom_rnw_db_sign))
+		
+		if (!does_db_exist(custom_arpt_db_path, custom_arpt_db_sign) || 
+			!does_db_exist(custom_rnw_db_path, custom_rnw_db_sign))
 		{
-			write_arpt_db.store(true, std::memory_order_seq_cst);
-			sim_db_loaded = std::async(std::launch::async, [](ArptDB* ptr) -> int { return ptr->load_from_sim_db(); }, this);
-			if (!does_db_exist(custom_arpt_db_path, custom_arpt_db_sign))
+			if(does_file_exist(sim_arpt_db_path))
 			{
-				apt_db_created = true;
-				arpt_db_task = std::async(std::launch::async, [](ArptDB* ptr) {ptr->write_to_arpt_db(); }, this);
+				write_arpt_db.store(true, std::memory_order_seq_cst);
+				sim_db_loaded = std::async(std::launch::async, [](ArptDB* ptr) -> int { return ptr->load_from_sim_db(); }, this);
+				if (!does_db_exist(custom_arpt_db_path, custom_arpt_db_sign))
+				{
+					apt_db_created = true;
+					arpt_db_task = std::async(std::launch::async, [](ArptDB* ptr) {ptr->write_to_arpt_db(); }, this);
+				}
+				if (!does_db_exist(custom_rnw_db_path, custom_rnw_db_sign))
+				{
+					rnw_db_created = true;
+					rnw_db_task = std::async(std::launch::async, [](ArptDB* ptr) {ptr->write_to_rnw_db(); }, this);
+				}
 			}
-			if (!does_db_exist(custom_rnw_db_path, custom_rnw_db_sign))
+			else
 			{
-				rnw_db_created = true;
-				rnw_db_task = std::async(std::launch::async, [](ArptDB* ptr) {ptr->write_to_rnw_db(); }, this);
+				err_code = DbErr::FILE_NOT_FOUND;
 			}
 		}
 		else
@@ -45,18 +56,34 @@ namespace libnav
 			arpt_db_task = std::async(std::launch::async, [](ArptDB* ptr) {ptr->load_from_custom_arpt(); }, this);
 			rnw_db_task = std::async(std::launch::async, [](ArptDB* ptr) {ptr->load_from_custom_rnw(); }, this);
 		}
+		
 	}
 
-	bool ArptDB::is_loaded()
+	DbErr ArptDB::is_loaded()
 	{
-		// Wait until all of the threads finish
-		arpt_db_task.get();
-		rnw_db_task.get();
-		if (apt_db_created || rnw_db_created)
+		if(err_code == DbErr::ERR_NONE)
 		{
-			return bool(sim_db_loaded.get());
+			// Wait until all of the threads finish
+			arpt_db_task.get();
+			rnw_db_task.get();
+			if (apt_db_created || rnw_db_created)
+			{
+				if(bool(sim_db_loaded.get()))
+				{
+					err_code = DbErr::SUCCESS;
+				}
+				else
+				{
+					err_code = DbErr::DATA_BASE_ERROR;
+				}
+			}
+			else
+			{
+				err_code = DbErr::SUCCESS;
+			}
 		}
-		return true;
+		
+		return err_code;
 	}
 
 	// These functions need to be public because they're used in 
@@ -95,12 +122,15 @@ namespace libnav
 					std::stringstream s(line);
 					s >> row_code;
 
-					if (tmp_arpt.icao != "" && tmp_rnw.icao != "" && (row_code == LAND_ARPT || row_code == DB_EOF))
+					if (tmp_arpt.icao != "" && tmp_rnw.icao != "" && 
+						(row_code == static_cast<int>(XPLMArptRowCode::LAND_ARPT)
+						 || row_code == static_cast<int>(XPLMArptRowCode::DB_EOF)))
 					{
 						// Offload airport data
 						double threshold = MIN_RWY_LENGTH_M;
 
-						if (max_rnw_length_m >= threshold && tmp_arpt.data.transition_alt_ft + tmp_arpt.data.transition_level > 0)
+						if (max_rnw_length_m >= threshold && tmp_arpt.data.transition_alt_ft + 
+							tmp_arpt.data.transition_level > 0)
 						{
 							std::unordered_map<std::string, runway_entry> apt_runways;
 							int n_runways = int(tmp_rnw.runways.size());
@@ -124,8 +154,10 @@ namespace libnav
 
 							// Update internal data
 
-							std::pair<std::string, airport_data> apt = std::make_pair(tmp_arpt.icao, tmp_arpt.data);
-							std::pair<std::string, std::unordered_map<std::string, runway_entry>> rnw_pair = std::make_pair(tmp_arpt.icao, apt_runways);
+							str_arpt_data_t apt = std::make_pair(tmp_arpt.icao, 
+								tmp_arpt.data);
+							str_rnw_t rnw_pair = std::make_pair(tmp_arpt.icao, 
+								apt_runways);
 							arpt_db.insert(apt);
 							rnw_db.insert(rnw_pair);
 						}
@@ -141,11 +173,11 @@ namespace libnav
 
 					// Parse data
 
-					if (row_code == LAND_ARPT)
+					if (row_code == static_cast<int>(XPLMArptRowCode::LAND_ARPT))
 					{
 						s >> tmp_arpt.data.elevation_ft;
 					}
-					else if (row_code == MISC_DATA)
+					else if (row_code == static_cast<int>(XPLMArptRowCode::MISC_DATA))
 					{
 						std::string var_name;
 						s >> var_name;
@@ -165,7 +197,8 @@ namespace libnav
 							s >> tmp_arpt.data.transition_level;
 						}
 					}
-					else if (row_code == LAND_RUNWAY && tmp_arpt.icao != "")
+					else if (row_code == static_cast<int>(XPLMArptRowCode::LAND_RUNWAY)
+						 && tmp_arpt.icao != "")
 					{
 						double tmp = parse_runway(line, &tmp_rnw.runways);
 						if (tmp > max_rnw_length_m)
@@ -173,7 +206,7 @@ namespace libnav
 							max_rnw_length_m = tmp;
 						}
 					}
-					else if (row_code == DB_EOF)
+					else if (row_code == static_cast<int>(XPLMArptRowCode::DB_EOF))
 					{
 						break;
 					}
@@ -249,10 +282,18 @@ namespace libnav
 				rnw_queue.erase(rnw_queue.begin());
 				for (int i = 0; i < int(data.runways.size()); i++)
 				{
-					std::string rnw_start_lat = strutils::double_to_str(data.runways[i].data.start.lat_deg, precision);
-					std::string rnw_start_lon = strutils::double_to_str(data.runways[i].data.start.lon_deg, precision);
-					std::string rnw_end_lat = strutils::double_to_str(data.runways[i].data.end.lat_deg, precision);
-					std::string rnw_end_lon = strutils::double_to_str(data.runways[i].data.end.lon_deg, precision);
+					std::string rnw_start_lat = strutils::double_to_str(
+						data.runways[i].data.start.lat_deg, precision);
+
+					std::string rnw_start_lon = strutils::double_to_str(
+						data.runways[i].data.start.lon_deg, precision);
+
+					std::string rnw_end_lat = strutils::double_to_str(
+						data.runways[i].data.end.lat_deg, precision);
+
+					std::string rnw_end_lon = strutils::double_to_str(
+						data.runways[i].data.end.lon_deg, precision);
+
 
 					std::string rnw_start = rnw_start_lat + " " + rnw_start_lon;
 					std::string rnw_end = rnw_end_lat + " " + rnw_end_lon;

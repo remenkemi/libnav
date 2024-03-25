@@ -45,7 +45,9 @@ namespace libnav
 	public:
 		NavDB(std::shared_ptr<libnav::ArptDB> arpt_ptr, std::shared_ptr<libnav::NavaidDB> navaid_ptr);
 
-		bool is_loaded();
+		DbErr is_arpt_loaded();
+
+		DbErr is_navaid_loaded();
 
 		//These member functions are just wrappers around ArptDB member functions.
 

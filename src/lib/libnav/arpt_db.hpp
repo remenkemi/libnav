@@ -25,6 +25,7 @@
 #include <ctype.h>
 #include "str_utils.hpp"
 #include "geo_utils.hpp"
+#include "common.hpp"
 
 
 namespace libnav
@@ -41,7 +42,8 @@ namespace libnav
 	constexpr char DEFAULT_COMMENT_CHAR = '#';
 
 
-	enum xplm_arpt_row_codes {
+	enum class XPLMArptRowCode 
+	{
 		LAND_ARPT = 1,
 		MISC_DATA = 1302,
 		LAND_RUNWAY = 100,
@@ -100,12 +102,17 @@ namespace libnav
 
 	class ArptDB
 	{
+		typedef std::pair<std::string, airport_data> str_arpt_data_t;
+		typedef std::pair<std::string, std::unordered_map<std::string, runway_entry>> 
+			str_rnw_t;
+
 	public:
+		DbErr err_code;
 
 		ArptDB(std::string sim_arpt_path, std::string custom_arpt_path,
 			std::string custom_rnw_path);
 
-		bool is_loaded();
+		DbErr is_loaded();
 
 		//These functions need to be public because they're used in 
 		//other threads when ArptDB object is constructed.
