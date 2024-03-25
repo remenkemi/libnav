@@ -60,9 +60,9 @@ namespace libnav
 		//These member functions are just wrappers around NavaidDB member functions.
 
 		int get_wpt_data(std::string id, std::vector<waypoint_entry_t>* out, 
-			std::string area_code="", navaid_type_t type=NAV_NONE);
+			std::string area_code="", NavaidType type=NavaidType::NAV_NONE);
 
-		bool is_navaid_of_type(std::string id, navaid_type_t type);
+		bool is_navaid_of_type(std::string id, NavaidType type);
 
 	private:
 		std::shared_ptr<libnav::ArptDB> arpt_db;

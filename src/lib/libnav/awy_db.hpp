@@ -27,7 +27,7 @@ namespace libnav
     };
 
 
-    navaid_type_t xp_awy_type_to_libnav(navaid_type_t type);
+    NavaidType xp_awy_type_to_libnav(navaid_type_t type);
 
 
     struct alt_restr_t
@@ -37,7 +37,7 @@ namespace libnav
 
     struct awy_entry_t
     {
-        navaid_type_t type;
+        NavaidType type;
         std::string reg_code;  // Region code of navaid/fix
     };
 
@@ -47,7 +47,7 @@ namespace libnav
         awy_entry_t data;
         alt_restr_t alt_restr;
 
-        awy_point_t(std::string nm="", navaid_type_t tp=NAV_NONE, 
+        awy_point_t(std::string nm="", NavaidType tp=NavaidType::NAV_NONE, 
             std::string r_c="", uint32_t lower=0, uint32_t upper=0);
     };
 

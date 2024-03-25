@@ -3,23 +3,26 @@
 
 namespace libnav
 {
-    navaid_type_t xp_awy_type_to_libnav(navaid_type_t type)
+    NavaidType xp_awy_type_to_libnav(navaid_type_t type)
     {
         switch (type)
         {
         case XP_AWY_WPT:
-            return NAV_WAYPOINT;
+            return NavaidType::NAV_WAYPOINT;
         case XP_AWY_NDB:
-            return NAV_NDB;
+            return NavaidType::NAV_NDB;
         case XP_AWY_VHF:
-            return NAV_DME + NAV_DME_ONLY + NAV_VOR + NAV_VOR_DME;
+            return NavaidType(static_cast<int>(NavaidType::NAV_DME) + 
+                static_cast<int>(NavaidType::NAV_DME_ONLY) + 
+                static_cast<int>(NavaidType::NAV_VOR) + 
+                static_cast<int>(NavaidType::NAV_VOR_DME));
         default:
-            return NAV_NONE;
+            return NavaidType::NAV_NONE;
         }
     }
 
 
-    awy_point_t::awy_point_t(std::string nm, navaid_type_t tp, std::string r_c, 
+    awy_point_t::awy_point_t(std::string nm, NavaidType tp, std::string r_c, 
         uint32_t lower, uint32_t upper)
     {
         id = nm;
@@ -149,9 +152,13 @@ namespace libnav
                     std::string token = check_val + "_" + id_2 + "_" + awy_names;
                     if(used.find(token) == used.end())
                     {
+                        NavaidType type_1 = xp_awy_type_to_libnav(tp_1);
+                        NavaidType type_2 = xp_awy_type_to_libnav(tp_2);
+
                         used.insert(token);
-                        awy_point_t p1(check_val, tp_1, reg_code_1, lower, upper);
-                        awy_point_t p2(id_2, tp_2, reg_code_2, lower, upper);
+                        
+                        awy_point_t p1(check_val, type_1, reg_code_1, lower, upper);
+                        awy_point_t p2(id_2, type_2, reg_code_2, lower, upper);
                         add_to_awy_db(p1, p2, awy_names, path_restr);
                     }
                 }
