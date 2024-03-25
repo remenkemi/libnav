@@ -52,7 +52,8 @@ namespace libnav
 		NAV_DME = 128,
 		NAV_DME_ONLY = 256,
 		NAV_VOR_DME = 512,
-		NAV_ILS_DME = 1024
+		NAV_ILS_DME = 1024,
+		NAV_VHF_NAVAID = 2047 - NAV_WAYPOINT - NAV_NDB
 	};
 
 

@@ -1,12 +1,20 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <assert.h>
 #include "nav_db.hpp"
 #include "common.hpp"
 
 
 namespace libnav
 {
+    enum class TurnDir
+    {
+        LEFT,
+        RIGHT,
+        EITHER
+    };
+
     enum class AltMode
     {
         AT_OR_ABOVE,
@@ -22,6 +30,15 @@ namespace libnav
         AT_OR_BELOW,
         AT
     };
+
+    
+    TurnDir char2dir(char c);
+
+    float str2rnp(std::string s);
+
+    float str2outbd_crs(std::string s, bool* is_true);
+
+    float str2outbd_dist(std::string s, bool* as_time);
 
 
     struct arinc_fix_entry_t
@@ -42,7 +59,7 @@ namespace libnav
         waypoint_t main_fix;  // Columns 5-8
         std::string wpt_desc;  //Column 9. Ref: arinc424 spec, section 5.17
         
-        char turn_dir;  // Column 10: L/R/E. Ref: arinc424 spec, section 5.20
+        TurnDir turn_dir;
         float rnp;
         std::string leg_type;  // Column 12: Ref: arinc424 spec, section 5.21
         bool is_ovfy;
@@ -121,7 +138,7 @@ namespace libnav
         char rt_qual2;  // Column 38. Ref: arinc424 spec, section 5.7
 
 
-        arinc_leg_t get_leg;
+        arinc_leg_t get_leg(std::shared_ptr<NavaidDB> nav_db);
     };
 
 
