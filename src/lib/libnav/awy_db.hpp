@@ -77,4 +77,4 @@ namespace libnav
 
         void add_to_awy_db(awy_point_t p1, awy_point_t p2, std::string awy_nm, char restr);
     };    
-}
+}; // namespace libnav

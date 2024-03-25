@@ -68,4 +68,4 @@ namespace libnav
 		std::shared_ptr<libnav::ArptDB> arpt_db;
 		std::shared_ptr<libnav::NavaidDB> navaid_db;
 	};
-}
+}; // namespace libnav

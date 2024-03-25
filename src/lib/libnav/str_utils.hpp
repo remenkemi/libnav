@@ -197,4 +197,4 @@ namespace strutils
 
         return in.substr(i_first, i_last - i_first + 1);
     }
-}
+}; // namespace strutils

@@ -50,4 +50,4 @@ namespace libnav
 			return lower;
 		return val;
 	}
-}
+}; // namespace libnav

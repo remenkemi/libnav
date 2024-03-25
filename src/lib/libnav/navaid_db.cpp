@@ -385,7 +385,7 @@ namespace libnav
 
 		sort(vec->begin(), vec->end(), comp);
 	}
-};
+}; // namespace libnav
 
 
 namespace radnav_util
@@ -551,4 +551,4 @@ namespace radnav_util
 		}
 		qual = -1;
 	}
-}
+}; // namespace radnav_util

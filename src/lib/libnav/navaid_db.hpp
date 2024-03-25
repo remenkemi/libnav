@@ -157,7 +157,7 @@ namespace libnav
 
 	void sort_wpts_by_dist(std::vector<waypoint_t>* vec, geo::point p);
 
-};
+}; // namespace libnav
 
 
 namespace radnav_util
@@ -236,4 +236,4 @@ namespace radnav_util
 
 		void calc_qual(geo::point ac_pos);
 	};
-};
+}; // namespace radnav_util

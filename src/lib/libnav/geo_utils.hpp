@@ -258,4 +258,4 @@ namespace geo
 		}
 		return 0;
 	}
-}
+}; // namespace libnav

@@ -177,4 +177,4 @@ namespace libnav
 
 		void add_to_rnw_queue(rnw_data_t rnw);
 	};
-}
+}; // namespace libnav

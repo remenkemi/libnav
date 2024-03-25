@@ -199,4 +199,4 @@ namespace libnav
             }
         }
     }
-}
+}; // namespace libnav

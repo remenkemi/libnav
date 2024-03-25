@@ -52,4 +52,4 @@ namespace libnav
 	{
 		return navaid_db->is_navaid_of_type(id, type);
 	}
-}
+}; // namespace libnav

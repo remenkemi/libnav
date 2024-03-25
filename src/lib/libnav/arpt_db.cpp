@@ -577,4 +577,4 @@ namespace libnav
 		std::lock_guard<std::mutex> lock(rnw_queue_mutex);
 		rnw_queue.push_back(rnw);
 	}
-}
+}; // namespace libnav
