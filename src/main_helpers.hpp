@@ -109,7 +109,7 @@ namespace dbg
 
         std::string poi_id = in[0];
 
-        libnav::airport_data found_arpt;
+        libnav::airport_data_t found_arpt;
         std::vector<libnav::waypoint_entry_t> found_wpts;
 
         libnav::NavDB* db = av->db;
@@ -183,7 +183,7 @@ namespace dbg
         }
         std::exit(0);
     }
-    
+
 
     std::unordered_map<std::string, cmd> cmd_map = {
         {"set", set_var},

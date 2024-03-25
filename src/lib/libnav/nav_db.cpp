@@ -25,7 +25,7 @@ namespace libnav
 
 	// Wrappers around ArptDB member functions.
 
-	int NavDB::get_airport_data(std::string icao_code, airport_data* out)
+	int NavDB::get_airport_data(std::string icao_code, airport_data_t* out)
 	{
 		return arpt_db->get_airport_data(icao_code, out);
 	}
@@ -35,7 +35,7 @@ namespace libnav
 		return arpt_db->get_apt_rwys(icao_code, out);
 	}
 
-	int NavDB::get_rnw_data(std::string apt_icao, std::string rnw_id, runway_entry* out)
+	int NavDB::get_rnw_data(std::string apt_icao, std::string rnw_id, runway_entry_t* out)
 	{
 		return arpt_db->get_rnw_data(apt_icao, rnw_id, out);
 	}

@@ -51,7 +51,7 @@ namespace libnav
 	};
 
 
-	struct runway_entry
+	struct runway_entry_t
 	{
 		geo::point start, end;
 		int displ_threshold_m;
@@ -67,43 +67,43 @@ namespace libnav
 		}
 	};
 
-	typedef std::unordered_map<std::string, runway_entry> runway_data;
+	typedef std::unordered_map<std::string, runway_entry_t> runway_data;
 
-	struct runway
+	struct runway_t
 	{
 		std::string id;
-		runway_entry data;
+		runway_entry_t data;
 	};
 
-	struct airport_data
+	struct airport_data_t
 	{
 		geo::point pos;
 		uint32_t elevation_ft, transition_alt_ft, transition_level;
 	};
 
-	struct airport_entry
+	struct airport_entry_t
 	{
-		std::unordered_map<std::string, runway_entry> runways;
-		airport_data data;
+		std::unordered_map<std::string, runway_entry_t> runways;
+		airport_data_t data;
 	};
 
-	struct airport
+	struct airport_t
 	{
 		std::string icao;
-		airport_data data;
+		airport_data_t data;
 	};
 
-	struct rnw_data
+	struct rnw_data_t
 	{
 		std::string icao; //Airport icao
-		std::vector<runway> runways;
+		std::vector<runway_t> runways;
 	};
 
 
 	class ArptDB
 	{
-		typedef std::pair<std::string, airport_data> str_arpt_data_t;
-		typedef std::pair<std::string, std::unordered_map<std::string, runway_entry>> 
+		typedef std::pair<std::string, airport_data_t> str_arpt_data_t;
+		typedef std::pair<std::string, std::unordered_map<std::string, runway_entry_t>> 
 			str_rnw_t;
 
 	public:
@@ -131,11 +131,11 @@ namespace libnav
 
 		bool is_airport(std::string icao_code);
 
-		int get_airport_data(std::string icao_code, airport_data* out);
+		int get_airport_data(std::string icao_code, airport_data_t* out);
 
 		int get_apt_rwys(std::string icao_code, runway_data* out);
 
-		int get_rnw_data(std::string apt_icao, std::string rnw_id, runway_entry* out);
+		int get_rnw_data(std::string apt_icao, std::string rnw_id, runway_entry_t* out);
 
 	private:
 		std::string custom_arpt_db_sign = "ARPTDB";
@@ -147,8 +147,8 @@ namespace libnav
 
 		std::atomic<bool> write_arpt_db{ false };
 
-		std::vector<airport> arpt_queue;
-		std::vector<rnw_data> rnw_queue;
+		std::vector<airport_t> arpt_queue;
+		std::vector<rnw_data_t> rnw_queue;
 
 		std::mutex arpt_queue_mutex;
 		std::mutex rnw_queue_mutex;
@@ -164,17 +164,17 @@ namespace libnav
 		std::future<void> arpt_db_task;
 		std::future<void> rnw_db_task;
 
-		std::unordered_map<std::string, airport_data> arpt_db;
-		std::unordered_map<std::string, std::unordered_map<std::string, runway_entry>> rnw_db;
+		std::unordered_map<std::string, airport_data_t> arpt_db;
+		std::unordered_map<std::string, std::unordered_map<std::string, runway_entry_t>> rnw_db;
 
 		static bool does_db_exist(std::string path, std::string sign);
 
 		std::string normalize_rnw_id(std::string id);
 
-		double parse_runway(std::string line, std::vector<runway>* rnw); // Returns runway length in meters
+		double parse_runway(std::string line, std::vector<runway_t>* rnw); // Returns runway length in meters
 
-		void add_to_arpt_queue(airport arpt);
+		void add_to_arpt_queue(airport_t arpt);
 
-		void add_to_rnw_queue(rnw_data rnw);
+		void add_to_rnw_queue(rnw_data_t rnw);
 	};
 }

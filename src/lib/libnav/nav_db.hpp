@@ -26,12 +26,12 @@ enum POI_types
 
 namespace libnav
 {
-	struct POI
+	struct POI_t
 	{
 		std::string id;
 		std::vector<geo::point> wpt;
 		std::vector<navaid_entry_t> navaid;
-		airport_entry arpt;
+		airport_entry_t arpt;
 		uint8_t type;
 	};
 
@@ -51,11 +51,11 @@ namespace libnav
 
 		//These member functions are just wrappers around ArptDB member functions.
 
-		int get_airport_data(std::string icao_code, airport_data* out);
+		int get_airport_data(std::string icao_code, airport_data_t* out);
 
 		int get_apt_rwys(std::string icao_code, runway_data* out);
 
-		int get_rnw_data(std::string apt_icao, std::string rnw_id, runway_entry* out);
+		int get_rnw_data(std::string apt_icao, std::string rnw_id, runway_entry_t* out);
 
 		//These member functions are just wrappers around NavaidDB member functions.
 

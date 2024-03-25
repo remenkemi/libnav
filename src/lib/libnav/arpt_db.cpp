@@ -109,8 +109,8 @@ namespace libnav
 			std::string line;
 			int i = 0;
 			int limit = N_ARPT_LINES_IGNORE;
-			airport tmp_arpt = { "", {{0, 0}, 0, 0, 0} };
-			rnw_data tmp_rnw = { "", {} };
+			airport_t tmp_arpt = { "", {{0, 0}, 0, 0, 0} };
+			rnw_data_t tmp_rnw = { "", {} };
 			double max_rnw_length_m = 0;
 
 			while (getline(file, line))
@@ -132,13 +132,13 @@ namespace libnav
 						if (max_rnw_length_m >= threshold && tmp_arpt.data.transition_alt_ft + 
 							tmp_arpt.data.transition_level > 0)
 						{
-							std::unordered_map<std::string, runway_entry> apt_runways;
+							std::unordered_map<std::string, runway_entry_t> apt_runways;
 							int n_runways = int(tmp_rnw.runways.size());
 
 							for (int i = 0; i < n_runways; i++)
 							{
-								runway rnw = tmp_rnw.runways.at(i);
-								std::pair<std::string, runway_entry> tmp = std::make_pair(rnw.id, rnw.data);
+								runway_t rnw = tmp_rnw.runways.at(i);
+								std::pair<std::string, runway_entry_t> tmp = std::make_pair(rnw.id, rnw.data);
 								apt_runways.insert(tmp);
 								tmp_arpt.data.pos.lat_deg += rnw.data.start.lat_deg;
 								tmp_arpt.data.pos.lon_deg += rnw.data.start.lon_deg;
@@ -243,7 +243,7 @@ namespace libnav
 			{
 				std::lock_guard<std::mutex> lock(arpt_queue_mutex);
 				uint8_t precision = N_DOUBLE_OUT_PRECISION;
-				airport data = arpt_queue[0];
+				airport_t data = arpt_queue[0];
 				arpt_queue.erase(arpt_queue.begin());
 
 				std::string arpt_lat = strutils::double_to_str(data.data.pos.lat_deg, precision);
@@ -278,7 +278,7 @@ namespace libnav
 			{
 				std::lock_guard<std::mutex> lock(rnw_queue_mutex);
 				uint8_t precision = N_DOUBLE_OUT_PRECISION;
-				rnw_data data = rnw_queue[0];
+				rnw_data_t data = rnw_queue[0];
 				rnw_queue.erase(rnw_queue.begin());
 				for (int i = 0; i < int(data.runways.size()); i++)
 				{
@@ -332,10 +332,10 @@ namespace libnav
 				if (line != custom_arpt_db_sign)
 				{
 					std::string icao;
-					airport_data tmp;
+					airport_data_t tmp;
 					std::stringstream s(line);
 					s >> icao >> tmp.pos.lat_deg >> tmp.pos.lon_deg >> tmp.elevation_ft >> tmp.transition_alt_ft >> tmp.transition_level;
-					std::pair<std::string, airport_data> tmp_pair = std::make_pair(icao, tmp);
+					std::pair<std::string, airport_data_t> tmp_pair = std::make_pair(icao, tmp);
 					arpt_db.insert(tmp_pair);
 				}
 			}
@@ -361,7 +361,7 @@ namespace libnav
 		{
 			std::string line;
 			std::string curr_icao = "";
-			std::unordered_map<std::string, runway_entry> runways = {};
+			std::unordered_map<std::string, runway_entry_t> runways = {};
 			while (getline(file, line))
 			{
 				if(line.length() == 0 || line[0] == DEFAULT_COMMENT_CHAR)
@@ -371,21 +371,21 @@ namespace libnav
 				if (line != custom_rnw_db_sign)
 				{
 					std::string icao, rnw_id;
-					runway_entry tmp;
+					runway_entry_t tmp;
 					std::stringstream s(line);
 					s >> icao;
 					if (icao != curr_icao)
 					{
 						if (curr_icao != "")
 						{
-							std::pair<std::string, std::unordered_map<std::string, runway_entry>> icao_runways = std::make_pair(curr_icao, runways);
+							std::pair<std::string, std::unordered_map<std::string, runway_entry_t>> icao_runways = std::make_pair(curr_icao, runways);
 							rnw_db.insert(icao_runways);
 						}
 						curr_icao = icao;
 						runways.clear();
 					}
 					s >> rnw_id >> tmp.start.lat_deg >> tmp.start.lon_deg >> tmp.end.lat_deg >> tmp.end.lon_deg >> tmp.displ_threshold_m;
-					std::pair<std::string, runway_entry> str_rnw_entry = std::make_pair(rnw_id, tmp);
+					std::pair<std::string, runway_entry_t> str_rnw_entry = std::make_pair(rnw_id, tmp);
 					runways.insert(str_rnw_entry);
 				}
 			}
@@ -423,7 +423,7 @@ namespace libnav
 		Returns 1 if any data has been written to out. Otherwise, returns 0.
 	*/
 
-	int ArptDB::get_airport_data(std::string icao_code, airport_data* out)
+	int ArptDB::get_airport_data(std::string icao_code, airport_data_t* out)
 	{
 		if (is_airport(icao_code))
 		{
@@ -474,7 +474,7 @@ namespace libnav
 		Returns 1 if runway data was found and written to out. Otherwise, returns 0.
 	*/
 
-	int ArptDB::get_rnw_data(std::string apt_icao, std::string rnw_id, runway_entry* out)
+	int ArptDB::get_rnw_data(std::string apt_icao, std::string rnw_id, runway_entry_t* out)
 	{
 		if (is_airport(apt_icao))
 		{
@@ -534,14 +534,14 @@ namespace libnav
 		return id;
 	}
 
-	double ArptDB::parse_runway(std::string line, std::vector<runway>* rnw)
+	double ArptDB::parse_runway(std::string line, std::vector<runway_t>* rnw)
 	{
 		std::stringstream s(line);
 		int limit_1 = N_RNW_ITEMS_IGNORE_BEGINNING;
 		int limit_2 = N_RNW_ITEMS_IGNORE_END;
 		std::string junk;
-		runway rnw_1;
-		runway rnw_2;
+		runway_t rnw_1;
+		runway_t rnw_2;
 		for (int i = 0; i < limit_1; i++)
 		{
 			s >> junk;
@@ -566,13 +566,13 @@ namespace libnav
 		return rnw_1.data.get_impl_length_m();
 	}
 
-	void ArptDB::add_to_arpt_queue(airport arpt)
+	void ArptDB::add_to_arpt_queue(airport_t arpt)
 	{
 		std::lock_guard<std::mutex> lock(arpt_queue_mutex);
 		arpt_queue.push_back(arpt);
 	}
 
-	void ArptDB::add_to_rnw_queue(rnw_data rnw)
+	void ArptDB::add_to_rnw_queue(rnw_data_t rnw)
 	{
 		std::lock_guard<std::mutex> lock(rnw_queue_mutex);
 		rnw_queue.push_back(rnw);

@@ -15,7 +15,7 @@
 
 namespace libnav
 {
-	uint16_t xp_type_to_libnav(uint16_t tp)
+	navaid_type_t xp_type_to_libnav(navaid_type_t tp)
 	{
 		switch(tp)
 		{
