@@ -44,8 +44,17 @@ namespace dbg
             awy_db = new libnav::AwyDB(awy_data);
             db = new libnav::NavDB(arpt_db_ptr, navaid_db_ptr);
 
-            bool ret = db->is_loaded();
-            (void)ret;
+            libnav::DbErr err_arpt = db->is_arpt_loaded();
+            libnav::DbErr err_nav = db->is_navaid_loaded();
+
+            if(err_arpt != libnav::DbErr::SUCCESS)
+            {
+                std::cout << "Unable to load airport database\n";
+            }
+            if(err_nav != libnav::DbErr::SUCCESS)
+            {
+                std::cout << "Unable to load navaid database\n";
+            }
         }
 
         void update()
@@ -57,7 +66,7 @@ namespace dbg
         {
             delete awy_db;
             delete db;
-            navaid_db_ptr->reset();
+            navaid_db_ptr.reset();
             navaid_db_ptr.reset();
             arpt_db_ptr.reset();
         }
@@ -174,6 +183,7 @@ namespace dbg
         }
         std::exit(0);
     }
+    
 
     std::unordered_map<std::string, cmd> cmd_map = {
         {"set", set_var},
