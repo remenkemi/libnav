@@ -4,8 +4,9 @@
 
 int main()
 {
-	dbg::Avionics avncs("apt.dat", "777_arpt.dat", "777_rnw.dat", "earth_fix.dat", 
-		"earth_nav.dat", "earth_awy.dat");
+	dbg::Avionics avncs("test_data/apt.dat", "test_data/777_arpt.dat", 
+		"test_data/777_rnw.dat", "test_data/earth_fix.dat", 
+		"test_data/earth_nav.dat", "test_data/earth_awy.dat");
 	std::cout << "Avionics loaded\n";
 	
 	while(1)
