@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "nav_db.hpp"
 #include "common.hpp"
+#include "str_utils.hpp"
 
 
 namespace libnav
@@ -21,7 +22,14 @@ namespace libnav
         AT_OR_BELOW,
         AT,
         WITHIN,
-        SID_AT_OR_ABOVE
+        SID_AT_OR_ABOVE,  // At or above altitude specified in the 2nd altitude field
+        GS_AT,  // Glide slope altitude in alt2, at altitude in alt1
+        GS_AT_OR_ABOVE,  // Glide slope altitude in alt2, at or above altitude in alt1
+        GS_INTC_AT,
+        GS_INTC_AT_OR_ABOVE,
+        ALT_STEPDOWN_AT_AT_OR_ABOVE,
+        ALT_STEPDOWN_AT_AT,
+        ALT_STEPDOWN_AT_AT_OR_BELOW
     };
 
     enum class SpeedMode
@@ -32,6 +40,8 @@ namespace libnav
     };
 
     
+    // Functions for decoding some arinc data fields:
+
     TurnDir char2dir(char c);
 
     float str2rnp(std::string s);
@@ -39,6 +49,10 @@ namespace libnav
     float str2outbd_crs(std::string s, bool* is_true);
 
     float str2outbd_dist(std::string s, bool* as_time);
+
+    AltMode char2alt_mode(char c);
+
+    int str2alt(std::string s);
 
 
     struct arinc_fix_entry_t
@@ -118,7 +132,7 @@ namespace libnav
         std::string outbd_dist_time;  // Column 22. Distance in nm/time(min) from main_fix to next wpt. *10. 
             // T at the end if time. Ref: arinc424 spec, section 5.27
         
-        char alt_desc;  // Column 23
+        char alt_desc;  // Column 23. Ref: arinc424 spec, section 5.29
         std::string alt1;  // Column 24. In feet or flight level. Ref: arinc424 spec, section 5.30
         std::string alt2;  // Column 25. In feet or flight level. Ref: arinc424 spec, section 5.30
         int trans_alt;  // Column 26. In feet MSL. Ref: arinc424 spec, section 5.53

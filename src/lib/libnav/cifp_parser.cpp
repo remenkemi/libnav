@@ -61,6 +61,61 @@ namespace libnav
         return 0;
     }
 
+    AltMode char2alt_mode(char c)
+    {
+        switch (c)
+        {
+        case '+':
+            return AltMode::AT_OR_ABOVE;
+        case '-':
+            return AltMode::AT_OR_BELOW;
+        case 'B':
+            return AltMode::WITHIN;
+        case 'C':
+            return AltMode::SID_AT_OR_ABOVE;
+        case 'G':
+            return AltMode::GS_AT;
+        case 'H':
+            return AltMode::GS_AT_OR_ABOVE;
+        case 'I':
+            return AltMode::GS_INTC_AT;
+        case 'J':
+            return AltMode::GS_INTC_AT_OR_ABOVE;
+        case 'V':
+            return AltMode::ALT_STEPDOWN_AT_AT_OR_ABOVE;
+        case 'X':
+            return AltMode::ALT_STEPDOWN_AT_AT;
+        case 'Y':
+            return AltMode::ALT_STEPDOWN_AT_AT_OR_BELOW;
+        default:
+            return AltMode::AT;
+        }
+    }
+
+    int str2alt(std::string s)
+    {
+        if(s.length() == 5)
+        {
+            if(s[0] == 'F' && s[1] == 'L')
+            {
+                std::string num_part = s.substr(2, 3);
+                if(strutils::is_numeric(num_part))
+                {
+                    return stoi(num_part) * 100;
+                }
+            }
+            else
+            {
+                if(strutils::is_numeric(s))
+                {
+                    return stoi(s) * 100;
+                }
+            }
+        }
+
+        return 0;
+    }
+
 
     // arinc_fix_entry_t definitions:
 
