@@ -76,12 +76,13 @@ namespace libnav
     struct arinc_fix_entry_t
     {
         std::string fix_ident;  //Ref: arinc424 spec, section 5.13/5.23/5.144/5.271
-        std::string area_code;  //Ref: arinc424 spec, section 5.14
+        std::string country_code;  //Ref: arinc424 spec, section 5.14
         char db_section;  //D - navaid, E - enroute, P - airport. Ref: arinc424 spec, section 5.4
         char db_subsection;  //Ref: arinc424 spec, section 5.5
 
 
-        waypoint_t to_waypoint_t(std::shared_ptr<NavDB> nav_db);
+        waypoint_t to_waypoint_t(std::string& area_code, 
+            std::shared_ptr<NavDB> nav_db);
     };
 
     struct arinc_leg_t
@@ -170,7 +171,7 @@ namespace libnav
         char rt_qual2;  // Column 38. Ref: arinc424 spec, section 5.7
 
 
-        arinc_leg_t get_leg(std::shared_ptr<NavDB> nav_db);
+        arinc_leg_t get_leg(std::string& area_code, std::shared_ptr<NavDB> nav_db);
     };
 
     /* This one contains procedure and transition name. Not just the leg itself.*/
@@ -185,9 +186,11 @@ namespace libnav
 
 
     inline void parse_flt_string(arinc_leg_full_t& full_leg, 
-        std::vector<std::string>& in, std::shared_ptr<NavDB> nav_db);
+        std::vector<std::string>& in, std::string& area_code, 
+        std::shared_ptr<NavDB> nav_db);
 
-    arinc_leg_full_t str2full_arinc(std::string s, std::shared_ptr<NavDB> nav_db);
+    arinc_leg_full_t str2full_arinc(std::string& s, std::string& area_code, 
+        std::shared_ptr<NavDB> nav_db);
 
 
     typedef std::vector<arinc_leg_t> arinc_leg_seq_t;

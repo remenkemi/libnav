@@ -158,9 +158,11 @@ namespace libnav
 
     // arinc_fix_entry_t definitions:
 
-    waypoint_t arinc_fix_entry_t::to_waypoint_t(std::shared_ptr<NavDB> nav_db)
+    waypoint_t arinc_fix_entry_t::to_waypoint_t(std::string& area_code, 
+        std::shared_ptr<NavDB> nav_db)
     {
         NavaidType lookup_type = NavaidType::NAV_NONE;
+        std::string lookup_area = "ENRT";
 
         if(db_section == 'D')
         {
@@ -174,13 +176,20 @@ namespace libnav
             }
             // Add section P
         }
+        else if(db_section == 'P')
+        {
+            if(db_subsection == 'C')
+            {
+                lookup_area = area_code;
+            }
+        }
         else if(db_section != 'D' && db_section != 'E')
         {
             return {};
         }
         
         std::vector<waypoint_entry_t> wpts;
-        nav_db->get_wpt_data(fix_ident, &wpts, area_code, lookup_type);
+        nav_db->get_wpt_data(fix_ident, &wpts, lookup_area, country_code, lookup_type);
 
         assert(wpts.size() < 2);
 
@@ -194,12 +203,13 @@ namespace libnav
 
     // arinc_str_t definitions:
 
-    arinc_leg_t arinc_str_t::get_leg(std::shared_ptr<NavDB> nav_db)
+    arinc_leg_t arinc_str_t::get_leg(std::string& area_code, 
+        std::shared_ptr<NavDB> nav_db)
     {
         arinc_leg_t out;
         out.rt_type = rt_type;
 
-        out.main_fix = main_fix.to_waypoint_t(nav_db);
+        out.main_fix = main_fix.to_waypoint_t(area_code, nav_db);
 
         out.wpt_desc = wpt_desc;
         out.turn_dir = char2dir(turn_dir);
@@ -207,7 +217,7 @@ namespace libnav
         out.leg_type = leg_type;
         out.is_ovfy = tdv == 'Y';
 
-        out.recd_navaid = recd_navaid.to_waypoint_t(nav_db);
+        out.recd_navaid = recd_navaid.to_waypoint_t(area_code, nav_db);
         out.arc_radius = arc_radius;
         out.theta = theta;
         out.rho = rho;
@@ -224,7 +234,7 @@ namespace libnav
         out.vert_angle_deg = vert_angle;
         out.vert_scale_ft = vert_scale;
 
-        out.center_fix = center_fix.to_waypoint_t(nav_db);
+        out.center_fix = center_fix.to_waypoint_t(area_code, nav_db);
 
         out.multi_cod = multi_cod;
         out.gnss_ind = gnss_ind;
@@ -236,7 +246,8 @@ namespace libnav
 
 
     inline void parse_flt_string(arinc_leg_full_t& full_leg, 
-        std::vector<std::string>& in, std::shared_ptr<NavDB> nav_db)
+        std::vector<std::string>& in, std::string& area_code, 
+        std::shared_ptr<NavDB> nav_db)
     {
         arinc_str_t tmp;
 
@@ -244,7 +255,7 @@ namespace libnav
         
 
         tmp.main_fix.fix_ident = in[4];
-        tmp.main_fix.area_code = in[5];
+        tmp.main_fix.country_code = in[5];
         tmp.main_fix.db_section = in[6][0];
         tmp.main_fix.db_subsection = in[7][0];
         tmp.wpt_desc = in[8];
@@ -255,7 +266,7 @@ namespace libnav
         tmp.tdv = in[12][0];
 
         tmp.recd_navaid.fix_ident = strutils::strip(in[13], ' ');
-        tmp.recd_navaid.area_code = strutils::strip(in[14], ' ');
+        tmp.recd_navaid.country_code = strutils::strip(in[14], ' ');
         tmp.recd_navaid.db_section = in[15][0];
         tmp.recd_navaid.db_subsection = in[16][0];
 
@@ -276,7 +287,7 @@ namespace libnav
         tmp.vert_scale = strutils::stoi_with_strip(in[29]);
 
         tmp.center_fix.fix_ident = strutils::strip(in[30], ' ');
-        tmp.center_fix.area_code = strutils::strip(in[31], ' ');
+        tmp.center_fix.country_code = strutils::strip(in[31], ' ');
         tmp.center_fix.db_section = in[32][0];
         tmp.center_fix.db_subsection = in[33][0];
 
@@ -285,11 +296,12 @@ namespace libnav
         tmp.rt_qual1 = in[36][0];
         tmp.rt_qual2 = in[37][0];
 
-        full_leg.leg = tmp.get_leg(nav_db);
+        full_leg.leg = tmp.get_leg(area_code, nav_db);
     }
 
 
-    arinc_leg_full_t str2full_arinc(std::string s, std::shared_ptr<NavDB> nav_db)
+    arinc_leg_full_t str2full_arinc(std::string& s, std::string& area_code, 
+        std::shared_ptr<NavDB> nav_db)
     {
         arinc_leg_full_t out;
         
@@ -304,7 +316,7 @@ namespace libnav
             out.proc_name = s_split[2];
             out.trans_name = s_split[3];
 
-            parse_flt_string(out, s_split, nav_db);
+            parse_flt_string(out, s_split, area_code, nav_db);
         }
         
         return out;
