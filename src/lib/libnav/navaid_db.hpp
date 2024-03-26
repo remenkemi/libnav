@@ -73,6 +73,7 @@ namespace libnav
 		NavaidType type;
 		geo::point pos;
 		std::string area_code;
+		std::string country_code;
 		navaid_entry_t* navaid = nullptr;
 	};
 
@@ -123,7 +124,8 @@ namespace libnav
 		// get_wpt_data returns 0 if waypoint is not in the database. 
 		// Otherwise, returns number of items written to out.
 		int get_wpt_data(std::string id, std::vector<waypoint_entry_t>* out, 
-			std::string area_code="", NavaidType type=NavaidType::NAV_NONE);
+			std::string area_code="", std::string country_code="", 
+			NavaidType type=NavaidType::NAV_NONE);
 
 		void reset();
 

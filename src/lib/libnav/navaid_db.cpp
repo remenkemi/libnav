@@ -164,7 +164,7 @@ namespace libnav
 					waypoint_t wpt = {};
 					wpt.data.type = NavaidType::NAV_WAYPOINT;
 					s >> wpt.data.pos.lat_deg >> wpt.data.pos.lon_deg >> wpt.id >> 
-						wpt.data.area_code >> junk;
+						wpt.data.area_code >> wpt.data.country_code >> junk;
 
 					add_to_wpt_cache(wpt);
 				}
@@ -203,7 +203,7 @@ namespace libnav
 					navaid_entry_t navaid;
 
 					s >> type >> lat >> lon >> elevation >> freq >> max_recv >> mag_var >> 
-						id >> wpt.data.area_code >> junk;
+						id >> wpt.data.area_code >> wpt.data.country_code >> junk;
 
 					wpt.id = id;
 					wpt.data.type = xp_type_to_libnav(type);
@@ -252,7 +252,7 @@ namespace libnav
 	}
 
 	int NavaidDB::get_wpt_data(std::string id, std::vector<waypoint_entry_t>* out, 
-		std::string area_code, NavaidType type)
+		std::string area_code, std::string country_code, NavaidType type)
 	{
 		if (is_wpt(id))
 		{
@@ -265,6 +265,10 @@ namespace libnav
 
 				bool is_fine = true;
 				if(area_code != "" && wpt_curr.area_code != area_code)
+				{
+					is_fine = false;
+				}
+				if(country_code != "" && wpt_curr.country_code != country_code)
 				{
 					is_fine = false;
 				}

@@ -43,9 +43,9 @@ namespace libnav
 	// Wrappers around NavaidDB member functions.
 
 	int NavDB::get_wpt_data(std::string id, std::vector<waypoint_entry_t>* out, 
-			std::string area_code, NavaidType type)
+			std::string area_code, std::string country_code, NavaidType type)
 	{
-		return navaid_db->get_wpt_data(id, out, area_code, type);
+		return navaid_db->get_wpt_data(id, out, area_code, country_code, type);
 	}
 
 	bool NavDB::is_navaid_of_type(std::string id, NavaidType type)
