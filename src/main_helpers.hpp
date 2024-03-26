@@ -196,7 +196,8 @@ namespace dbg
         UNUSED(in);
         std::string s = "SID:020,4,CASCD2,RW28R,PEGTY,K1,E,A,E   , ,   ,CF, ,PSC,K1,D, ,      ,2415,1539,2680,0015, ,     ,     ,     , ,   ,    ,   , , , , , , , , ;";
         libnav::arinc_leg_full_t leg_full;
-        leg_full = libnav::str2full_arinc(s, av->db);
+        std::string icao_cd = "KPDX";
+        leg_full = libnav::str2full_arinc(s, icao_cd, av->db);
         std::cout << leg_full.proc_name << " " << leg_full.trans_name << "\n";
     }
 
