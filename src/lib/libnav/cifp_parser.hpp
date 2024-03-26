@@ -49,6 +49,30 @@ namespace libnav
         NONE
     };
 
+    enum class TCHType
+    {
+        ILS_MLS,
+        RNAV,
+        VGSI,
+        DEFAULT,
+        NONE
+    };
+
+    enum class LSCategory  // Category of the landing system as per arinc 424, section 5.80
+    {
+        ILS_LOC_ONLY,
+        LS_CAT_I,
+        LS_CAT_II,
+        LS_CAT_III,
+        IGS,
+        LDA_GS,
+        LDA_NO_GS,
+        SDF_GS,
+        SDF_NO_GS,
+        NONE
+    };
+
+
     constexpr char ARINC_FIELD_SEP = ',';
     // Number of columns in string containing SID/STAR/APPCH
     constexpr size_t N_ARINC_FLT_PROC_COL = 38;
@@ -71,6 +95,10 @@ namespace libnav
     int str2alt(std::string s);  // Ref: arinc 5.30
 
     SpeedMode char2spd_mode(char c);  // Ref: arinc 5.261
+
+    TCHType char2tch_type(char c);  // Ref: arinc 5.270
+
+    LSCategory char2ls_category(char c);  // Ref: arinc 5.80
 
 
     struct arinc_fix_entry_t
@@ -172,6 +200,24 @@ namespace libnav
 
 
         arinc_leg_t get_leg(std::string& area_code, std::shared_ptr<NavDB> nav_db);
+    };
+
+    struct arinc_rwy_data_t
+    {
+        float grad_deg;  // Column 2. Runway gradient in degrees * 1000. Ref: arinc424 spec, section 5.212
+        float ellips_height_m;  // Column 3. Ellipsoidal height in m * 10. Ref: arinc424 spec, section 5.225
+        int thresh_elev_msl_ft;  // Column 4. Ref: arinc424 spec, section 5.68
+
+        TCHType tch_tp;  // Column 5. Ref: arinc424 spec, section 5.270
+
+        std::string ls_ident;  // Column 6. Identifyer of the landing system(4 chars). Ref: arinc424 spec, section 5.44
+        LSCategory ls_cat;  // Column 7. Landing system category. Ref: arinc424 spec, section 5.80
+
+        int tch_ft;  // Column 8. Threshold crossing height. Ref: arinc424 spec, section 5.67
+
+        geo::point pos;  // Column 9-10. Position of the runway. Ref: arinc424 spec, section 5.36-37. NOTE: dms format.
+
+        int thresh_displ_ft;  // Column 11. Ref: arinc424 spec, section 5.69.
     };
 
     /* This one contains procedure and transition name. Not just the leg itself.*/

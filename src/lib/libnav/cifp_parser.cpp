@@ -3,6 +3,8 @@
 
 namespace libnav
 {
+    // Functions for decoding some arinc data fields:
+
     ProcType str2proc_type(std::string s)
     {
         if(s == "SID")
@@ -156,6 +158,50 @@ namespace libnav
             return SpeedMode::AT_OR_BELOW;
         default:
             return SpeedMode::AT;
+        }
+    }
+
+    TCHType char2tch_type(char c)
+    {
+        switch (c)
+        {
+        case 'I':
+            return TCHType::ILS_MLS;
+        case 'R':
+            return TCHType::RNAV;
+        case 'V':
+            return TCHType::VGSI;
+        case 'D':
+            return TCHType::DEFAULT;
+        default:
+            return TCHType::NONE;
+        }
+    }
+
+    LSCategory char2ls_category(char c)
+    {
+        switch(c)
+        {
+        case '0':
+            return LSCategory::ILS_LOC_ONLY;
+        case '1':
+            return LSCategory::LS_CAT_I;
+        case '2':
+            return LSCategory::LS_CAT_II;
+        case '3':
+            return LSCategory::LS_CAT_III;
+        case 'I':
+            return LSCategory::IGS;
+        case 'L':
+            return LSCategory::LDA_GS;
+        case 'A':
+            return LSCategory::LDA_NO_GS;
+        case 'S':
+            return LSCategory::SDF_GS;
+        case 'F':
+            return LSCategory::SDF_NO_GS;
+        default:
+            return LSCategory::NONE;
         }
     }
 
