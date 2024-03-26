@@ -61,6 +61,8 @@ namespace libnav
 
     float str2outbd_crs(std::string s, bool* is_true)
     {
+        *is_true = false;
+
         if(s.length() == 4)
         {
             if(s[3] == 'T')
@@ -75,6 +77,8 @@ namespace libnav
 
     float str2outbd_dist(std::string s, bool* as_time)
     {
+        *as_time = false;
+
         if(s.length() == 4)
         {
             if(s[0] == 'T')
