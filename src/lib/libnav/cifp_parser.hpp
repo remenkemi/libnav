@@ -42,17 +42,19 @@ namespace libnav
     
     // Functions for decoding some arinc data fields:
 
-    TurnDir char2dir(char c);
+    TurnDir char2dir(char c);  // Ref: arinc section 5.20
 
-    float str2rnp(std::string s);
+    float str2rnp(std::string s);  // Ref: arinc section 5.211
 
-    float str2outbd_crs(std::string s, bool* is_true);
+    float str2outbd_crs(std::string s, bool* is_true);  // Ref: arinc 5.26
 
-    float str2outbd_dist(std::string s, bool* as_time);
+    float str2outbd_dist(std::string s, bool* as_time);  // Ref: arinc 5.27
 
-    AltMode char2alt_mode(char c);
+    AltMode char2alt_mode(char c);  // Ref: arinc 5.29
 
-    int str2alt(std::string s);
+    int str2alt(std::string s);  // Ref: arinc 5.30
+
+    SpeedMode char2spd_mode(char c);  // Ref: arinc 5.261
 
 
     struct arinc_fix_entry_t

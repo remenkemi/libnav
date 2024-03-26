@@ -116,6 +116,19 @@ namespace libnav
         return 0;
     }
 
+    SpeedMode char2spd_mode(char c)
+    {
+        switch(c)
+        {
+        case '+':
+            return SpeedMode::AT_OR_ABOVE;
+        case '-':
+            return SpeedMode::AT_OR_BELOW;
+        default:
+            return SpeedMode::AT;
+        }
+    }
+
 
     // arinc_fix_entry_t definitions:
 
@@ -174,7 +187,22 @@ namespace libnav
         out.outbd_crs_deg = str2outbd_crs(outbd_mag_crs, &out.outbd_crs_true);
         out.outbd_dist_time = str2outbd_dist(outbd_dist_time, &out.outbd_dist_as_time);
 
+        out.alt_desc = char2alt_mode(alt_desc);
+        out.alt1_ft = str2alt(alt1);
+        out.alt2_ft = str2alt(alt2);
+        out.trans_alt = trans_alt;
+
+        out.speed_desc = char2spd_mode(speed_desc);
+        out.spd_lim_kias = spd_lim;
+        out.vert_angle_deg = vert_angle;
+        out.vert_scale_ft = vert_scale;
+
+        out.center_fix = center_fix.to_waypoint_t(nav_db);
         
+        out.multi_cod = multi_cod;
+        out.gnss_ind = gnss_ind;
+        out.rt_qual1 = rt_qual1;
+        out.rt_qual2 = rt_qual2;
 
         return out;
     }
