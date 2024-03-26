@@ -197,4 +197,26 @@ namespace strutils
 
         return in.substr(i_first, i_last - i_first + 1);
     }
+
+	inline int stoi_with_strip(std::string& s, char s_char=' ')
+	{
+		std::string s_stripped = strip(s, s_char);
+		if(s_stripped != "")
+		{
+			return atoi(s_stripped.c_str());
+		}
+
+		return 0;
+	}
+
+	inline float stof_with_strip(std::string& s, char s_char=' ')
+	{
+		std::string s_stripped = strip(s, s_char);
+		if(s_stripped != "")
+		{
+			return atof(s_stripped.c_str());
+		}
+
+		return 0;
+	}
 }; // namespace strutils

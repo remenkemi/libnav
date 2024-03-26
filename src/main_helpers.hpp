@@ -3,6 +3,9 @@
 #include <string>
 #include "lib/libnav/nav_db.hpp"
 #include "lib/libnav/awy_db.hpp"
+#include "lib/libnav/cifp_parser.hpp"
+
+#define UNUSED(x) (void)(x)
 
 
 double AC_LAT_DEF = 45.588670483;
@@ -21,7 +24,7 @@ namespace dbg
         std::shared_ptr<libnav::NavaidDB> navaid_db_ptr;
 
         libnav::AwyDB* awy_db;
-        libnav::NavDB* db;
+        std::shared_ptr<libnav::NavDB> db;
 
         std::unordered_map<std::string, std::string> env_vars;
 
@@ -36,13 +39,13 @@ namespace dbg
             ac_lat = def_lat;
             ac_lon = def_lon;
 
-            std::shared_ptr<libnav::ArptDB> arpt_db_ptr = 
+            arpt_db_ptr = 
                 std::make_shared<libnav::ArptDB>(apt_dat, custom_apt, custom_rnw);
-	        std::shared_ptr<libnav::NavaidDB> navaid_db_ptr = 
+	        navaid_db_ptr = 
                 std::make_shared<libnav::NavaidDB>(fix_data, navaid_data);
 
             awy_db = new libnav::AwyDB(awy_data);
-            db = new libnav::NavDB(arpt_db_ptr, navaid_db_ptr);
+            db = std::make_shared<libnav::NavDB>(arpt_db_ptr, navaid_db_ptr);
 
             libnav::DbErr err_arpt = db->is_arpt_loaded();
             libnav::DbErr err_nav = db->is_navaid_loaded();
@@ -65,7 +68,7 @@ namespace dbg
         ~Avionics()
         {
             delete awy_db;
-            delete db;
+            db.reset();
             navaid_db_ptr.reset();
             navaid_db_ptr.reset();
             arpt_db_ptr.reset();
@@ -112,7 +115,7 @@ namespace dbg
         libnav::airport_data_t found_arpt;
         std::vector<libnav::waypoint_entry_t> found_wpts;
 
-        libnav::NavDB* db = av->db;
+        std::shared_ptr<libnav::NavDB> db = av->db;
 
         size_t n_arpts_found = db->get_airport_data(poi_id, &found_arpt);
         size_t n_wpts_found = db->get_wpt_data(poi_id, &found_wpts);
@@ -174,7 +177,7 @@ namespace dbg
 
     inline void quit(Avionics* av, std::vector<std::string>& in)
     {
-        (void)av;
+        UNUSED(av);
 
         if(in.size())
         {
@@ -184,11 +187,25 @@ namespace dbg
         std::exit(0);
     }
 
+    inline void test_cmd(Avionics* av, std::vector<std::string>& in)
+    {
+        //UNUSED(av);
+
+        //bool bool_var = false;
+        //std::cout << libnav::str2alt(in[0]) << " " << bool_var << "\n";
+        UNUSED(in);
+        std::string s = "SID:020,4,CASCD2,RW28R,PEGTY,K1,E,A,E   , ,   ,CF, ,PSC,K1,D, ,      ,2415,1539,2680,0015, ,     ,     ,     , ,   ,    ,   , , , , , , , , ;";
+        libnav::arinc_leg_full_t leg_full;
+        leg_full = libnav::str2full_arinc(s, av->db);
+        std::cout << leg_full.proc_name << " " << leg_full.trans_name << "\n";
+    }
+
 
     std::unordered_map<std::string, cmd> cmd_map = {
         {"set", set_var},
         {"poinfo", display_poi_info}, 
         {"get_path", get_path},
-        {"quit", quit}
+        {"quit", quit},
+        {"test", test_cmd}
         };
 }

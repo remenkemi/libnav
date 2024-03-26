@@ -39,8 +39,24 @@ namespace libnav
         AT
     };
 
+    enum class ProcType
+    {
+        SID,
+        STAR,
+        APPROACH,
+        PRDAT,
+        RWY,
+        NONE
+    };
+
+    constexpr char ARINC_FIELD_SEP = ',';
+    // Number of columns in string containing SID/STAR/APPCH
+    constexpr size_t N_ARINC_FLT_PROC_COL = 38;
+
     
     // Functions for decoding some arinc data fields:
+
+    ProcType str2proc_type(std::string s);
 
     TurnDir char2dir(char c);  // Ref: arinc section 5.20
 
@@ -65,7 +81,7 @@ namespace libnav
         char db_subsection;  //Ref: arinc424 spec, section 5.5
 
 
-        waypoint_t to_waypoint_t(std::shared_ptr<NavaidDB> nav_db);
+        waypoint_t to_waypoint_t(std::shared_ptr<NavDB> nav_db);
     };
 
     struct arinc_leg_t
@@ -154,8 +170,24 @@ namespace libnav
         char rt_qual2;  // Column 38. Ref: arinc424 spec, section 5.7
 
 
-        arinc_leg_t get_leg(std::shared_ptr<NavaidDB> nav_db);
+        arinc_leg_t get_leg(std::shared_ptr<NavDB> nav_db);
     };
+
+    /* This one contains procedure and transition name. Not just the leg itself.*/
+    struct arinc_leg_full_t  
+    {
+        ProcType p_type;
+        std::string proc_name;  // Column 3. Ref: arinc424 spec, section 5.9 & 5.10
+        std::string trans_name;  // Column 4. Ref: arinc424 spec, section 5.11
+
+        arinc_leg_t leg;
+    };
+
+
+    inline void parse_flt_string(arinc_leg_full_t& full_leg, 
+        std::vector<std::string>& in, std::shared_ptr<NavDB> nav_db);
+
+    arinc_leg_full_t str2full_arinc(std::string s, std::shared_ptr<NavDB> nav_db);
 
 
     typedef std::vector<arinc_leg_t> arinc_leg_seq_t;
