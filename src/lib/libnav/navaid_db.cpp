@@ -392,6 +392,10 @@ namespace libnav
 			return "WPT";
 		case NavaidType::NAV_NDB:
 			return "NDB";
+		case NavaidType::NAV_DME:
+			return "DME";
+		case NavaidType::NAV_VOR:
+			return "VOR";
 		case NavaidType::NAV_ILS_LOC_ONLY:
 			return "ILS";
 		case NavaidType::NAV_ILS_LOC:
