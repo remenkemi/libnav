@@ -10,29 +10,29 @@ namespace libnav
         char tmp[ARINC_MAX_TP_LENGTH+1];
         int sz = 0;
 
-        while (sz < s.length() && sz < ARINC_MAX_TP_LENGTH && s[sz] != ':')
+        while (sz < int(s.length()) && sz < ARINC_MAX_TP_LENGTH && s[sz] != ':')
         {
             tmp[sz] = s[sz];
             sz++;
         }
         
-        if(tmp == "SID")
+        if(strcmp(tmp, "SID") == 0)
         {
             return ProcType::SID;
         }
-        if(tmp == "STAR")
+        if(strcmp(tmp, "STAR") == 0)
         {
             return ProcType::STAR;
         }
-        if(tmp == "APPCH")
+        if(strcmp(tmp, "APPCH") == 0)
         {
             return ProcType::APPROACH;
         }
-        if(tmp == "PRDAT")
+        if(strcmp(tmp, "PRDAT") == 0)
         {
             return ProcType::PRDAT;
         }
-        if(tmp == "RWY")
+        if(strcmp(tmp, "RWY") == 0)
         {
             return ProcType::RWY;
         }
@@ -262,8 +262,7 @@ namespace libnav
 
     // arinc_str_t definitions:
 
-    arinc_str_t::arinc_str_t(std::vector<std::string>& in_split, std::string& area_code, 
-        std::shared_ptr<NavDB> nav_db)
+    arinc_str_t::arinc_str_t(std::vector<std::string>& in_split)
     {
         rt_type = in_split[1][0];
         
@@ -365,7 +364,7 @@ namespace libnav
             proc_name = s_split[2];
             trans_name = s_split[3];
 
-            arinc_str_t arnc_str(s_split, area_code, nav_db);
+            arinc_str_t arnc_str(s_split);
             leg = arnc_str.get_leg(area_code, nav_db);
 
             err = DbErr::SUCCESS;
@@ -381,6 +380,8 @@ namespace libnav
     arinc_rwy_full_t::arinc_rwy_full_t(std::string& s, std::string& area_code, 
         std::shared_ptr<NavDB> nav_db)
     {
+        (void)nav_db;
+        (void)area_code;
         /*
             Runway data is grouped into 2 parts separated by ';'. 
             The second(threshold location) part can be missing(e.g. HUEN).

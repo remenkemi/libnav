@@ -203,8 +203,7 @@ namespace libnav
         char rt_qual2;  // Column 38. Ref: arinc424 spec, section 5.7
 
 
-        arinc_str_t(std::vector<std::string>& in_split, std::string& area_code, 
-            std::shared_ptr<NavDB> nav_db);
+        arinc_str_t(std::vector<std::string>& in_split);
 
         arinc_leg_t get_leg(std::string& area_code, std::shared_ptr<NavDB> nav_db);
     };
