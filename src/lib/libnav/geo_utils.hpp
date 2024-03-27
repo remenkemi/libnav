@@ -8,15 +8,6 @@
 #include <math.h>
 
 
-#define DEG_TO_RAD M_PI / 180.0
-#define RAD_TO_DEG 180.0 / M_PI
-#define NM_TO_M 1852;
-#define FT_TO_NM 1 / 6076.12;
-#define M_TO_FT 3.28084
-
-constexpr double EARTH_RADIUS_NM = 3441.0;
-
-
 namespace geo
 {
 	/*
@@ -25,6 +16,13 @@ namespace geo
 		_nm: nautical miles
 		_ft: feet
 	*/
+
+	constexpr double DEG_TO_RAD = M_PI / 180.0;
+	constexpr double RAD_TO_DEG = 180.0 / M_PI;
+	constexpr double NM_TO_M = 1852;
+	constexpr double FT_TO_NM = 1 / 6076.12;
+	constexpr double M_TO_FT = 3.28084;
+	constexpr double EARTH_RADIUS_NM = 3441.0;
 
 
 	/*

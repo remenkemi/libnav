@@ -548,8 +548,8 @@ namespace radnav_util
 			if (lat_dist_nm)
 			{
 				
-				double v_dist_nm = abs(ac_pos.alt_ft - nav_data->elevation) * FT_TO_NM;
-				double slant_deg = atan(v_dist_nm / lat_dist_nm) * RAD_TO_DEG;
+				double v_dist_nm = abs(ac_pos.alt_ft - nav_data->elevation) * geo::FT_TO_NM;
+				double slant_deg = atan(v_dist_nm / lat_dist_nm) * geo::RAD_TO_DEG;
 
 				if (slant_deg > 0 && slant_deg < libnav::VOR_MAX_SLANT_ANGLE_DEG)
 				{
