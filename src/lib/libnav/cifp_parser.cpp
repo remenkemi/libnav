@@ -467,6 +467,7 @@ namespace libnav
         else
         {
             err = DbErr::DATA_BASE_ERROR;
+            return;
         }
 
         std::string pos_str = "";
