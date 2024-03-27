@@ -169,8 +169,6 @@ namespace libnav
 
 		static bool does_db_exist(std::string path, std::string sign);
 
-		std::string normalize_rnw_id(std::string id);
-
 		double parse_runway(std::string line, std::vector<runway_t>* rnw); // Returns runway length in meters
 
 		void add_to_arpt_queue(airport_t arpt);

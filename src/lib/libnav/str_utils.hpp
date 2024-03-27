@@ -277,4 +277,24 @@ namespace strutils
 
 		return 0;
 	}
+
+	/*
+		Function: normalize_rnw_id
+		Description:
+		Adds a leading 0 to runway IDs that need it. Runway IDs in some airports in e.g. US don't have
+		leading 0s, however, in Boeing's data bases all runways have them.
+		Param:
+		id: target id
+		Return:
+		Returns a modified id.
+	*/
+
+	inline std::string normalize_rnw_id(std::string id)
+	{
+		if (id.length() == 1 || (id.length() == 2 && std::isalpha(id[1])))
+		{
+			id = "0" + id;
+		}
+		return id;
+	}
 }; // namespace strutils
