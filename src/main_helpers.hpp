@@ -195,9 +195,9 @@ namespace dbg
         //std::cout << libnav::str2alt(in[0]) << " " << bool_var << "\n";
         UNUSED(in);
         //UNUSED(av);
-        std::string s = "APPCH:020,X,X22-X, ,BONDO,RJ,P,C,E  F, ,   ,CF, ,IKL,RJ,P,I,      ,0965,0127,2770,0020, ,05000,     ,     , ,   ,    ,   ,HME,RJ,D, , ,0,D,S;";
+        std::string s = "STAR:020,3,OCITY3,RW03,KPDX,K1,P,A,AE  , ,   ,VM, , , , , ,      ,    ,    ,2800,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;";
         //libnav::arinc_leg_full_t leg_full;
-        std::string icao_cd = "RJTT";
+        std::string icao_cd = "KPDX";
         libnav::arinc_leg_full_t leg(s, icao_cd, av->db);
         std::cout << leg.proc_name << " " << leg.trans_name << "\n";
 
