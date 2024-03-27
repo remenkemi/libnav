@@ -367,6 +367,12 @@ namespace libnav
 
             arinc_str_t arnc_str(s_split, area_code, nav_db);
             leg = arnc_str.get_leg(area_code, nav_db);
+
+            err = DbErr::SUCCESS;
+        }
+        else
+        {
+            err = DbErr::DATA_BASE_ERROR;
         }
     }
 
@@ -381,5 +387,27 @@ namespace libnav
             In that case we have to hope it's present in apt.dat.
         */
         std::vector<std::string> main_parts = strutils::str_split(s, ';');
+        std::vector<std::string> first_part_splt = strutils::str_split(
+            main_parts[0], ARINC_FIELD_SEP);
+        std::vector<std::string> name_part = strutils::str_split(
+            first_part_splt[0], ':');
+        
+        if(name_part.size() > 1 && first_part_splt.size() == N_ARINC_RWY_COL_FIRST)
+        {
+            id = name_part[1];
+
+            data.grad_deg = strutils::stof_with_strip(first_part_splt[1]) * 0.001;
+            data.ellips_height_m = strutils::stof_with_strip(first_part_splt[2]) * 0.1;
+            data.thresh_elev_msl_ft = strutils::stoi_with_strip(first_part_splt[3]);
+
+            data.tch_tp = char2tch_type(first_part_splt[4][0]);
+            data.ls_ident = first_part_splt[5];
+            data.ls_cat = char2ls_category(first_part_splt[6][0]);
+            data.tch_ft = strutils::stoi_with_strip(first_part_splt[7]);
+        }
+        else
+        {
+            err = DbErr::DATA_BASE_ERROR;
+        }
     }
 }; // namespace libnav

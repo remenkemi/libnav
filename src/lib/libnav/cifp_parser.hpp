@@ -78,6 +78,8 @@ namespace libnav
     constexpr size_t N_ARINC_FLT_PROC_COL = 38;
     // Maximum number of characters for the data designator(comes before the :)
     constexpr int ARINC_MAX_TP_LENGTH = 5;
+    // Number of columns in the first part of a runway entry
+    constexpr int N_ARINC_RWY_COL_FIRST = 8;
 
     
     // Functions for decoding some arinc data fields:
@@ -228,6 +230,8 @@ namespace libnav
     /* This one contains procedure and transition name. Not just the leg itself.*/
     struct arinc_leg_full_t  
     {
+        DbErr err;
+
         std::string proc_name;  // Column 3. Ref: arinc424 spec, section 5.9 & 5.10
         std::string trans_name;  // Column 4. Ref: arinc424 spec, section 5.11
 
@@ -240,6 +244,8 @@ namespace libnav
 
     struct arinc_rwy_full_t
     {
+        DbErr err;
+
         std::string id;
 
         arinc_rwy_data_t data;
