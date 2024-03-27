@@ -6,10 +6,15 @@
 #include <iomanip>
 #include <ctype.h>
 #include <math.h>
+#include <iostream>
 
 
 namespace strutils
 {
+	constexpr int N_LAT_STR_LENGTH = 9;
+	constexpr int N_LON_STR_LENGTH = 10;
+
+
 	inline bool is_numeric(std::string& s)
 	{
 		for(auto i: s)
@@ -107,6 +112,32 @@ namespace strutils
 		return s;
 	}
 
+	inline double str_to_lat(std::string& s)
+	{
+		if(int(s.length()) == N_LAT_STR_LENGTH)
+		{
+			double digit_pairs[4];
+			int curr_idx = 0;
+			for(int i = 1; i < N_LAT_STR_LENGTH + 1; i += 2)
+			{
+				int curr_pair = (s[i] - '0') * 10 + (s[i+1] - '0');
+				digit_pairs[curr_idx] = double(curr_pair);
+
+				curr_idx++;
+			}
+
+			double lat = digit_pairs[0] + digit_pairs[1] / 60 +
+				digit_pairs[2] / 3600 + digit_pairs[3] / 360000;
+			
+			if(s[0] == 'S')
+			{
+				lat *= -1;
+			}
+			return lat;
+		}
+		return 0;
+	}
+
 	/*
 		Converts longitude value in degrees to string Deg,Min,Sec notation
 	*/
@@ -132,6 +163,33 @@ namespace strutils
 		s.append(deg_to_str(abs_lon));
 
 		return s;
+	}
+
+	inline double str_to_lon(std::string& s)
+	{
+		if(int(s.length()) == N_LON_STR_LENGTH)
+		{
+			double digit_pairs[4];
+			digit_pairs[0] = (s[1] - '0') * 100 + (s[2] - '0') * 10 + (s[3] - '0');
+			int curr_idx = 1;
+			for(int i = 4; i < N_LON_STR_LENGTH + 1; i += 2)
+			{
+				int curr_pair = (s[i] - '0') * 10 + (s[i+1] - '0');
+				digit_pairs[curr_idx] = double(curr_pair);
+
+				curr_idx++;
+			}
+
+			double lon = digit_pairs[0] + digit_pairs[1] / 60 +
+				digit_pairs[2] / 3600 + digit_pairs[3] / 360000;
+			
+			if(s[0] == 'W')
+			{
+				lon *= -1;
+			}
+			return lon;
+		}
+		return 0;
 	}
 
 	/*
