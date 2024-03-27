@@ -237,12 +237,9 @@ namespace libnav
         }
         else if(db_section == 'P')
         {
-            if(db_subsection == 'C')
-            {
-                lookup_area = area_code;
-            }
+            lookup_area = area_code;
         }
-        else if(db_section != 'D' && db_section != 'E')
+        else if(db_section != 'D' && db_section != 'E' && db_section != 'P')
         {
             return {};
         }
@@ -361,8 +358,8 @@ namespace libnav
 
         if(s_split.size() == N_ARINC_FLT_PROC_COL)
         {
-            proc_name = s_split[2];
-            trans_name = s_split[3];
+            proc_name = strutils::strip(s_split[2], ' ');
+            trans_name = strutils::strip(s_split[3], ' ');
 
             arinc_str_t arnc_str(s_split);
             leg = arnc_str.get_leg(area_code, nav_db);

@@ -195,15 +195,15 @@ namespace dbg
         //std::cout << libnav::str2alt(in[0]) << " " << bool_var << "\n";
         UNUSED(in);
         //UNUSED(av);
-        std::string s = "RWY:RW34R,     ,      ,00020, ,ITC ,3,   ;N35323302,E139481134,1182;";
+        std::string s = "APPCH:020,X,X22-X, ,BONDO,RJ,P,C,E  F, ,   ,CF, ,IKL,RJ,P,I,      ,0965,0127,2770,0020, ,05000,     ,     , ,   ,    ,   ,HME,RJ,D, , ,0,D,S;";
         //libnav::arinc_leg_full_t leg_full;
         std::string icao_cd = "RJTT";
-        //leg_full = libnav::str2full_arinc(s, icao_cd, av->db);
-        //std::cout << leg_full.proc_name << " " << leg_full.trans_name << "\n";
+        libnav::arinc_leg_full_t leg(s, icao_cd, av->db);
+        std::cout << leg.proc_name << " " << leg.trans_name << "\n";
 
-        libnav::arinc_rwy_full_t rwy(s, icao_cd, av->db);
-        std::cout << rwy.id << " " << rwy.data.pos.lat_deg << " " 
-            << rwy.data.pos.lon_deg << " " << rwy.data.thresh_displ_ft << "\n";
+        //libnav::arinc_rwy_full_t rwy(s, icao_cd, av->db);
+        //std::cout << rwy.id << " " << rwy.data.pos.lat_deg << " " 
+        //    << rwy.data.pos.lon_deg << " " << rwy.data.thresh_displ_ft << "\n";
     }
 
 
