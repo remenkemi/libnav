@@ -74,6 +74,11 @@ namespace libnav
 		{
 			return NavaidType::NAV_ILS_DME;
 		}
+		if((tp_sum & static_cast<int>(NavaidType::NAV_ILS_LOC_ONLY)) && 
+			(tp_sum & static_cast<int>(NavaidType::NAV_DME)))
+		{
+			return NavaidType::NAV_ILS_DME;
+		}
 
 		return NavaidType::NAV_NONE;
 	}
