@@ -189,16 +189,21 @@ namespace dbg
 
     inline void test_cmd(Avionics* av, std::vector<std::string>& in)
     {
-        //UNUSED(av);
+        //UNUSED(av); b main_helpers.hpp:201
 
         //bool bool_var = false;
         //std::cout << libnav::str2alt(in[0]) << " " << bool_var << "\n";
-        UNUSED(in);
-        std::string s = "SID:020,4,CASCD2,RW28R,PEGTY,K1,E,A,E   , ,   ,CF, ,PSC,K1,D, ,      ,2415,1539,2680,0015, ,     ,     ,     , ,   ,    ,   , , , , , , , , ;";
-        libnav::arinc_leg_full_t leg_full;
-        std::string icao_cd = "KPDX";
-        leg_full = libnav::str2full_arinc(s, icao_cd, av->db);
-        std::cout << leg_full.proc_name << " " << leg_full.trans_name << "\n";
+        //UNUSED(in);
+        UNUSED(av);
+        //std::string s = "SID:040,4,HRMNS5,RW10B,LEZLI,K1,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;";
+        //libnav::arinc_leg_full_t leg_full;
+        //std::string icao_cd = "KPDX";
+        //leg_full = libnav::str2full_arinc(s, icao_cd, av->db);
+        //std::cout << leg_full.proc_name << " " << leg_full.trans_name << "\n";
+
+        double lat_deg = strutils::str_to_lat(in[0]);
+        double lon_deg = strutils::str_to_lon(in[1]);
+        std::cout << lat_deg << " " << lon_deg << "\n";
     }
 
 
