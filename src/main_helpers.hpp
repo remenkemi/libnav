@@ -193,17 +193,17 @@ namespace dbg
 
         //bool bool_var = false;
         //std::cout << libnav::str2alt(in[0]) << " " << bool_var << "\n";
-        //UNUSED(in);
-        UNUSED(av);
-        //std::string s = "SID:040,4,HRMNS5,RW10B,LEZLI,K1,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;";
+        UNUSED(in);
+        //UNUSED(av);
+        std::string s = "RWY:RW34R,     ,      ,00020, ,ITC ,3,   ;N35323302,E139481134,1182;";
         //libnav::arinc_leg_full_t leg_full;
-        //std::string icao_cd = "KPDX";
+        std::string icao_cd = "RJTT";
         //leg_full = libnav::str2full_arinc(s, icao_cd, av->db);
         //std::cout << leg_full.proc_name << " " << leg_full.trans_name << "\n";
 
-        double lat_deg = strutils::str_to_lat(in[0]);
-        double lon_deg = strutils::str_to_lon(in[1]);
-        std::cout << lat_deg << " " << lon_deg << "\n";
+        libnav::arinc_rwy_full_t rwy(s, icao_cd, av->db);
+        std::cout << rwy.id << " " << rwy.data.pos.lat_deg << " " 
+            << rwy.data.pos.lon_deg << " " << rwy.data.thresh_displ_ft << "\n";
     }
 
 

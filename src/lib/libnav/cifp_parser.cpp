@@ -407,9 +407,12 @@ namespace libnav
             data.pos.lat_deg = strutils::str_to_lat(lat_stripped);
             data.pos.lon_deg = strutils::str_to_lon(lon_stripped);
 
-            if(!get_pos_from_db(area_code, nav_db))
+            if(data.pos.lat_deg == 0 || data.pos.lon_deg == 0)
             {
-                err = DbErr::DATA_BASE_ERROR;
+                if(!get_pos_from_db(area_code, nav_db))
+                {
+                    err = DbErr::DATA_BASE_ERROR;
+                }
             }
         }
         else
@@ -439,14 +442,25 @@ namespace libnav
         
         if(name_part.size() > 1 && first_part_splt.size() == N_ARINC_RWY_COL_FIRST)
         {
-            id = name_part[1];
+            std::string curr_id = strutils::strip(name_part[1], ' ');
+            size_t id_length = curr_id.length();
+            if(id_length > 2 && curr_id[0] == 'R' && 
+                curr_id[1] == 'W' && isdigit(curr_id[2]))
+            {
+                id = strutils::normalize_rnw_id(curr_id.substr(2, id_length-2));
+            }
+            else
+            {
+                err = DbErr::DATA_BASE_ERROR;
+                return;
+            }
 
             data.grad_deg = strutils::stof_with_strip(first_part_splt[1]) * 0.001;
             data.ellips_height_m = strutils::stof_with_strip(first_part_splt[2]) * 0.1;
             data.thresh_elev_msl_ft = strutils::stoi_with_strip(first_part_splt[3]);
 
             data.tch_tp = char2tch_type(first_part_splt[4][0]);
-            data.ls_ident = first_part_splt[5];
+            data.ls_ident = strutils::strip(first_part_splt[5], ' ');
             data.ls_cat = char2ls_category(first_part_splt[6][0]);
             data.tch_ft = strutils::stoi_with_strip(first_part_splt[7]);
         }
@@ -455,9 +469,12 @@ namespace libnav
             err = DbErr::DATA_BASE_ERROR;
         }
 
+        std::string pos_str = "";
         if(main_parts.size() == 2)
         {
-            get_rwy_coords(main_parts[1], area_code, nav_db);
+            pos_str = main_parts[1];
         }
+
+        get_rwy_coords(pos_str, area_code, nav_db);
     }
 }; // namespace libnav
