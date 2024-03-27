@@ -159,7 +159,7 @@ namespace strutils
 		@Return: vector of strings
 	*/
 
-	inline std::vector<std::string> str_split(std::string in, char sep)
+	inline std::vector<std::string> str_split(std::string& in, char sep)
 	{
 		std::stringstream s(in);
 		std::string tmp;
