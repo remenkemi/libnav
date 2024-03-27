@@ -76,6 +76,8 @@ namespace libnav
     constexpr char ARINC_FIELD_SEP = ',';
     // Number of columns in string containing SID/STAR/APPCH
     constexpr size_t N_ARINC_FLT_PROC_COL = 38;
+    // Maximum number of characters for the data designator(comes before the :)
+    constexpr int ARINC_MAX_TP_LENGTH = 5;
 
     
     // Functions for decoding some arinc data fields:
@@ -199,6 +201,9 @@ namespace libnav
         char rt_qual2;  // Column 38. Ref: arinc424 spec, section 5.7
 
 
+        arinc_str_t(std::vector<std::string>& in_split, std::string& area_code, 
+            std::shared_ptr<NavDB> nav_db);
+
         arinc_leg_t get_leg(std::string& area_code, std::shared_ptr<NavDB> nav_db);
     };
 
@@ -223,20 +228,26 @@ namespace libnav
     /* This one contains procedure and transition name. Not just the leg itself.*/
     struct arinc_leg_full_t  
     {
-        ProcType p_type;
         std::string proc_name;  // Column 3. Ref: arinc424 spec, section 5.9 & 5.10
         std::string trans_name;  // Column 4. Ref: arinc424 spec, section 5.11
 
         arinc_leg_t leg;
+
+
+        arinc_leg_full_t(std::string& s, std::string& area_code, 
+            std::shared_ptr<NavDB> nav_db);
     };
 
+    struct arinc_rwy_full_t
+    {
+        std::string id;
 
-    inline void parse_flt_string(arinc_leg_full_t& full_leg, 
-        std::vector<std::string>& in, std::string& area_code, 
-        std::shared_ptr<NavDB> nav_db);
+        arinc_rwy_data_t data;
 
-    arinc_leg_full_t str2full_arinc(std::string& s, std::string& area_code, 
-        std::shared_ptr<NavDB> nav_db);
+
+        arinc_rwy_full_t(std::string& s, std::string& area_code, 
+            std::shared_ptr<NavDB> nav_db);
+    };
 
 
     typedef std::vector<arinc_leg_t> arinc_leg_seq_t;

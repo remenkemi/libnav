@@ -7,23 +7,32 @@ namespace libnav
 
     ProcType str2proc_type(std::string s)
     {
-        if(s == "SID")
+        char tmp[ARINC_MAX_TP_LENGTH+1];
+        int sz = 0;
+
+        while (sz < s.length() && sz < ARINC_MAX_TP_LENGTH && s[sz] != ':')
+        {
+            tmp[sz] = s[sz];
+            sz++;
+        }
+        
+        if(tmp == "SID")
         {
             return ProcType::SID;
         }
-        if(s == "STAR")
+        if(tmp == "STAR")
         {
             return ProcType::STAR;
         }
-        if(s == "APPCH")
+        if(tmp == "APPCH")
         {
             return ProcType::APPROACH;
         }
-        if(s == "PRDAT")
+        if(tmp == "PRDAT")
         {
             return ProcType::PRDAT;
         }
-        if(s == "RWY")
+        if(tmp == "RWY")
         {
             return ProcType::RWY;
         }
@@ -253,6 +262,56 @@ namespace libnav
 
     // arinc_str_t definitions:
 
+    arinc_str_t::arinc_str_t(std::vector<std::string>& in_split, std::string& area_code, 
+        std::shared_ptr<NavDB> nav_db)
+    {
+        rt_type = in_split[1][0];
+        
+        main_fix.fix_ident = in_split[4];
+        main_fix.country_code = in_split[5];
+        main_fix.db_section = in_split[6][0];
+        main_fix.db_subsection = in_split[7][0];
+        wpt_desc = in_split[8];
+
+        turn_dir = in_split[9][0];
+        rnp = strutils::strip(in_split[10], ' ');
+        leg_type = strutils::strip(in_split[11], ' ');
+        tdv = in_split[12][0];
+
+        recd_navaid.fix_ident = strutils::strip(in_split[13], ' ');
+        recd_navaid.country_code = strutils::strip(in_split[14], ' ');
+        recd_navaid.db_section = in_split[15][0];
+        recd_navaid.db_subsection = in_split[16][0];
+
+        arc_radius = strutils::stof_with_strip(in_split[17]);
+        theta = strutils::stof_with_strip(in_split[18]);
+        rho = strutils::stof_with_strip(in_split[19]);
+        outbd_mag_crs = strutils::strip(in_split[20], ' ');
+        outbd_dist_time = strutils::strip(in_split[21], ' ');
+
+        alt_desc = in_split[22][0];
+        alt1 = strutils::strip(in_split[23], ' ');
+        alt2 = strutils::strip(in_split[24], ' ');
+        trans_alt = strutils::stoi_with_strip(in_split[25]);
+
+        speed_desc = in_split[26][0];
+        spd_lim = strutils::stoi_with_strip(in_split[27]);
+        vert_angle = strutils::stof_with_strip(in_split[28]) * 0.01;
+        vert_scale = strutils::stoi_with_strip(in_split[29]);
+
+        center_fix.fix_ident = strutils::strip(in_split[30], ' ');
+        center_fix.country_code = strutils::strip(in_split[31], ' ');
+        center_fix.db_section = in_split[32][0];
+        center_fix.db_subsection = in_split[33][0];
+
+        multi_cod = in_split[34][0];
+        gnss_ind = in_split[35][0];
+        rt_qual1 = in_split[36][0];
+        rt_qual2 = in_split[37][0];
+    }
+
+    // arinc_leg_t definitions:
+
     arinc_leg_t arinc_str_t::get_leg(std::string& area_code, 
         std::shared_ptr<NavDB> nav_db)
     {
@@ -294,81 +353,33 @@ namespace libnav
         return out;
     }
 
+    // arinc_leg_full_t definitions:
 
-    inline void parse_flt_string(arinc_leg_full_t& full_leg, 
-        std::vector<std::string>& in, std::string& area_code, 
+    arinc_leg_full_t::arinc_leg_full_t(std::string& s, std::string& area_code, 
         std::shared_ptr<NavDB> nav_db)
-    {
-        arinc_str_t tmp;
+    {        
+        std::vector<std::string> s_split = strutils::str_split(s, ARINC_FIELD_SEP);
 
-        tmp.rt_type = in[1][0];
-        
+        if(s_split.size() == N_ARINC_FLT_PROC_COL)
+        {
+            proc_name = s_split[2];
+            trans_name = s_split[3];
 
-        tmp.main_fix.fix_ident = in[4];
-        tmp.main_fix.country_code = in[5];
-        tmp.main_fix.db_section = in[6][0];
-        tmp.main_fix.db_subsection = in[7][0];
-        tmp.wpt_desc = in[8];
-
-        tmp.turn_dir = in[9][0];
-        tmp.rnp = strutils::strip(in[10], ' ');
-        tmp.leg_type = strutils::strip(in[11], ' ');
-        tmp.tdv = in[12][0];
-
-        tmp.recd_navaid.fix_ident = strutils::strip(in[13], ' ');
-        tmp.recd_navaid.country_code = strutils::strip(in[14], ' ');
-        tmp.recd_navaid.db_section = in[15][0];
-        tmp.recd_navaid.db_subsection = in[16][0];
-
-        tmp.arc_radius = strutils::stof_with_strip(in[17]);
-        tmp.theta = strutils::stof_with_strip(in[18]);
-        tmp.rho = strutils::stof_with_strip(in[19]);
-        tmp.outbd_mag_crs = strutils::strip(in[20], ' ');
-        tmp.outbd_dist_time = strutils::strip(in[21], ' ');
-
-        tmp.alt_desc = in[22][0];
-        tmp.alt1 = strutils::strip(in[23], ' ');
-        tmp.alt2 = strutils::strip(in[24], ' ');
-        tmp.trans_alt = strutils::stoi_with_strip(in[25]);
-
-        tmp.speed_desc = in[26][0];
-        tmp.spd_lim = strutils::stoi_with_strip(in[27]);
-        tmp.vert_angle = strutils::stof_with_strip(in[28]) * 0.01;
-        tmp.vert_scale = strutils::stoi_with_strip(in[29]);
-
-        tmp.center_fix.fix_ident = strutils::strip(in[30], ' ');
-        tmp.center_fix.country_code = strutils::strip(in[31], ' ');
-        tmp.center_fix.db_section = in[32][0];
-        tmp.center_fix.db_subsection = in[33][0];
-
-        tmp.multi_cod = in[34][0];
-        tmp.gnss_ind = in[35][0];
-        tmp.rt_qual1 = in[36][0];
-        tmp.rt_qual2 = in[37][0];
-
-        full_leg.leg = tmp.get_leg(area_code, nav_db);
+            arinc_str_t arnc_str(s_split, area_code, nav_db);
+            leg = arnc_str.get_leg(area_code, nav_db);
+        }
     }
 
+    // arinc_rwy_full_t definitions:
 
-    arinc_leg_full_t str2full_arinc(std::string& s, std::string& area_code, 
+    arinc_rwy_full_t::arinc_rwy_full_t(std::string& s, std::string& area_code, 
         std::shared_ptr<NavDB> nav_db)
     {
-        arinc_leg_full_t out;
-        
-        std::vector<std::string> s_split = strutils::str_split(s, ARINC_FIELD_SEP);
-        std::vector<std::string> proc_tp = strutils::str_split(s_split[0], ':');
-
-        out.p_type = str2proc_type(proc_tp[0]);
-
-        if(out.p_type != ProcType::NONE && out.p_type != ProcType::PRDAT 
-            && out.p_type != ProcType::RWY && s_split.size() == N_ARINC_FLT_PROC_COL)
-        {
-            out.proc_name = s_split[2];
-            out.trans_name = s_split[3];
-
-            parse_flt_string(out, s_split, area_code, nav_db);
-        }
-        
-        return out;
+        /*
+            Runway data is grouped into 2 parts separated by ';'. 
+            The second(threshold location) part can be missing(e.g. HUEN).
+            In that case we have to hope it's present in apt.dat.
+        */
+        std::vector<std::string> main_parts = strutils::str_split(s, ';');
     }
 }; // namespace libnav
