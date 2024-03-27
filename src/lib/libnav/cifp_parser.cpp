@@ -237,6 +237,16 @@ namespace libnav
         }
         else if(db_section == 'P')
         {
+            if(db_subsection == 'A')
+            {
+                airport_data_t apt_data;
+                int ret = nav_db->get_airport_data(area_code, &apt_data);
+                if(ret)
+                {
+                    return {area_code, {NavaidType::NAV_NONE, apt_data.pos, 
+                        area_code, country_code}};
+                }
+            }
             lookup_area = area_code;
         }
         else if(db_section != 'D' && db_section != 'E' && db_section != 'P')
