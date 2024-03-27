@@ -80,6 +80,7 @@ namespace libnav
     constexpr int ARINC_MAX_TP_LENGTH = 5;
     // Number of columns in the first part of a runway entry
     constexpr int N_ARINC_RWY_COL_FIRST = 8;
+    constexpr int N_ARINC_RWY_COL_SECOND = 3;
 
     
     // Functions for decoding some arinc data fields:
@@ -249,6 +250,12 @@ namespace libnav
 
         arinc_rwy_data_t data;
 
+
+        int get_pos_from_db(std::string& area_code, 
+            std::shared_ptr<NavDB> nav_db);
+
+        void get_rwy_coords(std::string& s, std::string& area_code, 
+            std::shared_ptr<NavDB> nav_db);
 
         arinc_rwy_full_t(std::string& s, std::string& area_code, 
             std::shared_ptr<NavDB> nav_db);

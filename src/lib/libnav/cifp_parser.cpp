@@ -377,16 +377,60 @@ namespace libnav
 
     // arinc_rwy_full_t definitions:
 
+    int arinc_rwy_full_t::get_pos_from_db(std::string& area_code, 
+        std::shared_ptr<NavDB> nav_db)
+    {
+        runway_entry_t rnw;
+        int ret = nav_db->get_rnw_data(area_code, id, &rnw);
+
+        if(ret)
+        {
+            data.pos = rnw.start;
+            data.thresh_displ_ft = rnw.displ_threshold_m * geo::M_TO_FT;
+        }
+
+        return ret;
+    }
+
+    void arinc_rwy_full_t::get_rwy_coords(std::string& s, std::string& area_code, 
+        std::shared_ptr<NavDB> nav_db)
+    {
+        std::vector<std::string> second_part_splt = strutils::str_split(
+            s, ARINC_FIELD_SEP);
+        
+        if(second_part_splt.size() == N_ARINC_RWY_COL_SECOND)
+        {
+            std::string lat_stripped = strutils::strip(second_part_splt[0], ' ');
+            std::string lon_stripped = strutils::strip(second_part_splt[1], ' ');
+            data.thresh_displ_ft = strutils::stoi_with_strip(second_part_splt[2]);
+
+            data.pos.lat_deg = strutils::str_to_lat(lat_stripped);
+            data.pos.lon_deg = strutils::str_to_lon(lon_stripped);
+
+            if(!get_pos_from_db(area_code, nav_db))
+            {
+                err = DbErr::DATA_BASE_ERROR;
+            }
+        }
+        else
+        {
+            if(!get_pos_from_db(area_code, nav_db))
+            {
+                err = DbErr::DATA_BASE_ERROR;
+            }
+        }
+    }
+
     arinc_rwy_full_t::arinc_rwy_full_t(std::string& s, std::string& area_code, 
         std::shared_ptr<NavDB> nav_db)
     {
-        (void)nav_db;
-        (void)area_code;
         /*
             Runway data is grouped into 2 parts separated by ';'. 
             The second(threshold location) part can be missing(e.g. HUEN).
             In that case we have to hope it's present in apt.dat.
         */
+        err = DbErr::SUCCESS;
+
         std::vector<std::string> main_parts = strutils::str_split(s, ';');
         std::vector<std::string> first_part_splt = strutils::str_split(
             main_parts[0], ARINC_FIELD_SEP);
@@ -409,6 +453,11 @@ namespace libnav
         else
         {
             err = DbErr::DATA_BASE_ERROR;
+        }
+
+        if(main_parts.size() == 2)
+        {
+            get_rwy_coords(main_parts[1], area_code, nav_db);
         }
     }
 }; // namespace libnav
