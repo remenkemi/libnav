@@ -102,6 +102,28 @@ namespace dbg
         av->env_vars[in[0]] = in[1];
     }
 
+    inline void name(Avionics* av, std::vector<std::string>& in)
+    {
+        if(in.size() < 1)
+        {
+            std::cout << "Too few arguments provided\n";
+            return;
+        }
+        
+        std::string poi_id = in[0];
+
+        std::vector<libnav::waypoint_entry_t> found_wpts;
+
+        size_t n_wpts_found = av->db->get_wpt_data(poi_id, &found_wpts);
+
+        for(size_t i = 0; i < n_wpts_found; i++)
+        {
+            libnav::waypoint_t wpt = {poi_id, found_wpts[i]};
+
+            std::cout << av->db->get_fix_desc(wpt) << "\n";
+        }
+    }
+
     inline void display_poi_info(Avionics* av, std::vector<std::string>& in)
     {
         if(in.size() < 1)
@@ -209,6 +231,7 @@ namespace dbg
 
     std::unordered_map<std::string, cmd> cmd_map = {
         {"set", set_var},
+        {"name", name}, 
         {"poinfo", display_poi_info}, 
         {"get_path", get_path},
         {"quit", quit},

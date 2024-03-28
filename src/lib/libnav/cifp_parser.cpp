@@ -243,7 +243,7 @@ namespace libnav
                 int ret = nav_db->get_airport_data(area_code, &apt_data);
                 if(ret)
                 {
-                    return {area_code, {NavaidType::NAV_NONE, apt_data.pos, 
+                    return {area_code, {NavaidType::NAV_NONE, 0, apt_data.pos, 
                         area_code, country_code}};
                 }
             }
