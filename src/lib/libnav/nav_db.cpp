@@ -52,4 +52,9 @@ namespace libnav
 	{
 		return navaid_db->is_navaid_of_type(id, type);
 	}
+
+	std::string NavDB::get_fix_desc(waypoint_t& fix)
+	{
+		return navaid_db->get_fix_desc(fix);
+	}
 }; // namespace libnav

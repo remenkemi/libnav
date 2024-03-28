@@ -165,12 +165,22 @@ namespace libnav
 				{
 					// Construct a waypoint_t entry.
 					std::stringstream s(line);
-					std::string junk;
+					std::string desc;
 					waypoint_t wpt = {};
 					wpt.data.type = NavaidType::NAV_WAYPOINT;
 					s >> wpt.data.pos.lat_deg >> wpt.data.pos.lon_deg >> wpt.id >> 
-						wpt.data.area_code >> wpt.data.country_code >> junk;
+						wpt.data.area_code >> wpt.data.country_code >> 
+						wpt.data.arinc_type;
 
+					getline(s, desc);
+					if(desc.length())
+					{
+						desc = desc.substr(1, desc.length() - 1);
+					}
+
+					std::string unique_ident = get_fix_unique_ident(wpt);
+
+					add_to_map_with_mutex(unique_ident, desc, wpt_desc_mutex, wpt_desc_db);
 					add_to_wpt_cache(wpt);
 				}
 				i++;
@@ -202,13 +212,19 @@ namespace libnav
 					uint32_t freq;
 					std::string id;
 					std::string area_code;
-					std::string junk;
+					std::string desc;  // Spoken name of the navaid
 
 					waypoint_t wpt;
 					navaid_entry_t navaid;
 
 					s >> type >> lat >> lon >> elevation >> freq >> max_recv >> mag_var >> 
-						id >> wpt.data.area_code >> wpt.data.country_code >> junk;
+						id >> wpt.data.area_code >> wpt.data.country_code;
+
+					getline(s, desc);
+					if(desc.length())
+					{
+						desc = desc.substr(1, desc.length() - 1);
+					}
 
 					wpt.id = id;
 					wpt.data.type = xp_type_to_libnav(type);
@@ -218,6 +234,9 @@ namespace libnav
 					navaid.elevation = elevation;
 					navaid.freq = freq;
 
+					std::string unique_ident = get_fix_unique_ident(wpt);
+
+					add_to_map_with_mutex(unique_ident, desc, navaid_desc_mutex, navaid_desc_db);
 					add_to_navaid_cache(wpt, navaid);
 				}
 				else if (check_val == "99")
@@ -289,6 +308,18 @@ namespace libnav
 			}
 		}
 		return out->size();
+	}
+
+	std::string NavaidDB::get_fix_desc(waypoint_t& fix)
+	{
+		std::string unique_ident = get_fix_unique_ident(fix);
+		if(fix.data.navaid != nullptr)
+		{
+			return get_map_val_with_mutex(unique_ident, navaid_desc_mutex, 
+				navaid_desc_db);
+		}
+
+		return get_map_val_with_mutex(unique_ident, wpt_desc_mutex, wpt_desc_db);
 	}
 
 	// Private member functions:
@@ -381,6 +412,33 @@ namespace libnav
 
 			add_to_wpt_cache(wpt);
 		}
+	}
+
+
+	std::string NavaidDB::get_fix_unique_ident(waypoint_t& fix)
+	{
+		return fix.id + fix.data.country_code + fix.data.area_code;
+	}
+
+	void NavaidDB::add_to_map_with_mutex(std::string& id, std::string& desc,
+		std::mutex& mtx, std::unordered_map<std::string, std::string>& umap)
+	{
+		std::lock_guard<std::mutex> lock(mtx);
+
+		umap[id] = desc;
+	}
+
+	std::string NavaidDB::get_map_val_with_mutex(std::string& id,
+		std::mutex& mtx, std::unordered_map<std::string, std::string>& umap)
+	{
+		std::lock_guard<std::mutex> lock(mtx);
+
+		if(umap.find(id) != umap.end())
+		{
+			return umap[id];
+		}
+
+		return "";
 	}
 
 

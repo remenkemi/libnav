@@ -71,6 +71,7 @@ namespace libnav
 	struct waypoint_entry_t
 	{
 		NavaidType type;
+		uint32_t arinc_type = 0;  // Ref: arinc424 spec, section 5.42
 		geo::point pos;
 		std::string area_code;
 		std::string country_code;
@@ -127,6 +128,8 @@ namespace libnav
 			std::string area_code="", std::string country_code="", 
 			NavaidType type=NavaidType::NAV_NONE);
 
+		std::string get_fix_desc(waypoint_t& fix);
+
 		void reset();
 
 		~NavaidDB();
@@ -141,9 +144,15 @@ namespace libnav
 		std::mutex wpt_db_mutex;
 		std::mutex navaid_db_mutex;
 
+		std::mutex wpt_desc_mutex;
+		std::mutex navaid_desc_mutex;
+
 		wpt_db_t wpt_cache;
 		navaid_entry_t* navaid_entries;
 		size_t n_navaid_entries;
+
+		std::unordered_map<std::string, std::string> wpt_desc_db;
+		std::unordered_map<std::string, std::string> navaid_desc_db;
 
 
 		navaid_entry_t* navaid_entries_add(navaid_entry_t data);
@@ -151,6 +160,15 @@ namespace libnav
 		void add_to_wpt_cache(waypoint_t wpt);
 
 		void add_to_navaid_cache(waypoint_t wpt, navaid_entry_t data);
+
+
+		static std::string get_fix_unique_ident(waypoint_t& fix);
+
+		static void add_to_map_with_mutex(std::string& id, std::string& desc,
+			std::mutex& mtx, std::unordered_map<std::string, std::string>& umap);
+
+		static std::string get_map_val_with_mutex(std::string& id,
+			std::mutex& mtx, std::unordered_map<std::string, std::string>& umap);
 	};
 
 

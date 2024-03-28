@@ -63,6 +63,8 @@ namespace libnav
 			std::string area_code="", std::string country_code="", 
 			NavaidType type=NavaidType::NAV_NONE);
 
+		std::string get_fix_desc(waypoint_t& fix);
+
 		bool is_navaid_of_type(std::string id, NavaidType type);
 
 	private:
