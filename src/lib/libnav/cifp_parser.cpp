@@ -218,7 +218,7 @@ namespace libnav
     // arinc_fix_entry_t definitions:
 
     waypoint_t arinc_fix_entry_t::to_waypoint_t(std::string& area_code, 
-        std::shared_ptr<NavDB> nav_db)
+        std::shared_ptr<NavDB> nav_db, arinc_rwy_db_t& rwy_db)
     {
         NavaidType lookup_type = NavaidType::NAV_NONE;
         std::string lookup_area = "ENRT";
@@ -243,9 +243,13 @@ namespace libnav
                 int ret = nav_db->get_airport_data(area_code, &apt_data);
                 if(ret)
                 {
-                    return {area_code, {NavaidType::NAV_NONE, 0, apt_data.pos, 
+                    return {area_code, {NavaidType::NAV_APT, 0, apt_data.pos, 
                         area_code, country_code}};
                 }
+            }
+            else if(db_subsection == 'G')
+            {
+                return get_rnw_wpt(rwy_db, fix_ident, area_code, country_code);
             }
             lookup_area = area_code;
         }
@@ -319,12 +323,12 @@ namespace libnav
     // arinc_leg_t definitions:
 
     arinc_leg_t arinc_str_t::get_leg(std::string& area_code, 
-        std::shared_ptr<NavDB> nav_db)
+        std::shared_ptr<NavDB> nav_db, arinc_rwy_db_t& rwy_db)
     {
         arinc_leg_t out;
         out.rt_type = rt_type;
 
-        out.main_fix = main_fix.to_waypoint_t(area_code, nav_db);
+        out.main_fix = main_fix.to_waypoint_t(area_code, nav_db, rwy_db);
 
         out.wpt_desc = wpt_desc;
         out.turn_dir = char2dir(turn_dir);
@@ -332,7 +336,7 @@ namespace libnav
         out.leg_type = leg_type;
         out.is_ovfy = tdv == 'Y';
 
-        out.recd_navaid = recd_navaid.to_waypoint_t(area_code, nav_db);
+        out.recd_navaid = recd_navaid.to_waypoint_t(area_code, nav_db, rwy_db);
         out.arc_radius = arc_radius;
         out.theta = theta;
         out.rho = rho;
@@ -349,7 +353,7 @@ namespace libnav
         out.vert_angle_deg = vert_angle;
         out.vert_scale_ft = vert_scale;
 
-        out.center_fix = center_fix.to_waypoint_t(area_code, nav_db);
+        out.center_fix = center_fix.to_waypoint_t(area_code, nav_db, rwy_db);
 
         out.multi_cod = multi_cod;
         out.gnss_ind = gnss_ind;
@@ -362,7 +366,7 @@ namespace libnav
     // arinc_leg_full_t definitions:
 
     arinc_leg_full_t::arinc_leg_full_t(std::string& s, std::string& area_code, 
-        std::shared_ptr<NavDB> nav_db)
+        std::shared_ptr<NavDB> nav_db, arinc_rwy_db_t& rwy_db)
     {        
         std::vector<std::string> s_split = strutils::str_split(s, ARINC_FIELD_SEP);
 
@@ -372,7 +376,7 @@ namespace libnav
             trans_name = strutils::strip(s_split[3], ' ');
 
             arinc_str_t arnc_str(s_split);
-            leg = arnc_str.get_leg(area_code, nav_db);
+            leg = arnc_str.get_leg(area_code, nav_db, rwy_db);
 
             err = DbErr::SUCCESS;
         }
@@ -484,5 +488,32 @@ namespace libnav
         }
 
         get_rwy_coords(pos_str, area_code, nav_db);
+    }
+
+
+    waypoint_t get_rnw_wpt(arinc_rwy_db_t& rwy_db, std::string& id, std::string& area_cd, 
+        std::string& country_cd)
+    {
+        std::string tmp = id;
+        size_t tmp_length = tmp.length();
+        if(tmp_length > 1 && tmp[0] == 'R' && tmp[1] == 'W')
+        {
+            tmp = tmp.substr(2, tmp_length-2);
+        }
+
+        tmp = strutils::normalize_rnw_id(tmp);
+        
+        if(rwy_db.find(tmp) != rwy_db.end())
+        {
+            waypoint_t out;
+            out.data.pos = rwy_db[tmp].pos;
+            out.id = tmp;
+            out.data.type = NavaidType::NAV_RWY;
+            out.data.area_code = area_cd;
+            out.data.country_code = country_cd;
+
+            return out;
+        }
+        return {};
     }
 }; // namespace libnav

@@ -217,13 +217,19 @@ namespace dbg
         //std::cout << libnav::str2alt(in[0]) << " " << bool_var << "\n";
         UNUSED(in);
         //UNUSED(av);
-        std::string s = "STAR:020,3,OCITY3,RW03,KPDX,K1,P,A,AE  , ,   ,VM, , , , , ,      ,    ,    ,2800,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;";
-        //libnav::arinc_leg_full_t leg_full;
+        std::string rwy_str = "RWY:RW28R,     ,      ,00031, ,IIAP,1,   ;N45350294,W122340584,0535;";
+        std::string s = "APPCH:020,R,R28RZ, ,TOLOC,K1,P,C,E  F, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,18000, ,   ,    ,   ,RW28R,K1,P,G,A,A,P,S;";
+        
         std::string icao_cd = "KPDX";
-        libnav::arinc_leg_full_t leg(s, icao_cd, av->db);
+        libnav::arinc_rwy_db_t rnw_db;
+
+        libnav::arinc_rwy_full_t rwy(rwy_str, icao_cd, av->db);
+        rnw_db[rwy.id] = rwy.data;
+
+        libnav::arinc_leg_full_t leg(s, icao_cd, av->db, rnw_db);
         std::cout << leg.proc_name << " " << leg.trans_name << "\n";
 
-        //libnav::arinc_rwy_full_t rwy(s, icao_cd, av->db);
+        //
         //std::cout << rwy.id << " " << rwy.data.pos.lat_deg << " " 
         //    << rwy.data.pos.lon_deg << " " << rwy.data.thresh_displ_ft << "\n";
     }

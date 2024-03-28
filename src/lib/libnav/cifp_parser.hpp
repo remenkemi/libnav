@@ -106,6 +106,46 @@ namespace libnav
     LSCategory char2ls_category(char c);  // Ref: arinc 5.80
 
 
+    struct arinc_rwy_data_t
+    {
+        float grad_deg;  // Column 2. Runway gradient in degrees * 1000. Ref: arinc424 spec, section 5.212
+        float ellips_height_m;  // Column 3. Ellipsoidal height in m * 10. Ref: arinc424 spec, section 5.225
+        int thresh_elev_msl_ft;  // Column 4. Ref: arinc424 spec, section 5.68
+
+        TCHType tch_tp;  // Column 5. Ref: arinc424 spec, section 5.270
+
+        std::string ls_ident;  // Column 6. Identifyer of the landing system(4 chars). Ref: arinc424 spec, section 5.44
+        LSCategory ls_cat;  // Column 7. Landing system category. Ref: arinc424 spec, section 5.80
+
+        int tch_ft;  // Column 8. Threshold crossing height. Ref: arinc424 spec, section 5.67
+
+        geo::point pos;  // Column 9-10. Position of the runway. Ref: arinc424 spec, section 5.36-37. NOTE: dms format.
+
+        int thresh_displ_ft;  // Column 11. Ref: arinc424 spec, section 5.69.
+    };
+
+    struct arinc_rwy_full_t
+    {
+        DbErr err;
+
+        std::string id;
+
+        arinc_rwy_data_t data;
+
+
+        int get_pos_from_db(std::string& area_code, 
+            std::shared_ptr<NavDB> nav_db);
+
+        void get_rwy_coords(std::string& s, std::string& area_code, 
+            std::shared_ptr<NavDB> nav_db);
+
+        arinc_rwy_full_t(std::string& s, std::string& area_code, 
+            std::shared_ptr<NavDB> nav_db);
+    };
+
+    typedef std::unordered_map<std::string, arinc_rwy_data_t> arinc_rwy_db_t;
+
+
     struct arinc_fix_entry_t
     {
         std::string fix_ident;  //Ref: arinc424 spec, section 5.13/5.23/5.144/5.271
@@ -115,7 +155,7 @@ namespace libnav
 
 
         waypoint_t to_waypoint_t(std::string& area_code, 
-            std::shared_ptr<NavDB> nav_db);
+            std::shared_ptr<NavDB> nav_db, arinc_rwy_db_t& rwy_db);
     };
 
     struct arinc_leg_t
@@ -206,25 +246,7 @@ namespace libnav
 
         arinc_str_t(std::vector<std::string>& in_split);
 
-        arinc_leg_t get_leg(std::string& area_code, std::shared_ptr<NavDB> nav_db);
-    };
-
-    struct arinc_rwy_data_t
-    {
-        float grad_deg;  // Column 2. Runway gradient in degrees * 1000. Ref: arinc424 spec, section 5.212
-        float ellips_height_m;  // Column 3. Ellipsoidal height in m * 10. Ref: arinc424 spec, section 5.225
-        int thresh_elev_msl_ft;  // Column 4. Ref: arinc424 spec, section 5.68
-
-        TCHType tch_tp;  // Column 5. Ref: arinc424 spec, section 5.270
-
-        std::string ls_ident;  // Column 6. Identifyer of the landing system(4 chars). Ref: arinc424 spec, section 5.44
-        LSCategory ls_cat;  // Column 7. Landing system category. Ref: arinc424 spec, section 5.80
-
-        int tch_ft;  // Column 8. Threshold crossing height. Ref: arinc424 spec, section 5.67
-
-        geo::point pos;  // Column 9-10. Position of the runway. Ref: arinc424 spec, section 5.36-37. NOTE: dms format.
-
-        int thresh_displ_ft;  // Column 11. Ref: arinc424 spec, section 5.69.
+        arinc_leg_t get_leg(std::string& area_code, std::shared_ptr<NavDB> nav_db, arinc_rwy_db_t& rwy_db);
     };
 
     /* This one contains procedure and transition name. Not just the leg itself.*/
@@ -239,30 +261,24 @@ namespace libnav
 
 
         arinc_leg_full_t(std::string& s, std::string& area_code, 
-            std::shared_ptr<NavDB> nav_db);
-    };
-
-    struct arinc_rwy_full_t
-    {
-        DbErr err;
-
-        std::string id;
-
-        arinc_rwy_data_t data;
-
-
-        int get_pos_from_db(std::string& area_code, 
-            std::shared_ptr<NavDB> nav_db);
-
-        void get_rwy_coords(std::string& s, std::string& area_code, 
-            std::shared_ptr<NavDB> nav_db);
-
-        arinc_rwy_full_t(std::string& s, std::string& area_code, 
-            std::shared_ptr<NavDB> nav_db);
+            std::shared_ptr<NavDB> nav_db, arinc_rwy_db_t& rwy_db);
     };
 
 
     typedef std::vector<arinc_leg_t> arinc_leg_seq_t;
+
+    /*
+        Function: get_rnw_wpt
+        Description:
+        Checks if id is a valid runway and constructs a waypoint_t from such runway if it's valid.
+        @param rwy_db: reference to a runway data base
+        @param id: id of the target runway. Can have "RW" prefix, but not necessary.
+        @param area_cd: area code.
+        @param country_cd: country code.
+        @return waypoint_t: waypoint with the position at the start of the selected runway.
+    */
+    waypoint_t get_rnw_wpt(arinc_rwy_db_t& rwy_db, std::string& id, std::string& area_cd, 
+        std::string& country_cd);
 
 
     class Airport
