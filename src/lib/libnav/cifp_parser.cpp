@@ -516,4 +516,77 @@ namespace libnav
         }
         return {};
     }
+
+    // Airport class definitions
+
+    // public member functions:
+
+    Airport::Airport(std::string icao, std::shared_ptr<NavaidDB> nav_db, 
+        std::string cifp_path)
+    {
+        icao_code = icao;
+        err_code = DbErr::ERR_NONE;
+
+        arinc_legs = new arinc_leg_t[N_FLT_LEG_CACHE_SZ];
+        n_arinc_legs_used = 0;
+
+        if(arinc_legs == nullptr)
+        {
+            err_code = DbErr::BAD_ALLOC;
+        }
+    }
+
+    // private member functions:
+
+    void Airport::parse_flt_legs(std::shared_ptr<NavDB> nav_db)
+    {
+        while(flt_leg_strings.size())
+        {
+            proc_typed_str_t curr = flt_leg_strings.front();
+            flt_leg_strings.pop();
+
+
+            std::string curr_uid;
+        }
+    }
+
+    DbErr Airport::load_db(std::shared_ptr<NavDB> nav_db, std::string& path)
+    {
+        std::string full_path = path + icao_code;
+
+        std::ifstream file(full_path);
+		if (file.is_open())
+        {
+            // Let the fun begin
+            std::string line;
+			while (getline(file, line))
+            {
+                ProcType curr_tp = str2proc_type(line);
+
+                if(curr_tp != ProcType::RWY)
+                {
+                    proc_typed_str_t tmp = std::make_pair(line, curr_tp);
+                    flt_leg_strings.push(tmp);
+                }
+                else
+                {
+                    arinc_rwy_db_t rnw_db;
+
+                    arinc_rwy_full_t rwy(line, icao_code, nav_db);
+
+                    if(rwy.err != DbErr::SUCCESS)
+                    {
+                        return DbErr::DATA_BASE_ERROR;
+                    }
+                    rnw_db[rwy.id] = rwy.data;
+                }
+            }
+
+            parse_flt_legs(nav_db);
+        }
+        else
+        {
+            return DbErr::FILE_NOT_FOUND;
+        }
+    }
 }; // namespace libnav

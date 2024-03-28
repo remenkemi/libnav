@@ -2,6 +2,10 @@
 #include <sstream>
 #include <fstream>
 #include <assert.h>
+#include <queue>
+#include <unordered_map>
+#include <unordered_set>
+#include <mutex>
 #include "nav_db.hpp"
 #include "common.hpp"
 #include "str_utils.hpp"
@@ -81,6 +85,8 @@ namespace libnav
     // Number of columns in the first part of a runway entry
     constexpr int N_ARINC_RWY_COL_FIRST = 8;
     constexpr int N_ARINC_RWY_COL_SECOND = 3;
+
+    constexpr size_t N_FLT_LEG_CACHE_SZ = 3000;
 
     
     // Functions for decoding some arinc data fields:
@@ -285,22 +291,43 @@ namespace libnav
     {
         typedef std::unordered_map<std::string, std::vector<int>> trans_db_t;
         typedef std::unordered_map<std::string, trans_db_t> proc_db_t;
+        typedef std::pair<std::string, ProcType> proc_typed_str_t;
 
     public:
         DbErr err_code;
+
+        std::string icao_code;
 
 
         Airport(std::string icao, std::shared_ptr<NavaidDB> nav_db, 
             std::string cifp_path="");
 
+        arinc_leg_seq_t get_sid(std::string& proc_name, std::string& trans);
+
     private:
-        arinc_leg_seq_t arinc_legs;
+        arinc_rwy_db_t rwy_db;
+        arinc_leg_t* arinc_legs;
+        size_t n_arinc_legs_used;
 
-        proc_db_t trans_per_proc_rwy;
-        proc_db_t trans_per_rwy_proc;
-        proc_db_t trans_per_proc_trans;
+        //std::mutex sid_mutex;
+        //std::mutex star_mutex;
+        //std::mutex appch_mutex;
+
+        proc_db_t sid_db;
+        proc_db_t star_db;
+        proc_db_t appch_db;
+
+        std::unordered_map<std::string, std::vector<std::string>> sid_per_rwy;
+        std::unordered_map<std::string, std::vector<std::string>> star_per_rwy;
+
+        std::queue<proc_typed_str_t> flt_leg_strings;
+        std::unordered_set<std::string> sid_black_list;
+        std::unordered_set<std::string> star_black_list;
+        std::unordered_set<std::string> appch_black_list;
 
 
-        DbErr load_db();
+        void parse_flt_legs(std::shared_ptr<NavDB> nav_db);
+
+        DbErr load_db(std::shared_ptr<NavDB> nav_db, std::string& path);
     };
 }; // namespace libnav
