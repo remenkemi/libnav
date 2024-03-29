@@ -363,29 +363,6 @@ namespace libnav
         return out;
     }
 
-    // arinc_leg_full_t definitions:
-
-    arinc_leg_full_t::arinc_leg_full_t(std::string& s, std::string& area_code, 
-        std::shared_ptr<NavDB> nav_db, arinc_rwy_db_t& rwy_db)
-    {        
-        std::vector<std::string> s_split = strutils::str_split(s, ARINC_FIELD_SEP);
-
-        if(s_split.size() == N_ARINC_FLT_PROC_COL)
-        {
-            proc_name = strutils::strip(s_split[2], ' ');
-            trans_name = strutils::strip(s_split[3], ' ');
-
-            arinc_str_t arnc_str(s_split);
-            leg = arnc_str.get_leg(area_code, nav_db, rwy_db);
-
-            err = DbErr::SUCCESS;
-        }
-        else
-        {
-            err = DbErr::DATA_BASE_ERROR;
-        }
-    }
-
     // arinc_rwy_full_t definitions:
 
     int arinc_rwy_full_t::get_pos_from_db(std::string& area_code, 
@@ -517,11 +494,37 @@ namespace libnav
         return {};
     }
 
+    std::vector<std::string> get_all_rwys_by_mask(std::string mask, 
+        arinc_rwy_db_t& rwy_db)
+    {
+        if(rwy_db.find(mask) != rwy_db.end())
+        {
+            return {mask};
+        }
+        else if(mask.back() == 'B')
+        {
+            std::string rnw_id = mask.substr(0, mask.length()-1);
+            std::vector<std::string> out;
+
+            for(auto i: rwy_db)
+            {
+                std::string curr_id = i.first.substr(0, i.first.length()-1);
+                if(curr_id == rnw_id)
+                {
+                    out.push_back(i.first);
+                }
+            }
+
+            return out;
+        }
+        return {};
+    }
+
     // Airport class definitions
 
     // public member functions:
 
-    Airport::Airport(std::string icao, std::shared_ptr<NavaidDB> nav_db, 
+    Airport::Airport(std::string icao, std::shared_ptr<NavDB> nav_db, 
         std::string cifp_path)
     {
         icao_code = icao;
@@ -534,20 +537,93 @@ namespace libnav
         {
             err_code = DbErr::BAD_ALLOC;
         }
+        else
+        {
+            err_code = load_db(nav_db, cifp_path);
+        }
+    }
+
+    Airport::~Airport()
+    {
+        if(arinc_legs != nullptr)
+        {
+            delete[] arinc_legs;
+        }
     }
 
     // private member functions:
 
-    void Airport::parse_flt_legs(std::shared_ptr<NavDB> nav_db)
+    DbErr Airport::parse_flt_legs(std::shared_ptr<NavDB> nav_db)
     {
+        DbErr out = DbErr::SUCCESS;
         while(flt_leg_strings.size())
         {
             proc_typed_str_t curr = flt_leg_strings.front();
             flt_leg_strings.pop();
 
+            if(curr.second != ProcType::PRDAT)
+            {
+                std::vector<std::string> s_split = strutils::str_split(curr.first, 
+                    ARINC_FIELD_SEP);
 
-            std::string curr_uid;
+                if(s_split.size() == N_ARINC_FLT_PROC_COL)
+                {
+                    std::string proc_name = strutils::strip(s_split[2], ' ');
+                    std::string trans_name = strutils::strip(s_split[3], ' ');
+
+                    arinc_str_t arnc_str(s_split);
+                    arinc_leg_t leg = arnc_str.get_leg(icao_code, nav_db, rwy_db);
+
+                    if(n_arinc_legs_used = N_FLT_LEG_CACHE_SZ)
+                    {
+                        return DbErr::BAD_ALLOC;
+                    }
+                    arinc_legs[n_arinc_legs_used] = leg;
+
+                    std::string rnw_trans = strutils::get_rnw_id(trans_name);
+                    std::vector<std::string> rwys = get_all_rwys_by_mask(
+                        rnw_trans, rwy_db);
+                    bool is_rwy = true;
+
+                    if(rwys.size() == 0)
+                    {
+                        rwys.push_back(trans_name);
+                        is_rwy = false;
+                    }
+                    
+                    for(auto i: rwys)
+                    {
+                        if(curr.second == ProcType::SID)
+                        {
+                            if(is_rwy)
+                                sid_per_rwy[i].push_back(proc_name);
+                            sid_db[proc_name][i].push_back(
+                                n_arinc_legs_used);
+                        }
+                        else if(curr.second == ProcType::STAR)
+                        {
+                            if(is_rwy)
+                                star_per_rwy[i].push_back(proc_name);
+                            star_db[proc_name][i].push_back(
+                                n_arinc_legs_used);
+                        }
+                        else
+                        {
+                            appch_db[proc_name][i].push_back(
+                                n_arinc_legs_used);
+                        }   
+                    }
+
+                    n_arinc_legs_used++;
+                }
+                else
+                {
+                    out = DbErr::PARTIAL_LOAD;
+                }
+            }
         }
+
+        return out;
     }
 
     DbErr Airport::load_db(std::shared_ptr<NavDB> nav_db, std::string& path)
@@ -582,7 +658,7 @@ namespace libnav
                 }
             }
 
-            parse_flt_legs(nav_db);
+            return parse_flt_legs(nav_db);
         }
         else
         {

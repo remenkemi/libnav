@@ -86,7 +86,7 @@ namespace libnav
     constexpr int N_ARINC_RWY_COL_FIRST = 8;
     constexpr int N_ARINC_RWY_COL_SECOND = 3;
 
-    constexpr size_t N_FLT_LEG_CACHE_SZ = 3000;
+    constexpr int N_FLT_LEG_CACHE_SZ = 3000;
 
     
     // Functions for decoding some arinc data fields:
@@ -255,21 +255,6 @@ namespace libnav
         arinc_leg_t get_leg(std::string& area_code, std::shared_ptr<NavDB> nav_db, arinc_rwy_db_t& rwy_db);
     };
 
-    /* This one contains procedure and transition name. Not just the leg itself.*/
-    struct arinc_leg_full_t  
-    {
-        DbErr err;
-
-        std::string proc_name;  // Column 3. Ref: arinc424 spec, section 5.9 & 5.10
-        std::string trans_name;  // Column 4. Ref: arinc424 spec, section 5.11
-
-        arinc_leg_t leg;
-
-
-        arinc_leg_full_t(std::string& s, std::string& area_code, 
-            std::shared_ptr<NavDB> nav_db, arinc_rwy_db_t& rwy_db);
-    };
-
 
     typedef std::vector<arinc_leg_t> arinc_leg_seq_t;
 
@@ -286,6 +271,9 @@ namespace libnav
     waypoint_t get_rnw_wpt(arinc_rwy_db_t& rwy_db, std::string& id, std::string& area_cd, 
         std::string& country_cd);
 
+    std::vector<std::string> get_all_rwys_by_mask(std::string mask, 
+        arinc_rwy_db_t& rwy_db);
+
 
     class Airport
     {
@@ -299,15 +287,17 @@ namespace libnav
         std::string icao_code;
 
 
-        Airport(std::string icao, std::shared_ptr<NavaidDB> nav_db, 
+        Airport(std::string icao, std::shared_ptr<NavDB> nav_db, 
             std::string cifp_path="");
 
         arinc_leg_seq_t get_sid(std::string& proc_name, std::string& trans);
 
+        ~Airport();
+
     private:
         arinc_rwy_db_t rwy_db;
         arinc_leg_t* arinc_legs;
-        size_t n_arinc_legs_used;
+        int n_arinc_legs_used;
 
         //std::mutex sid_mutex;
         //std::mutex star_mutex;
@@ -321,12 +311,9 @@ namespace libnav
         std::unordered_map<std::string, std::vector<std::string>> star_per_rwy;
 
         std::queue<proc_typed_str_t> flt_leg_strings;
-        std::unordered_set<std::string> sid_black_list;
-        std::unordered_set<std::string> star_black_list;
-        std::unordered_set<std::string> appch_black_list;
 
 
-        void parse_flt_legs(std::shared_ptr<NavDB> nav_db);
+        DbErr parse_flt_legs(std::shared_ptr<NavDB> nav_db);
 
         DbErr load_db(std::shared_ptr<NavDB> nav_db, std::string& path);
     };
