@@ -298,8 +298,12 @@ namespace strutils
 		return id;
 	}
 
-	inline std::string get_rnw_id(std::string id)
+	inline std::string get_rnw_id(std::string id, bool ignore_all=false)
 	{
+		if(id == "ALL" && !ignore_all)
+		{
+			return id;
+		}
 		if(id.length() > 2 && id.length() < 6 && id[0] == 'R' && id[1] == 'W')
 		{
 			int i = 2;

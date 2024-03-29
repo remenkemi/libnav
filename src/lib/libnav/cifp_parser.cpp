@@ -503,6 +503,17 @@ namespace libnav
     std::vector<std::string> get_all_rwys_by_mask(std::string mask, 
         arinc_rwy_db_t& rwy_db)
     {
+        if(mask == "ALL")
+        {
+            std::vector<std::string> out;
+
+            for(auto i: rwy_db)
+            {
+                out.push_back(i.first);
+            }
+
+            return out;
+        }
         if(rwy_db.find(mask) != rwy_db.end())
         {
             return {mask};
