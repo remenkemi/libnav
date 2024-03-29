@@ -15,6 +15,7 @@ namespace libnav
             tmp[sz] = s[sz];
             sz++;
         }
+        tmp[sz] = 0;//
         
         if(strcmp(tmp, "SID") == 0)
         {
@@ -261,9 +262,14 @@ namespace libnav
         std::vector<waypoint_entry_t> wpts;
         nav_db->get_wpt_data(fix_ident, &wpts, lookup_area, country_code, lookup_type);
 
-        assert(wpts.size() < 2);
+        //if(wpts.size() > 1)
+        //{
+        //    std::cout << fix_ident << " " << country_code << " " << 
+        //        area_code << " " << db_section << " " << db_subsection << "\n";
+        //}
+        //assert(wpts.size() < 2);
 
-        if(wpts.size() == 1)
+        if(wpts.size())
         {
             return {fix_ident, wpts[0]};
         }
@@ -525,7 +531,7 @@ namespace libnav
     // public member functions:
 
     Airport::Airport(std::string icao, std::shared_ptr<NavDB> nav_db, 
-        std::string cifp_path)
+        std::string cifp_path, std::string postfix)
     {
         icao_code = icao;
         err_code = DbErr::ERR_NONE;
@@ -539,8 +545,23 @@ namespace libnav
         }
         else
         {
-            err_code = load_db(nav_db, cifp_path);
+            err_code = load_db(nav_db, cifp_path, postfix);
         }
+    }
+
+    arinc_leg_seq_t Airport::get_sid(std::string& proc_name, std::string& trans)
+    {
+        return get_proc(proc_name, trans, sid_db);
+    }
+
+    arinc_leg_seq_t Airport::get_star(std::string& proc_name, std::string& trans)
+    {
+        return get_proc(proc_name, trans, star_db);
+    }
+
+    arinc_leg_seq_t Airport::get_appch(std::string& proc_name, std::string& trans)
+    {
+        return get_proc(proc_name, trans, appch_db);
     }
 
     Airport::~Airport()
@@ -552,6 +573,27 @@ namespace libnav
     }
 
     // private member functions:
+
+    arinc_leg_seq_t Airport::get_proc(std::string& proc_name, std::string& trans, 
+        proc_db_t& db)
+    {
+        if(db.find(proc_name) != db.end())
+        {
+            if(db[proc_name].find(trans) != db[proc_name].end())
+            {
+                arinc_leg_seq_t proc_legs;
+
+                for(int i = 0; i < int(db[proc_name][trans].size()); i++)
+                {
+                    int leg_idx = db[proc_name][trans][i];
+                    proc_legs.push_back(arinc_legs[leg_idx]);
+                }
+
+                return proc_legs;
+            }
+        }
+        return {};
+    }
 
     DbErr Airport::parse_flt_legs(std::shared_ptr<NavDB> nav_db)
     {
@@ -574,7 +616,7 @@ namespace libnav
                     arinc_str_t arnc_str(s_split);
                     arinc_leg_t leg = arnc_str.get_leg(icao_code, nav_db, rwy_db);
 
-                    if(n_arinc_legs_used = N_FLT_LEG_CACHE_SZ)
+                    if(n_arinc_legs_used == N_FLT_LEG_CACHE_SZ)
                     {
                         return DbErr::BAD_ALLOC;
                     }
@@ -626,9 +668,10 @@ namespace libnav
         return out;
     }
 
-    DbErr Airport::load_db(std::shared_ptr<NavDB> nav_db, std::string& path)
+    DbErr Airport::load_db(std::shared_ptr<NavDB> nav_db, std::string& path,
+        std::string& postfix)
     {
-        std::string full_path = path + icao_code;
+        std::string full_path = path + "/" + icao_code + postfix;
 
         std::ifstream file(full_path);
 		if (file.is_open())
@@ -646,18 +689,16 @@ namespace libnav
                 }
                 else
                 {
-                    arinc_rwy_db_t rnw_db;
-
                     arinc_rwy_full_t rwy(line, icao_code, nav_db);
 
                     if(rwy.err != DbErr::SUCCESS)
                     {
                         return DbErr::DATA_BASE_ERROR;
                     }
-                    rnw_db[rwy.id] = rwy.data;
+                    rwy_db[rwy.id] = rwy.data;
                 }
             }
-
+            file.close();
             return parse_flt_legs(nav_db);
         }
         else
