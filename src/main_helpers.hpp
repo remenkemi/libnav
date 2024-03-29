@@ -28,13 +28,18 @@ namespace dbg
 
         std::unordered_map<std::string, std::string> env_vars;
 
+        std::string cifp_dir_path;
+
 
         Avionics(std::string apt_dat, std::string custom_apt, std::string custom_rnw,
             std::string fix_data, std::string navaid_data, std::string awy_data, 
-            double def_lat=AC_LAT_DEF, double def_lon=AC_LON_DEF)
+            std::string cifp_path, double def_lat=AC_LAT_DEF, 
+            double def_lon=AC_LON_DEF)
         {
             env_vars["ac_lat"] = strutils::double_to_str(def_lat, 8);
             env_vars["ac_lon"] = strutils::double_to_str(def_lon, 8);
+
+            cifp_dir_path = cifp_path;
 
             ac_lat = def_lat;
             ac_lon = def_lon;
@@ -215,19 +220,23 @@ namespace dbg
 
         //bool bool_var = false;
         //std::cout << libnav::str2alt(in[0]) << " " << bool_var << "\n";
-        UNUSED(in);
+        //UNUSED(in);
         //UNUSED(av);
-        std::string rwy_str = "RWY:RW28R,     ,      ,00031, ,IIAP,1,   ;N45350294,W122340584,0535;";
-        std::string s = "APPCH:020,R,R28RZ, ,TOLOC,K1,P,C,E  F, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,18000, ,   ,    ,   ,RW28R,K1,P,G,A,A,P,S;";
+
+        if(in.size() != 3)
+        {
+            std::cout << "Invalid arguments provided\n";
+            return;
+        }
         
-        std::string icao_cd = "KPDX";
-        libnav::arinc_rwy_db_t rnw_db;
+        libnav::Airport apt(in[0], av->db, av->cifp_dir_path);
 
-        libnav::arinc_rwy_full_t rwy(rwy_str, icao_cd, av->db);
-        rnw_db[rwy.id] = rwy.data;
-
-        libnav::arinc_leg_full_t leg(s, icao_cd, av->db, rnw_db);
-        std::cout << leg.proc_name << " " << leg.trans_name << "\n";
+        libnav::arinc_leg_seq_t sid_legs = apt.get_sid(in[1], in[2]);
+        for(auto i: sid_legs)
+        {
+            std::cout << i.main_fix.id << " " << i.leg_type << "\n";
+        }
+        //std::cout << leg.proc_name << " " << leg.trans_name << "\n";
 
         //
         //std::cout << rwy.id << " " << rwy.data.pos.lat_deg << " " 
