@@ -19,7 +19,8 @@ namespace libnav
 		SUCCESS,
 		FILE_NOT_FOUND,
 		DATA_BASE_ERROR,
-		BAD_ALLOC
+		BAD_ALLOC,
+		PARTIAL_LOAD
 	};
 
 
