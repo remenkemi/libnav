@@ -214,6 +214,24 @@ namespace dbg
         std::exit(0);
     }
 
+    inline void allsid(Avionics* av, std::vector<std::string>& in)
+    {
+        if(in.size() != 1)
+        {
+            std::cout << "Invalid arguments provided\n";
+            return;
+        }
+        
+        libnav::Airport apt(in[0], av->db, av->cifp_dir_path);
+
+        std::unordered_set<std::string> sids = apt.get_all_sids();
+
+        for(auto i: sids)
+        {
+            std::cout << i << "\n";
+        }
+    }
+
     inline void getsid(Avionics* av, std::vector<std::string>& in)
     {
         if(in.size() != 3)
@@ -375,6 +393,7 @@ namespace dbg
         {"poinfo", display_poi_info}, 
         {"get_path", get_path},
         {"quit", quit},
+        {"allsid", allsid},
         {"getsid", getsid},
         {"getstar", getstar},
         {"lssid", lssid},
