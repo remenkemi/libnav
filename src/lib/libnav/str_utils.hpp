@@ -297,4 +297,23 @@ namespace strutils
 		}
 		return id;
 	}
+
+	inline std::string get_rnw_id(std::string id)
+	{
+		if(id.length() > 2 && id.length() < 6 && id[0] == 'R' && id[1] == 'W')
+		{
+			int i = 2;
+			while(i < id.length() && !isalpha(id[i]))
+			{
+				i++;
+			}
+
+			if(i >= id.length()-1)
+			{
+				std::string num_part = id.substr(2, id.length()-2);
+				return normalize_rnw_id(num_part);
+			}
+		}
+		return "";
+	}
 }; // namespace strutils
