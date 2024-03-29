@@ -280,7 +280,7 @@ namespace libnav
         typedef std::unordered_map<std::string, std::vector<int>> trans_db_t;
         typedef std::unordered_map<std::string, trans_db_t> proc_db_t;
         typedef std::pair<std::string, ProcType> proc_typed_str_t;
-        typedef std::unordered_map<std::string, std::vector<std::string>> str_umap_t;
+        typedef std::unordered_map<std::string, std::unordered_set<std::string>> str_umap_t;
 
     public:
         DbErr err_code;
@@ -297,9 +297,17 @@ namespace libnav
 
         arinc_leg_seq_t get_appch(std::string& proc_name, std::string& trans);
 
-        std::vector<std::string> get_sid_by_rwy(std::string& rwy_id);
+        std::unordered_set<std::string> get_sid_by_rwy(std::string& rwy_id);
 
-        std::vector<std::string> get_star_by_rwy(std::string& rwy_id);
+        std::unordered_set<std::string> get_star_by_rwy(std::string& rwy_id);
+
+        std::unordered_set<std::string> get_rwy_by_sid(std::string& sid);
+
+        std::unordered_set<std::string> get_rwy_by_star(std::string& star);
+
+        std::unordered_set<std::string> get_trans_by_sid(std::string& sid);
+
+        std::unordered_set<std::string> get_trans_by_star(std::string& star);
 
         ~Airport();
 
@@ -318,8 +326,6 @@ namespace libnav
 
         str_umap_t sid_per_rwy;
         str_umap_t star_per_rwy;
-        str_umap_t rwy_per_sid;
-        str_umap_t rwy_per_star;
 
         std::queue<proc_typed_str_t> flt_leg_strings;
 
@@ -327,8 +333,11 @@ namespace libnav
         arinc_leg_seq_t get_proc(std::string& proc_name, std::string& trans, 
             proc_db_t& db);
 
-        std::vector<std::string> get_proc_by_rwy(std::string& rwy_id, 
+        std::unordered_set<std::string> get_proc_by_rwy(std::string& rwy_id, 
             str_umap_t& umap);
+
+        std::unordered_set<std::string> get_trans_by_proc(std::string& proc_name, 
+            proc_db_t db, bool rwy=false);
 
         DbErr parse_flt_legs(std::shared_ptr<NavDB> nav_db);
 

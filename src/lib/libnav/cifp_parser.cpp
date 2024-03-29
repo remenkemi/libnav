@@ -564,14 +564,34 @@ namespace libnav
         return get_proc(proc_name, trans, appch_db);
     }
 
-    std::vector<std::string> Airport::get_sid_by_rwy(std::string& rwy_id)
+    std::unordered_set<std::string> Airport::get_sid_by_rwy(std::string& rwy_id)
     {
         return get_proc_by_rwy(rwy_id, sid_per_rwy);
     }
 
-    std::vector<std::string> Airport::get_star_by_rwy(std::string& rwy_id)
+    std::unordered_set<std::string> Airport::get_star_by_rwy(std::string& rwy_id)
     {
         return get_proc_by_rwy(rwy_id, star_per_rwy);
+    }
+
+    std::unordered_set<std::string> Airport::get_rwy_by_sid(std::string& sid)
+    {
+        return get_trans_by_proc(sid, sid_db, true);
+    }
+
+    std::unordered_set<std::string> Airport::get_rwy_by_star(std::string& star)
+    {
+        return get_trans_by_proc(star, star_db, true);
+    }
+
+    std::unordered_set<std::string> Airport::get_trans_by_sid(std::string& sid)
+    {
+        return get_trans_by_proc(sid, sid_db);
+    }
+
+    std::unordered_set<std::string> Airport::get_trans_by_star(std::string& star)
+    {
+        return get_trans_by_proc(star, star_db);
     }
 
     Airport::~Airport()
@@ -605,7 +625,7 @@ namespace libnav
         return {};
     }
 
-    std::vector<std::string> Airport::get_proc_by_rwy(std::string& rwy_id, 
+    std::unordered_set<std::string> Airport::get_proc_by_rwy(std::string& rwy_id, 
         str_umap_t& umap)
     {
         if(umap.find(rwy_id) != umap.end())
@@ -615,6 +635,29 @@ namespace libnav
         }
 
         return {};
+    }
+
+    std::unordered_set<std::string> Airport::get_trans_by_proc(std::string& proc_name, 
+        proc_db_t db, bool rwy)
+    {
+        std::unordered_set<std::string> out;
+
+        if(db.find(proc_name) != db.end())
+        {
+            for(auto i: db[proc_name])
+            {
+                if(rwy_db.find(i.first) != rwy_db.end() && rwy)
+                {
+                    out.insert(i.first);
+                }
+                else if(rwy_db.find(i.first) == rwy_db.end() && !rwy)
+                {
+                    out.insert(i.first);
+                }
+            }
+        }
+
+        return out;
     }
 
     DbErr Airport::parse_flt_legs(std::shared_ptr<NavDB> nav_db)
@@ -634,6 +677,9 @@ namespace libnav
                 {
                     std::string proc_name = strutils::strip(s_split[2], ' ');
                     std::string trans_name = strutils::strip(s_split[3], ' ');
+
+                    if(trans_name == "")
+                        trans_name = "NONE";
 
                     arinc_str_t arnc_str(s_split);
                     arinc_leg_t leg = arnc_str.get_leg(icao_code, nav_db, rwy_db);
@@ -661,8 +707,7 @@ namespace libnav
                         {
                             if(is_rwy)
                             {
-                                sid_per_rwy[i].push_back(proc_name);
-                                rwy_per_sid[proc_name].push_back(i);
+                                sid_per_rwy[i].insert(proc_name);
                             }
                             sid_db[proc_name][i].push_back(
                                 n_arinc_legs_used);
@@ -671,8 +716,7 @@ namespace libnav
                         {
                             if(is_rwy)
                             {
-                                star_per_rwy[i].push_back(proc_name);
-                                rwy_per_star[proc_name].push_back(i);
+                                star_per_rwy[i].insert(proc_name);
                             }
                             star_db[proc_name][i].push_back(
                                 n_arinc_legs_used);
