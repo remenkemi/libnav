@@ -243,6 +243,38 @@ namespace dbg
         //    << rwy.data.pos.lon_deg << " " << rwy.data.thresh_displ_ft << "\n";
     }
 
+    inline void lssid(Avionics* av, std::vector<std::string>& in)
+    {
+        if(in.size() != 2)
+        {
+            std::cout << "Invalid arguments provided\n";
+            return;
+        }
+
+        libnav::Airport apt(in[0], av->db, av->cifp_dir_path);
+
+        if(apt.err_code != libnav::DbErr::SUCCESS &&
+            apt.err_code != libnav::DbErr::PARTIAL_LOAD)
+        {
+            std::cout << "Invalid airport icao\n";
+            return;
+        }
+
+        std::vector<std::string> sids = apt.get_sid_by_rwy(in[1]);
+
+        if(!sids.size())
+        {
+            std::cout << "Invalid runway\n";
+        }
+        else
+        {
+            for(auto i: sids)
+            {
+                std::cout << i << "\n";
+            }
+        }
+    }
+
 
     std::unordered_map<std::string, cmd> cmd_map = {
         {"set", set_var},
@@ -250,6 +282,7 @@ namespace dbg
         {"poinfo", display_poi_info}, 
         {"get_path", get_path},
         {"quit", quit},
-        {"test", test_cmd}
+        {"test", test_cmd},
+        {"lssid", lssid}
         };
 }

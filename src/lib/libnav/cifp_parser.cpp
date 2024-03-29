@@ -564,6 +564,16 @@ namespace libnav
         return get_proc(proc_name, trans, appch_db);
     }
 
+    std::vector<std::string> Airport::get_sid_by_rwy(std::string& rwy_id)
+    {
+        return get_proc_by_rwy(rwy_id, sid_per_rwy);
+    }
+
+    std::vector<std::string> Airport::get_star_by_rwy(std::string& rwy_id)
+    {
+        return get_proc_by_rwy(rwy_id, star_per_rwy);
+    }
+
     Airport::~Airport()
     {
         if(arinc_legs != nullptr)
@@ -592,6 +602,18 @@ namespace libnav
                 return proc_legs;
             }
         }
+        return {};
+    }
+
+    std::vector<std::string> Airport::get_proc_by_rwy(std::string& rwy_id, 
+        str_umap_t& umap)
+    {
+        if(umap.find(rwy_id) != umap.end())
+        {
+            // Case: runway was found
+            return umap[rwy_id];
+        }
+
         return {};
     }
 
@@ -638,14 +660,20 @@ namespace libnav
                         if(curr.second == ProcType::SID)
                         {
                             if(is_rwy)
+                            {
                                 sid_per_rwy[i].push_back(proc_name);
+                                rwy_per_sid[proc_name].push_back(i);
+                            }
                             sid_db[proc_name][i].push_back(
                                 n_arinc_legs_used);
                         }
                         else if(curr.second == ProcType::STAR)
                         {
                             if(is_rwy)
+                            {
                                 star_per_rwy[i].push_back(proc_name);
+                                rwy_per_star[proc_name].push_back(i);
+                            }
                             star_db[proc_name][i].push_back(
                                 n_arinc_legs_used);
                         }
