@@ -549,6 +549,21 @@ namespace libnav
         }
     }
 
+    std::unordered_set<std::string> Airport::get_all_sids()
+    {
+        return get_all_proc(sid_db);
+    }
+
+    std::unordered_set<std::string> Airport::get_all_stars()
+    {
+        return get_all_proc(star_db);
+    }
+
+    std::unordered_set<std::string> Airport::get_all_appch()
+    {
+        return get_all_proc(appch_db);
+    }
+
     arinc_leg_seq_t Airport::get_sid(std::string& proc_name, std::string& trans)
     {
         return get_proc(proc_name, trans, sid_db);
@@ -603,6 +618,17 @@ namespace libnav
     }
 
     // private member functions:
+
+    std::unordered_set<std::string> Airport::get_all_proc(proc_db_t& db)
+    {
+        std::unordered_set<std::string> out;
+        for(auto i: db)
+        {
+            out.insert(i.first);
+        }
+
+        return out;
+    }
 
     arinc_leg_seq_t Airport::get_proc(std::string& proc_name, std::string& trans, 
         proc_db_t& db)

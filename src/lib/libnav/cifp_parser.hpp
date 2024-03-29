@@ -291,6 +291,12 @@ namespace libnav
         Airport(std::string icao, std::shared_ptr<NavDB> nav_db, 
             std::string cifp_path="", std::string postfix=".dat");
 
+        std::unordered_set<std::string> get_all_sids();
+
+        std::unordered_set<std::string> get_all_stars();
+
+        std::unordered_set<std::string> get_all_appch();
+
         arinc_leg_seq_t get_sid(std::string& proc_name, std::string& trans);
 
         arinc_leg_seq_t get_star(std::string& proc_name, std::string& trans);
@@ -329,6 +335,8 @@ namespace libnav
 
         std::queue<proc_typed_str_t> flt_leg_strings;
 
+
+        std::unordered_set<std::string> get_all_proc(proc_db_t& db);
 
         arinc_leg_seq_t get_proc(std::string& proc_name, std::string& trans, 
             proc_db_t& db);
