@@ -214,15 +214,8 @@ namespace dbg
         std::exit(0);
     }
 
-    inline void test_cmd(Avionics* av, std::vector<std::string>& in)
+    inline void getsid(Avionics* av, std::vector<std::string>& in)
     {
-        //UNUSED(av); b main_helpers.hpp:201
-
-        //bool bool_var = false;
-        //std::cout << libnav::str2alt(in[0]) << " " << bool_var << "\n";
-        //UNUSED(in);
-        //UNUSED(av);
-
         if(in.size() != 3)
         {
             std::cout << "Invalid arguments provided\n";
@@ -236,11 +229,30 @@ namespace dbg
         {
             std::cout << i.main_fix.id << " " << i.leg_type << "\n";
         }
-        //std::cout << leg.proc_name << " " << leg.trans_name << "\n";
+    }
 
-        //
-        //std::cout << rwy.id << " " << rwy.data.pos.lat_deg << " " 
-        //    << rwy.data.pos.lon_deg << " " << rwy.data.thresh_displ_ft << "\n";
+    inline void getstar(Avionics* av, std::vector<std::string>& in)
+    {
+        if(in.size() != 3)
+        {
+            std::cout << "Invalid arguments provided\n";
+            return;
+        }
+        
+        libnav::Airport apt(in[0], av->db, av->cifp_dir_path);
+
+        if(apt.err_code != libnav::DbErr::SUCCESS &&
+            apt.err_code != libnav::DbErr::PARTIAL_LOAD)
+        {
+            std::cout << "Invalid airport icao\n";
+            return;
+        }
+
+        libnav::arinc_leg_seq_t star_legs = apt.get_star(in[1], in[2]);
+        for(auto i: star_legs)
+        {
+            std::cout << i.main_fix.id << " " << i.leg_type << "\n";
+        }
     }
 
     inline void lssid(Avionics* av, std::vector<std::string>& in)
@@ -260,7 +272,7 @@ namespace dbg
             return;
         }
 
-        std::vector<std::string> sids = apt.get_sid_by_rwy(in[1]);
+        std::unordered_set<std::string> sids = apt.get_sid_by_rwy(in[1]);
 
         if(!sids.size())
         {
@@ -275,6 +287,87 @@ namespace dbg
         }
     }
 
+    inline void lsstar(Avionics* av, std::vector<std::string>& in)
+    {
+        if(in.size() != 2)
+        {
+            std::cout << "Invalid arguments provided\n";
+            return;
+        }
+
+        libnav::Airport apt(in[0], av->db, av->cifp_dir_path);
+
+        if(apt.err_code != libnav::DbErr::SUCCESS &&
+            apt.err_code != libnav::DbErr::PARTIAL_LOAD)
+        {
+            std::cout << "Invalid airport icao\n";
+            return;
+        }
+
+        std::unordered_set<std::string> stars = apt.get_star_by_rwy(in[1]);
+
+        if(!stars.size())
+        {
+            std::cout << "Invalid runway\n";
+        }
+        else
+        {
+            for(auto i: stars)
+            {
+                std::cout << i << "\n";
+            }
+        }
+    }
+
+    inline void lssidtrans(Avionics* av, std::vector<std::string>& in)
+    {
+        if(in.size() != 2)
+        {
+            std::cout << "Invalid arguments provided\n";
+            return;
+        }
+
+        libnav::Airport apt(in[0], av->db, av->cifp_dir_path);
+
+        if(apt.err_code != libnav::DbErr::SUCCESS &&
+            apt.err_code != libnav::DbErr::PARTIAL_LOAD)
+        {
+            std::cout << "Invalid airport icao\n";
+            return;
+        }
+
+        std::unordered_set<std::string> trans = apt.get_trans_by_sid(in[1]);
+
+        for(auto i: trans)
+        {
+            std::cout << i << "\n";
+        }
+    }
+
+    inline void lsstartrans(Avionics* av, std::vector<std::string>& in)
+    {
+        if(in.size() != 2)
+        {
+            std::cout << "Invalid arguments provided\n";
+            return;
+        }
+
+        libnav::Airport apt(in[0], av->db, av->cifp_dir_path);
+
+        if(apt.err_code != libnav::DbErr::SUCCESS &&
+            apt.err_code != libnav::DbErr::PARTIAL_LOAD)
+        {
+            std::cout << "Invalid airport icao\n";
+            return;
+        }
+
+        std::unordered_set<std::string> trans = apt.get_trans_by_star(in[1]);
+
+        for(auto i: trans)
+        {
+            std::cout << i << "\n";
+        }
+    }
 
     std::unordered_map<std::string, cmd> cmd_map = {
         {"set", set_var},
@@ -282,7 +375,11 @@ namespace dbg
         {"poinfo", display_poi_info}, 
         {"get_path", get_path},
         {"quit", quit},
-        {"test", test_cmd},
-        {"lssid", lssid}
+        {"getsid", getsid},
+        {"getstar", getstar},
+        {"lssid", lssid},
+        {"lsstar", lsstar},
+        {"lssidtrans", lssidtrans},
+        {"lsstartrans", lsstartrans}
         };
 }
