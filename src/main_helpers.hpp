@@ -224,7 +224,7 @@ namespace dbg
         
         libnav::Airport apt(in[0], av->db, av->cifp_dir_path);
 
-        std::unordered_set<std::string> sids = apt.get_all_sids();
+        std::set<std::string> sids = apt.get_all_sids();
 
         for(auto i: sids)
         {
@@ -290,7 +290,7 @@ namespace dbg
             return;
         }
 
-        std::unordered_set<std::string> sids = apt.get_sid_by_rwy(in[1]);
+        std::set<std::string> sids = apt.get_sid_by_rwy(in[1]);
 
         if(!sids.size())
         {
@@ -322,7 +322,7 @@ namespace dbg
             return;
         }
 
-        std::unordered_set<std::string> stars = apt.get_star_by_rwy(in[1]);
+        std::set<std::string> stars = apt.get_star_by_rwy(in[1]);
 
         if(!stars.size())
         {
@@ -354,7 +354,7 @@ namespace dbg
             return;
         }
 
-        std::unordered_set<std::string> trans = apt.get_trans_by_sid(in[1]);
+        std::set<std::string> trans = apt.get_trans_by_sid(in[1]);
 
         for(auto i: trans)
         {
@@ -379,7 +379,7 @@ namespace dbg
             return;
         }
 
-        std::unordered_set<std::string> trans = apt.get_trans_by_star(in[1]);
+        std::set<std::string> trans = apt.get_trans_by_star(in[1]);
 
         for(auto i: trans)
         {
