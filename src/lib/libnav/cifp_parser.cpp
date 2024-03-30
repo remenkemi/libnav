@@ -560,17 +560,17 @@ namespace libnav
         }
     }
 
-    std::unordered_set<std::string> Airport::get_all_sids()
+    Airport::str_set_t Airport::get_all_sids()
     {
         return get_all_proc(sid_db);
     }
 
-    std::unordered_set<std::string> Airport::get_all_stars()
+    Airport::str_set_t Airport::get_all_stars()
     {
         return get_all_proc(star_db);
     }
 
-    std::unordered_set<std::string> Airport::get_all_appch()
+    Airport::str_set_t Airport::get_all_appch()
     {
         return get_all_proc(appch_db);
     }
@@ -590,32 +590,32 @@ namespace libnav
         return get_proc(proc_name, trans, appch_db);
     }
 
-    std::unordered_set<std::string> Airport::get_sid_by_rwy(std::string& rwy_id)
+    Airport::str_set_t Airport::get_sid_by_rwy(std::string& rwy_id)
     {
         return get_proc_by_rwy(rwy_id, sid_per_rwy);
     }
 
-    std::unordered_set<std::string> Airport::get_star_by_rwy(std::string& rwy_id)
+    Airport::str_set_t Airport::get_star_by_rwy(std::string& rwy_id)
     {
         return get_proc_by_rwy(rwy_id, star_per_rwy);
     }
 
-    std::unordered_set<std::string> Airport::get_rwy_by_sid(std::string& sid)
+    Airport::str_set_t Airport::get_rwy_by_sid(std::string& sid)
     {
         return get_trans_by_proc(sid, sid_db, true);
     }
 
-    std::unordered_set<std::string> Airport::get_rwy_by_star(std::string& star)
+    Airport::str_set_t Airport::get_rwy_by_star(std::string& star)
     {
         return get_trans_by_proc(star, star_db, true);
     }
 
-    std::unordered_set<std::string> Airport::get_trans_by_sid(std::string& sid)
+    Airport::str_set_t Airport::get_trans_by_sid(std::string& sid)
     {
         return get_trans_by_proc(sid, sid_db);
     }
 
-    std::unordered_set<std::string> Airport::get_trans_by_star(std::string& star)
+    Airport::str_set_t Airport::get_trans_by_star(std::string& star)
     {
         return get_trans_by_proc(star, star_db);
     }
@@ -630,9 +630,9 @@ namespace libnav
 
     // private member functions:
 
-    std::unordered_set<std::string> Airport::get_all_proc(proc_db_t& db)
+    Airport::str_set_t Airport::get_all_proc(proc_db_t& db)
     {
-        std::unordered_set<std::string> out;
+        str_set_t out;
         for(auto i: db)
         {
             out.insert(i.first);
@@ -662,7 +662,7 @@ namespace libnav
         return {};
     }
 
-    std::unordered_set<std::string> Airport::get_proc_by_rwy(std::string& rwy_id, 
+    Airport::str_set_t Airport::get_proc_by_rwy(std::string& rwy_id, 
         str_umap_t& umap)
     {
         if(umap.find(rwy_id) != umap.end())
@@ -674,10 +674,10 @@ namespace libnav
         return {};
     }
 
-    std::unordered_set<std::string> Airport::get_trans_by_proc(std::string& proc_name, 
+    Airport::str_set_t Airport::get_trans_by_proc(std::string& proc_name, 
         proc_db_t db, bool rwy)
     {
-        std::unordered_set<std::string> out;
+        str_set_t out;
 
         if(db.find(proc_name) != db.end())
         {
