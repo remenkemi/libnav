@@ -9,7 +9,7 @@
 	This file contains definitions of member functions used within the REF NAV DATA page.
 */
 
-#include "navaid_db.hpp"
+#include "libnav/navaid_db.hpp"
 #include <assert.h>
 
 

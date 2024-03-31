@@ -1,4 +1,4 @@
-#include "cifp_parser.hpp"
+#include "libnav/cifp_parser.hpp"
 
 
 namespace libnav

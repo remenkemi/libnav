@@ -2,7 +2,7 @@
 	Author: discord/bruh4096#4512
 */
 
-#include "nav_db.hpp"
+#include "libnav/nav_db.hpp"
 
 
 namespace libnav
