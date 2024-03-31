@@ -180,7 +180,7 @@ namespace libnav
 
         float arc_radius;  // Column 18. Arc radius *1000 nm. Ref: arinc424 spec, section 5.204
         float theta;  // Column 19. magnetic bearing from recd_navaid to main_fix *10. Ref: arinc424 spec, section 5.24
-        float rho;  // Column 20. geodesic distance from recd_navaid to main_fix *10. Ref: arinc424 spec, section 5.25
+        float rho;  // Column 20. geodetic distance from recd_navaid to main_fix *10. Ref: arinc424 spec, section 5.25
         bool outbd_crs_true;
         float outbd_crs_deg;  // Treated as magnetic if outbd_crs_true is false.
         bool outbd_dist_as_time;
@@ -224,7 +224,7 @@ namespace libnav
 
         float arc_radius;  // Column 18. Arc radius *1000 nm. Ref: arinc424 spec, section 5.204
         float theta;  // Column 19. magnetic bearing from recd_navaid to main_fix *10. Ref: arinc424 spec, section 5.24
-        float rho;  // Column 20. geodesic distance from recd_navaid to main_fix *10. Ref: arinc424 spec, section 5.25
+        float rho;  // Column 20. geodetic distance from recd_navaid to main_fix *10. Ref: arinc424 spec, section 5.25
         std::string outbd_mag_crs;  // Column 21. Magnetic course from main_fix *10. If true, has T at the end. 
             // Ref: arinc424 spec, section 5.26
         std::string outbd_dist_time;  // Column 22. Distance in nm/time(min) from main_fix to next wpt. *10. 
