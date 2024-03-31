@@ -1,9 +1,9 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include "lib/libnav/nav_db.hpp"
-#include "lib/libnav/awy_db.hpp"
-#include "lib/libnav/cifp_parser.hpp"
+#include <libnav/nav_db.hpp>
+#include <libnav/awy_db.hpp>
+#include <libnav/cifp_parser.hpp>
 
 #define UNUSED(x) (void)(x)
 

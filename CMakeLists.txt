@@ -10,6 +10,7 @@ add_subdirectory(src/lib)
 
 add_executable(navcmd "src/main.cpp")
 target_link_libraries(navcmd PUBLIC libnav)
+target_include_directories(navcmd PUBLIC src/lib/libnav)
 
 set(PLUGIN_BUILD_DIR "${PROJECT_SOURCE_DIR}")
 
