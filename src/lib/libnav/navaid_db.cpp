@@ -140,6 +140,16 @@ namespace libnav
 		return err_code;
 	}
 
+	int NavaidDB::get_wpt_cycle()
+	{
+		return wpt_airac_cycle;
+	}
+
+	int NavaidDB::get_navaid_cycle()
+	{
+		return navaid_airac_cycle;
+	}
+
 	void NavaidDB::reset()
 	{
 		delete[] navaid_entries;
@@ -182,6 +192,10 @@ namespace libnav
 
 					add_to_map_with_mutex(unique_ident, desc, wpt_desc_mutex, wpt_desc_db);
 					add_to_wpt_cache(wpt);
+				}
+				else if(i+1 == AIRAC_CYCLE_LINE)
+				{
+					wpt_airac_cycle = get_airac_cycle(line);
 				}
 				i++;
 			}
@@ -238,6 +252,10 @@ namespace libnav
 
 					add_to_map_with_mutex(unique_ident, desc, navaid_desc_mutex, navaid_desc_db);
 					add_to_navaid_cache(wpt, navaid);
+				}
+				else if(i+1 == AIRAC_CYCLE_LINE)
+				{
+					navaid_airac_cycle = get_airac_cycle(line);
 				}
 				else if (check_val == "99")
 				{

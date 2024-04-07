@@ -117,6 +117,10 @@ namespace libnav
 
 		DbErr is_loaded();
 
+		int get_wpt_cycle();
+
+		int get_navaid_cycle();
+
 		bool load_waypoints();
 
 		bool load_navaids();
@@ -138,6 +142,9 @@ namespace libnav
 		~NavaidDB();
 
 	private:
+		int wpt_airac_cycle;
+		int navaid_airac_cycle;
+
 		std::string sim_wpt_db_path;
 		std::string sim_navaid_db_path;
 

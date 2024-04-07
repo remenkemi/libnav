@@ -23,6 +23,10 @@ namespace libnav
 		PARTIAL_LOAD
 	};
 
+	constexpr int AIRAC_CYCLE_WORD = 6;
+	constexpr int AIRAC_CYCLE_LINE = 2;
+	constexpr char AIRAC_WORD_SEP = ' ';
+
 
 	inline bool does_file_exist(std::string name)
 	{
@@ -50,5 +54,23 @@ namespace libnav
 		else if (val < lower)
 			return lower;
 		return val;
+	}
+
+	inline int get_airac_cycle(std::string s)
+	{
+		int curr_word = 1;
+		std::stringstream ss(s);
+		std::string word;
+
+		while(std::getline(ss, word, AIRAC_WORD_SEP) && curr_word <= AIRAC_CYCLE_WORD)
+		{
+			if(curr_word == AIRAC_CYCLE_WORD)
+			{
+				return std::stoi(word);
+			}
+			curr_word++;
+		}
+		
+		return 0;
 	}
 }; // namespace libnav
