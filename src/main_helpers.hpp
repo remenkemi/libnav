@@ -55,6 +55,9 @@ namespace dbg
             libnav::DbErr err_arpt = db->is_arpt_loaded();
             libnav::DbErr err_nav = db->is_navaid_loaded();
 
+            std::cout << navaid_db_ptr->get_wpt_cycle() << " " <<
+                navaid_db_ptr->get_navaid_cycle() << "\n";
+
             if(err_arpt != libnav::DbErr::SUCCESS)
             {
                 std::cout << "Unable to load airport database\n";
