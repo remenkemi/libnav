@@ -221,18 +221,18 @@ namespace libnav
     waypoint_t arinc_fix_entry_t::to_waypoint_t(std::string& area_code, 
         std::shared_ptr<NavDB> nav_db, arinc_rwy_db_t& rwy_db)
     {
-        NavaidType lookup_type = NavaidType::NAV_NONE;
+        NavaidType lookup_type = NavaidType::NONE;
         std::string lookup_area = "ENRT";
 
         if(db_section == 'D')
         {
             if(db_subsection == 'B')
             {
-                lookup_type = NavaidType::NAV_NDB;
+                lookup_type = NavaidType::NDB;
             }
             else
             {
-                lookup_type = NavaidType::NAV_VHF_NAVAID;
+                lookup_type = NavaidType::VHF_NAVAID;
             }
             // Add section P
         }
@@ -244,7 +244,7 @@ namespace libnav
                 int ret = nav_db->get_airport_data(area_code, &apt_data);
                 if(ret)
                 {
-                    return {area_code, {NavaidType::NAV_APT, 0, apt_data.pos, 
+                    return {area_code, {NavaidType::APT, 0, apt_data.pos, 
                         area_code, country_code}};
                 }
             }
@@ -491,7 +491,7 @@ namespace libnav
             waypoint_t out;
             out.data.pos = rwy_db[tmp].pos;
             out.id = tmp;
-            out.data.type = NavaidType::NAV_RWY;
+            out.data.type = NavaidType::RWY;
             out.data.area_code = area_cd;
             out.data.country_code = country_cd;
 

@@ -47,7 +47,7 @@ namespace libnav
         awy_entry_t data;
         alt_restr_t alt_restr;
 
-        awy_point_t(std::string nm="", NavaidType tp=NavaidType::NAV_NONE, 
+        awy_point_t(std::string nm="", NavaidType tp=NavaidType::NONE, 
             std::string r_c="", uint32_t lower=0, uint32_t upper=0);
     };
 
@@ -59,6 +59,9 @@ namespace libnav
         typedef std::unordered_map<std::string, awy_entry_t> awy_data_db_t;
 
     public:
+        DbErr err_code;
+
+
         AwyDB(std::string awy_path);
 
         bool is_in_awy(std::string awy, std::string point);
@@ -73,7 +76,7 @@ namespace libnav
         std::unordered_map<std::string, awy_data_db_t> awy_data;
 
 
-        void load_airways(std::string awy_path);
+        DbErr load_airways(std::string awy_path);
 
         void add_to_awy_db(awy_point_t p1, awy_point_t p2, std::string awy_nm, char restr);
     };    

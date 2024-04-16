@@ -166,7 +166,7 @@ namespace dbg
                 std::string lon_str = strutils::lon_to_str(found_wpts[i].pos.lon_deg);
                 libnav::NavaidType wpt_type = found_wpts[i].type;
                 std::string type_str = libnav::navaid_to_str(wpt_type);
-                if (wpt_type == libnav::NavaidType::NAV_WAYPOINT)
+                if (wpt_type == libnav::NavaidType::WAYPOINT)
                 {
                     std::cout << poi_id << " " << lat_str << " " << lon_str << " " << 
                         type_str << "\n";

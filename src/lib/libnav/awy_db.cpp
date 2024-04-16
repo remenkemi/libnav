@@ -8,16 +8,16 @@ namespace libnav
         switch (type)
         {
         case XP_AWY_WPT:
-            return NavaidType::NAV_WAYPOINT;
+            return NavaidType::WAYPOINT;
         case XP_AWY_NDB:
-            return NavaidType::NAV_NDB;
+            return NavaidType::NDB;
         case XP_AWY_VHF:
-            return NavaidType(static_cast<int>(NavaidType::NAV_DME) + 
-                static_cast<int>(NavaidType::NAV_DME_ONLY) + 
-                static_cast<int>(NavaidType::NAV_VOR) + 
-                static_cast<int>(NavaidType::NAV_VOR_DME));
+            return NavaidType(static_cast<int>(NavaidType::DME) + 
+                static_cast<int>(NavaidType::DME_ONLY) + 
+                static_cast<int>(NavaidType::VOR) + 
+                static_cast<int>(NavaidType::VOR_DME));
         default:
-            return NavaidType::NAV_NONE;
+            return NavaidType::NONE;
         }
     }
 
@@ -119,7 +119,7 @@ namespace libnav
 
     // Private member functions:
 
-    void AwyDB::load_airways(std::string awy_path)
+    DbErr AwyDB::load_airways(std::string awy_path)
     {
         std::ifstream file(awy_path);
 		if (file.is_open())
@@ -172,6 +172,11 @@ namespace libnav
 
             file.close();
         }
+        else
+        {
+            return DbErr::FILE_NOT_FOUND;
+        }
+        return DbErr::SUCCESS;
     }
 
     void AwyDB::add_to_awy_db(awy_point_t p1, awy_point_t p2, std::string awy_nm, char restr)
