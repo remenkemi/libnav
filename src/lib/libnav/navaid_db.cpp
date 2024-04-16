@@ -20,27 +20,33 @@ namespace libnav
 		switch(tp)
 		{
 		case XP_NAV_NDB:
-			return NavaidType::NAV_NDB;
+			return NavaidType::NDB;
 		case XP_NAV_VOR:
-			return NavaidType::NAV_VOR;
+			return NavaidType::VOR;
 		case XP_NAV_ILS_LOC_ONLY:
-			return NavaidType::NAV_ILS_LOC_ONLY;
+			return NavaidType::ILS_LOC_ONLY;
 		case XP_NAV_ILS_LOC:
-			return NavaidType::NAV_ILS_LOC;
+			return NavaidType::ILS_LOC;
 		case XP_NAV_ILS_GS:
-			return NavaidType::NAV_ILS_GS;
+			return NavaidType::ILS_GS;
+		case XP_NAV_OM:
+			return NavaidType::OUTER_MARKER;
+		case XP_NAV_MM:
+			return NavaidType::MIDDLE_MARKER;
+		case XP_NAV_IM:
+			return NavaidType::INNER_MARKER;
 		case XP_NAV_ILS_FULL:
-			return NavaidType::NAV_ILS_FULL;
+			return NavaidType::ILS_FULL;
 		case XP_NAV_DME:
-			return NavaidType::NAV_DME;
+			return NavaidType::DME;
 		case XP_NAV_DME_ONLY:
-			return NavaidType::NAV_DME_ONLY;
+			return NavaidType::DME_ONLY;
 		case XP_NAV_VOR_DME:
-			return NavaidType::NAV_VOR_DME;
+			return NavaidType::VOR_DME;
 		case XP_NAV_ILS_DME:
-			return NavaidType::NAV_ILS_DME;
+			return NavaidType::ILS_DME;
 		default:
-			return NavaidType::NAV_NONE;
+			return NavaidType::NONE;
 		}
 	}
 
@@ -49,38 +55,38 @@ namespace libnav
 		int v1 = static_cast<int>(tp1), v2 = static_cast<int>(tp2);
 		int tp_sum = v1 + v2;
 
-		if((tp_sum & static_cast<int>(NavaidType::NAV_ILS_LOC)) && 
-			(tp_sum & static_cast<int>(NavaidType::NAV_ILS_GS)))
+		if((tp_sum & static_cast<int>(NavaidType::ILS_LOC)) && 
+			(tp_sum & static_cast<int>(NavaidType::ILS_GS)))
 		{
-			return NavaidType::NAV_ILS_FULL;
+			return NavaidType::ILS_FULL;
 		}
-		if((tp_sum & static_cast<int>(NavaidType::NAV_VOR)) && 
-			(tp_sum & static_cast<int>(NavaidType::NAV_DME)))
+		if((tp_sum & static_cast<int>(NavaidType::VOR)) && 
+			(tp_sum & static_cast<int>(NavaidType::DME)))
 		{
-			return NavaidType::NAV_VOR_DME;
+			return NavaidType::VOR_DME;
 		}
-		if((tp_sum & static_cast<int>(NavaidType::NAV_ILS_FULL)) && 
-			(tp_sum & static_cast<int>(NavaidType::NAV_DME)))
+		if((tp_sum & static_cast<int>(NavaidType::ILS_FULL)) && 
+			(tp_sum & static_cast<int>(NavaidType::DME)))
 		{
-			return NavaidType::NAV_ILS_DME;
+			return NavaidType::ILS_DME;
 		}
-		if((tp_sum & static_cast<int>(NavaidType::NAV_ILS_GS)) && 
-			(tp_sum & static_cast<int>(NavaidType::NAV_DME)))
+		if((tp_sum & static_cast<int>(NavaidType::ILS_GS)) && 
+			(tp_sum & static_cast<int>(NavaidType::DME)))
 		{
-			return NavaidType::NAV_ILS_DME;
+			return NavaidType::ILS_DME;
 		}
-		if((tp_sum & static_cast<int>(NavaidType::NAV_ILS_LOC)) && 
-			(tp_sum & static_cast<int>(NavaidType::NAV_DME)))
+		if((tp_sum & static_cast<int>(NavaidType::ILS_LOC)) && 
+			(tp_sum & static_cast<int>(NavaidType::DME)))
 		{
-			return NavaidType::NAV_ILS_DME;
+			return NavaidType::ILS_DME;
 		}
-		if((tp_sum & static_cast<int>(NavaidType::NAV_ILS_LOC_ONLY)) && 
-			(tp_sum & static_cast<int>(NavaidType::NAV_DME)))
+		if((tp_sum & static_cast<int>(NavaidType::ILS_LOC_ONLY)) && 
+			(tp_sum & static_cast<int>(NavaidType::DME)))
 		{
-			return NavaidType::NAV_ILS_DME;
+			return NavaidType::ILS_DME;
 		}
 
-		return NavaidType::NAV_NONE;
+		return NavaidType::NONE;
 	}
 
 
@@ -177,7 +183,7 @@ namespace libnav
 					std::stringstream s(line);
 					std::string desc;
 					waypoint_t wpt = {};
-					wpt.data.type = NavaidType::NAV_WAYPOINT;
+					wpt.data.type = NavaidType::WAYPOINT;
 					s >> wpt.data.pos.lat_deg >> wpt.data.pos.lon_deg >> wpt.id >> 
 						wpt.data.area_code >> wpt.data.country_code >> 
 						wpt.data.arinc_type;
@@ -314,7 +320,7 @@ namespace libnav
 				{
 					is_fine = false;
 				}
-				else if(type != NavaidType::NAV_NONE && 
+				else if(type != NavaidType::NONE && 
 					(static_cast<int>(wpt_curr.type) & static_cast<int>(type)) == 0)
 				{
 					is_fine = false;
@@ -405,8 +411,8 @@ namespace libnav
 					double lon_dev = abs(wpt.data.pos.lon_deg - tmp_wpt.pos.lon_deg);
 					double ang_dev = lat_dev + lon_dev;
 					NavaidType type_sum = make_composite(wpt.data.type, tmp_wpt.type);
-					bool is_comp = type_sum != NavaidType::NAV_NONE;
-					if (ang_dev < 0.001 && is_comp && data.freq == tmp_navaid->freq)
+					bool is_comp = type_sum != NavaidType::NONE;
+					if (ang_dev < MAX_ANG_DEV_MERGE && is_comp && data.freq == tmp_navaid->freq)
 					{
 						entries->at(i).type = type_sum;
 						is_colocated = true;
@@ -464,27 +470,27 @@ namespace libnav
 	{
 		switch (navaid_type)
 		{
-		case NavaidType::NAV_WAYPOINT:
+		case NavaidType::WAYPOINT:
 			return "WPT";
-		case NavaidType::NAV_NDB:
+		case NavaidType::NDB:
 			return "NDB";
-		case NavaidType::NAV_DME:
+		case NavaidType::DME:
 			return "DME";
-		case NavaidType::NAV_VOR:
+		case NavaidType::VOR:
 			return "VOR";
-		case NavaidType::NAV_ILS_LOC_ONLY:
+		case NavaidType::ILS_LOC_ONLY:
+			return "ILS LOC";
+		case NavaidType::ILS_LOC:
+			return "ILS LOC";
+		case NavaidType::ILS_GS:
+			return "ILS GS";
+		case NavaidType::ILS_FULL:
 			return "ILS";
-		case NavaidType::NAV_ILS_LOC:
-			return "ILS";
-		case NavaidType::NAV_ILS_GS:
-			return "ILS";
-		case NavaidType::NAV_ILS_FULL:
-			return "ILS";
-		case NavaidType::NAV_DME_ONLY:
+		case NavaidType::DME_ONLY:
 			return "DME";
-		case NavaidType::NAV_VOR_DME:
+		case NavaidType::VOR_DME:
 			return "VORDME";
-		case NavaidType::NAV_ILS_DME:
+		case NavaidType::ILS_DME:
 			return "ILSDME";
 		default:
 			return "";

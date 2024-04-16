@@ -18,6 +18,7 @@ namespace libnav
 	constexpr double VOR_MAX_SLANT_ANGLE_DEG = 40;
 	constexpr double DME_DME_PHI_MIN_DEG = 30;
 	constexpr double DME_DME_PHI_MAX_DEG = 180 - DME_DME_PHI_MIN_DEG;
+	constexpr double MAX_ANG_DEV_MERGE = 0.03;
 	constexpr size_t NAVAID_ENTRY_CACHE_SZ = 300000;
 	//Number of lines at the beginning of the .dat file to ignore
 	constexpr int N_NAVAID_LINES_IGNORE = 3;
@@ -32,6 +33,9 @@ namespace libnav
 		XP_NAV_ILS_LOC = 4,
 		XP_NAV_ILS_LOC_ONLY = 5,
 		XP_NAV_ILS_GS = 6,
+		XP_NAV_OM = 7,  // Outer marker
+		XP_NAV_MM = 8,  // Middle marker
+		XP_NAV_IM = 9,  // Inner marker
 		XP_NAV_ILS_FULL = 10,
 		XP_NAV_DME = 12,
 		XP_NAV_DME_ONLY = 13,
@@ -41,22 +45,27 @@ namespace libnav
 
 	enum class NavaidType 
 	{
-		NAV_NONE = 0,
-		NAV_WAYPOINT = 1,
-		NAV_NDB = 2,
-		NAV_VOR = 4,
-		NAV_ILS_LOC = 8,
-		NAV_ILS_LOC_ONLY = 16,
-		NAV_ILS_GS = 32,
-		NAV_ILS_FULL = 64,
-		NAV_DME = 128,
-		NAV_DME_ONLY = 256,
-		NAV_VOR_DME = 512,
-		NAV_ILS_DME = 1024,
-		NAV_VHF_NAVAID = 2047 - NAV_WAYPOINT - NAV_NDB,
+		NONE = 0,
+		WAYPOINT = 1,
+		NDB = 2,
+		VOR = 4,
+		ILS_LOC = 8,
+		ILS_LOC_ONLY = 16,
+		ILS_GS = 32,
+		ILS_FULL = 64,
+		DME = 128,
+		DME_ONLY = 256,
+		VOR_DME = 512,
+		ILS_DME = 1024,
+		VHF_NAVAID = 2047 - WAYPOINT - NDB,
+		NAVAID = 2047,
+		OUTER_MARKER = 2048,
+		MIDDLE_MARKER = 4096,
+		INNER_MARKER = 8192,
+		MARKER = OUTER_MARKER + MIDDLE_MARKER + INNER_MARKER,
 		// Used only by CIFP parser:
-		NAV_RWY,
-		NAV_APT
+		RWY = 16384,
+		APT = 32768
 	};
 
 
@@ -133,7 +142,7 @@ namespace libnav
 		// Otherwise, returns number of items written to out.
 		int get_wpt_data(std::string id, std::vector<waypoint_entry_t>* out, 
 			std::string area_code="", std::string country_code="", 
-			NavaidType type=NavaidType::NAV_NONE);
+			NavaidType type=NavaidType::NAVAID);
 
 		std::string get_fix_desc(waypoint_t& fix);
 
