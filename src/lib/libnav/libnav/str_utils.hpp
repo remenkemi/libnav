@@ -210,28 +210,6 @@ namespace strutils
 	}
 
 	/*
-		Function: str_split
-		Description: splits the string by a designated character
-		@param in: input string
-		@param sep: separator
-		@Return: vector of strings
-	*/
-
-	inline std::vector<std::string> str_split(std::string& in, char sep)
-	{
-		std::stringstream s(in);
-		std::string tmp;
-		std::vector<std::string> out;
-
-		while(std::getline(s, tmp, sep))
-		{
-			out.push_back(tmp);
-		}
-
-		return out;
-	}
-
-	/*
 		Function: strip
 		Description: removes a designated character from the start and end of the string
 		@param in: input string
@@ -255,6 +233,29 @@ namespace strutils
 
         return in.substr(i_first, i_last - i_first + 1);
     }
+
+	/*
+		Function: str_split
+		Description: splits the string by a designated character
+		@param in: input string
+		@param sep: separator
+		@Return: vector of strings
+	*/
+
+	inline std::vector<std::string> str_split(std::string& in, char sep=' ')
+	{
+		std::stringstream s(in);
+		std::string tmp;
+		std::vector<std::string> out;
+
+		while(std::getline(s, tmp, sep))
+		{
+			if(tmp != "")
+				out.push_back(strip(tmp, '\r'));
+		}
+
+		return out;
+	}
 
 	inline int stoi_with_strip(std::string& s, char s_char=' ')
 	{
