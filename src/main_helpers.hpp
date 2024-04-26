@@ -56,7 +56,7 @@ namespace dbg
             libnav::DbErr err_nav = db->is_navaid_loaded();
 
             std::cout << navaid_db_ptr->get_wpt_cycle() << " " <<
-                navaid_db_ptr->get_navaid_cycle() << "\n";
+                navaid_db_ptr->get_navaid_cycle() << " " << awy_db->get_airac() << "\n";
 
             if(err_arpt != libnav::DbErr::SUCCESS)
             {
@@ -103,18 +103,36 @@ namespace dbg
     {
         if(in.size() != 2)
         {
-            std::cout << "Command expects 2 arguments\n";
+            std::cout << "Command expects 2 arguments: <variable name>, <value>\n";
             return;
         }
 
         av->env_vars[in[0]] = in[1];
     }
 
+    inline void print(Avionics* av, std::vector<std::string>& in)
+    {
+        if(in.size() != 1)
+        {
+            std::cout << "Command expects 1 argument: <variable name>\n";
+            return;
+        }
+
+        if(av->env_vars.find(in[0]) != av->env_vars.end())
+        {
+            std::cout << av->env_vars[in[0]] << "\n";
+        }
+        else
+        {
+            std::cout << "Variable not found\n";
+        }
+    }
+
     inline void name(Avionics* av, std::vector<std::string>& in)
     {
-        if(in.size() < 1)
+        if(in.size() != 1)
         {
-            std::cout << "Too few arguments provided\n";
+            std::cout << "Command expects 1 argument: <fix name>\n";
             return;
         }
         
@@ -392,10 +410,13 @@ namespace dbg
 
     std::unordered_map<std::string, cmd> cmd_map = {
         {"set", set_var},
+        {"print", print},
+        {"p", print},
         {"name", name}, 
         {"poinfo", display_poi_info}, 
         {"get_path", get_path},
         {"quit", quit},
+        {"q", quit},
         {"allsid", allsid},
         {"getsid", getsid},
         {"getstar", getstar},
