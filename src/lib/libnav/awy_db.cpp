@@ -72,6 +72,11 @@ namespace libnav
         load_airways(awy_path);
     }
 
+    int AwyDB::get_airac()
+    {
+        return airac_cycle;
+    }
+
     bool AwyDB::is_in_awy(std::string awy, std::string point)
     {
         if(awy_data.find(awy) != awy_data.end() && 
@@ -181,6 +186,10 @@ namespace libnav
                             awy_line.upper_fl);
                         add_to_awy_db(p1, p2, awy_line.awy_names, awy_line.path_restr);
                     }
+                }
+                else if(awy_line.is_airac)
+                {
+                    airac_cycle = awy_line.airac_cycle;
                 }
                 else if(awy_line.is_last)
                 {

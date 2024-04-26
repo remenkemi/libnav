@@ -88,6 +88,8 @@ namespace libnav
 
         AwyDB(std::string awy_path);
 
+        int get_airac();
+
         bool is_in_awy(std::string awy, std::string point);
 
         int get_path(std::string awy, std::string start, 
@@ -96,6 +98,7 @@ namespace libnav
         ~AwyDB();
 
     private:
+        int airac_cycle;
         awy_db_t awy_db;
         std::unordered_map<std::string, awy_data_db_t> awy_data;
 
