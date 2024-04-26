@@ -256,7 +256,7 @@ namespace dbg
     {
         if(in.size() != 3)
         {
-            std::cout << "Invalid arguments provided\n";
+            std::cout << "Command expected 3 arguments: <airport icao> <runway id>\n";
             return;
         }
         
@@ -280,7 +280,7 @@ namespace dbg
     {
         if(in.size() != 2)
         {
-            std::cout << "Invalid arguments provided\n";
+            std::cout << "Command expected 2 arguments: <airport icao> <runway id>\n";
             return;
         }
 
@@ -312,7 +312,7 @@ namespace dbg
     {
         if(in.size() != 2)
         {
-            std::cout << "Invalid arguments provided\n";
+            std::cout << "Command expected 2 arguments: <airport icao> <runway id>\n";
             return;
         }
 
