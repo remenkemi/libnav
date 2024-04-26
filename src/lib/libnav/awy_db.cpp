@@ -21,6 +21,38 @@ namespace libnav
         }
     }
 
+    awy_line_t::awy_line_t(std::string& s)
+    {
+        std::vector<std::string> s_split = strutils::str_split(s);
+
+        if(int(s_split.size()) == N_COL_AIRAC)
+        {
+            is_parsed = true;
+            is_airac = true;
+            airac_cycle = strutils::stoi_with_strip(s_split[AIRAC_CYCLE_WORD-1]);
+        }
+        else if(int(s_split.size()) == N_COL_NORML)
+        {
+            is_parsed = true;
+            id_1 = s_split[0];
+            reg_code_1 = s_split[1];
+            tp_1 = uint16_t(strutils::stoi_with_strip(s_split[2]));
+            id_2 = s_split[3];
+            reg_code_2 = s_split[4];
+            tp_2 = uint16_t(strutils::stoi_with_strip(s_split[5]));
+            path_restr = s_split[6][0];
+
+            lower_fl = uint32_t(strutils::stoi_with_strip(s_split[8]));
+            upper_fl = uint32_t(strutils::stoi_with_strip(s_split[9]));
+            awy_names = s_split[10];
+        }
+        else if(s_split.size() && s_split[0] == "99")
+        {
+            is_parsed = true;
+            is_last = true;
+        }
+    }
+
 
     awy_point_t::awy_point_t(std::string nm, NavaidType tp, std::string r_c, 
         uint32_t lower, uint32_t upper)
@@ -125,49 +157,35 @@ namespace libnav
 		if (file.is_open())
 		{
 			std::string line;
-			int i = 0;
             std::unordered_set<std::string> used;
 			while (getline(file, line))
 			{
-				std::string check_val;
-				std::stringstream s(line);
-				s >> check_val;
+                awy_line_t awy_line(line);
 
-                if(check_val != "99" && i >= N_AWY_LINES_IGNORE)
+                if(!awy_line.is_last && awy_line.is_parsed && !awy_line.is_airac)
                 {
-                    std::string reg_code_1;
-                    navaid_type_t tp_1;
-                    std::string id_2;
-                    std::string reg_code_2;
-                    navaid_type_t tp_2;
-                    char path_restr;
-                    std::string junk;
-                    uint32_t lower;
-                    uint32_t upper;
-                    std::string awy_names;
-
-                    s >> reg_code_1 >> tp_1 >> id_2 >> reg_code_2 >> tp_2 >> path_restr >>
-                        junk >> lower >> upper >> awy_names;
-
-                    std::string token = check_val + "_" + id_2 + "_" + awy_names;
+                    std::string token = awy_line.id_1 + "_" + awy_line.id_2 
+                        + "_" + awy_line.awy_names;
                     if(used.find(token) == used.end())
                     {
-                        NavaidType type_1 = xp_awy_type_to_libnav(tp_1);
-                        NavaidType type_2 = xp_awy_type_to_libnav(tp_2);
+                        NavaidType type_1 = xp_awy_type_to_libnav(awy_line.tp_1);
+                        NavaidType type_2 = xp_awy_type_to_libnav(awy_line.tp_2);
 
                         used.insert(token);
                         
-                        awy_point_t p1(check_val, type_1, reg_code_1, lower, upper);
-                        awy_point_t p2(id_2, type_2, reg_code_2, lower, upper);
-                        add_to_awy_db(p1, p2, awy_names, path_restr);
+                        awy_point_t p1(awy_line.id_1, type_1, 
+                            awy_line.reg_code_1, awy_line.lower_fl, 
+                            awy_line.upper_fl);
+                        awy_point_t p2(awy_line.id_2, type_2, 
+                            awy_line.reg_code_2, awy_line.lower_fl, 
+                            awy_line.upper_fl);
+                        add_to_awy_db(p1, p2, awy_line.awy_names, awy_line.path_restr);
                     }
                 }
-                else if(check_val == "99")
+                else if(awy_line.is_last)
                 {
                     break;
                 }
-
-                i++;
             }
 
             file.close();

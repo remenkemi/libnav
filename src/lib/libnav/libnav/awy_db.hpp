@@ -14,6 +14,8 @@
 namespace libnav
 {
     constexpr int N_AWY_LINES_IGNORE = 3;
+    constexpr int N_COL_NORML = 11;
+    constexpr int N_COL_AIRAC = 16;
     constexpr char AWY_NAME_SEP = '-';
     constexpr char AWY_RESTR_FWD = 'F';
     constexpr char AWY_RESTR_BWD = 'B';
@@ -29,6 +31,28 @@ namespace libnav
 
     NavaidType xp_awy_type_to_libnav(navaid_type_t type);
 
+
+    struct awy_line_t  // This is used to store the contents of 1 line of awy.dat
+    {
+        int airac_cycle;
+
+        std::string id_1;
+        std::string reg_code_1;
+        navaid_type_t tp_1;
+        std::string id_2;
+        std::string reg_code_2;
+        navaid_type_t tp_2;
+        char path_restr;
+
+        uint32_t lower_fl;
+        uint32_t upper_fl;
+        std::string awy_names;
+
+        bool is_parsed=false, is_last=false, is_airac=false;
+
+
+        awy_line_t(std::string& s);
+    };
 
     struct alt_restr_t
     {
