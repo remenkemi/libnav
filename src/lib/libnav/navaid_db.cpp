@@ -125,8 +125,10 @@ namespace libnav
 		}
 		else
 		{
-			wpt_loaded = std::async(std::launch::async, [](NavaidDB* db) -> bool {return db->load_waypoints(); }, this);
-			navaid_loaded = std::async(std::launch::async, [](NavaidDB* db) -> bool {return db->load_navaids(); }, this);
+			wpt_loaded = std::async(std::launch::async, [](NavaidDB* db) -> 
+				bool {return db->load_waypoints(); }, this);
+			navaid_loaded = std::async(std::launch::async, [](NavaidDB* db) -> 
+				bool {return db->load_navaids(); }, this);
 		}
 	}
 
