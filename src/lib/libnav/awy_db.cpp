@@ -69,7 +69,13 @@ namespace libnav
 
     AwyDB::AwyDB(std::string awy_path)
     {
-        load_airways(awy_path);
+        db_loaded = std::async(std::launch::async, [](AwyDB* db, std::string awy_path) -> 
+				DbErr {return db->load_airways(awy_path); }, this, awy_path);
+    }
+
+    DbErr AwyDB::get_err()
+    {
+        return db_loaded.get();
     }
 
     int AwyDB::get_airac()
@@ -154,18 +160,23 @@ namespace libnav
 
     }
 
-    // Private member functions:
-
     DbErr AwyDB::load_airways(std::string awy_path)
     {
+        DbErr out_code = DbErr::SUCCESS;
+        
         std::ifstream file(awy_path);
 		if (file.is_open())
 		{
 			std::string line;
             std::unordered_set<std::string> used;
+            int i = 1;
 			while (getline(file, line))
 			{
                 awy_line_t awy_line(line);
+                if(!awy_line.is_parsed && i > N_AWY_LINES_IGNORE)
+                {
+                    out_code = DbErr::PARTIAL_LOAD;
+                }
 
                 if(!awy_line.is_last && awy_line.is_parsed && !awy_line.is_airac)
                 {
@@ -195,6 +206,8 @@ namespace libnav
                 {
                     break;
                 }
+
+                i++;
             }
 
             file.close();
@@ -203,8 +216,10 @@ namespace libnav
         {
             return DbErr::FILE_NOT_FOUND;
         }
-        return DbErr::SUCCESS;
+        return out_code;
     }
+
+    // Private member functions:
 
     void AwyDB::add_to_awy_db(awy_point_t p1, awy_point_t p2, std::string awy_nm, char restr)
     {

@@ -83,10 +83,10 @@ namespace libnav
         typedef std::unordered_map<std::string, awy_entry_t> awy_data_db_t;
 
     public:
-        DbErr err_code;
-
 
         AwyDB(std::string awy_path);
+
+        DbErr get_err();
 
         int get_airac();
 
@@ -95,15 +95,17 @@ namespace libnav
         int get_path(std::string awy, std::string start, 
             std::string end, std::vector<awy_point_t>* out);
 
+        // You aren't supposed to call this function.
+        // It's public to allow for the concurrent loading
+        DbErr load_airways(std::string awy_path);
+
         ~AwyDB();
 
     private:
         int airac_cycle;
         awy_db_t awy_db;
         std::unordered_map<std::string, awy_data_db_t> awy_data;
-
-
-        DbErr load_airways(std::string awy_path);
+        std::future<DbErr> db_loaded;
 
         void add_to_awy_db(awy_point_t p1, awy_point_t p2, std::string awy_nm, char restr);
     };    
