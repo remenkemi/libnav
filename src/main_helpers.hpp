@@ -23,7 +23,7 @@ namespace dbg
         std::shared_ptr<libnav::ArptDB> arpt_db_ptr;
         std::shared_ptr<libnav::NavaidDB> navaid_db_ptr;
 
-        libnav::AwyDB* awy_db;
+        std::shared_ptr<libnav::AwyDB> awy_db;
         std::shared_ptr<libnav::NavDB> db;
 
         std::unordered_map<std::string, std::string> env_vars;
@@ -48,12 +48,13 @@ namespace dbg
                 std::make_shared<libnav::ArptDB>(apt_dat, custom_apt, custom_rnw);
 	        navaid_db_ptr = 
                 std::make_shared<libnav::NavaidDB>(fix_data, navaid_data);
+            awy_db = std::make_shared<libnav::AwyDB>(awy_data);
 
-            awy_db = new libnav::AwyDB(awy_data);
             db = std::make_shared<libnav::NavDB>(arpt_db_ptr, navaid_db_ptr);
 
             libnav::DbErr err_arpt = db->is_arpt_loaded();
             libnav::DbErr err_nav = db->is_navaid_loaded();
+            libnav::DbErr err_awy = awy_db->get_err();
 
             std::cout << navaid_db_ptr->get_wpt_cycle() << " " <<
                 navaid_db_ptr->get_navaid_cycle() << " " << awy_db->get_airac() << "\n";
@@ -66,6 +67,10 @@ namespace dbg
             {
                 std::cout << "Unable to load navaid database\n";
             }
+            if(err_awy != libnav::DbErr::SUCCESS)
+            {
+                std::cout << "Unable to load airway database\n";
+            }
         }
 
         void update()
@@ -75,7 +80,7 @@ namespace dbg
 
         ~Avionics()
         {
-            delete awy_db;
+            awy_db.reset();
             db.reset();
             navaid_db_ptr.reset();
             navaid_db_ptr.reset();
