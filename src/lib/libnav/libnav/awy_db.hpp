@@ -14,8 +14,7 @@
 namespace libnav
 {
     constexpr int N_AWY_LINES_IGNORE = 3;
-    constexpr int N_COL_NORML = 11;
-    constexpr int N_COL_AIRAC = 16;
+    constexpr int N_AWY_COL_NORML = 11;
     constexpr char AWY_NAME_SEP = '-';
     constexpr char AWY_RESTR_FWD = 'F';
     constexpr char AWY_RESTR_BWD = 'B';
@@ -34,7 +33,7 @@ namespace libnav
 
     struct awy_line_t  // This is used to store the contents of 1 line of awy.dat
     {
-        int airac_cycle;
+        earth_data_line_t data;
 
         std::string id_1;
         std::string reg_code_1;
@@ -47,9 +46,6 @@ namespace libnav
         uint32_t lower_fl;
         uint32_t upper_fl;
         std::string awy_names;
-
-        bool is_parsed=false, is_last=false, is_airac=false;
-
 
         awy_line_t(std::string& s);
     };

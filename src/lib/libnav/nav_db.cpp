@@ -18,9 +18,22 @@ namespace libnav
 		return arpt_db->is_loaded();
 	}
 
+	DbErr NavDB::is_wpt_loaded()
+	{
+		if(navaid_db->err_code != DbErr::ERR_NONE)
+		{
+			return navaid_db->err_code;
+		}
+		return navaid_db->wpt_loaded();
+	}
+
 	DbErr NavDB::is_navaid_loaded()
 	{
-		return navaid_db->is_loaded();
+		if(navaid_db->err_code != DbErr::ERR_NONE)
+		{
+			return navaid_db->err_code;
+		}
+		return navaid_db->navaids_loaded();
 	}
 
 	// Wrappers around ArptDB member functions.

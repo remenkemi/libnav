@@ -23,17 +23,21 @@ namespace libnav
 
     awy_line_t::awy_line_t(std::string& s)
     {
+        data.is_parsed = false;
+        data.is_airac = false;
+        data.is_last = false;
+        
         std::vector<std::string> s_split = strutils::str_split(s);
 
         if(int(s_split.size()) == N_COL_AIRAC)
         {
-            is_parsed = true;
-            is_airac = true;
-            airac_cycle = strutils::stoi_with_strip(s_split[AIRAC_CYCLE_WORD-1]);
+            data.is_parsed = true;
+            data.is_airac = true;
+            data.airac_cycle = strutils::stoi_with_strip(s_split[AIRAC_CYCLE_WORD-1]);
         }
-        else if(int(s_split.size()) == N_COL_NORML)
+        else if(int(s_split.size()) == N_AWY_COL_NORML)
         {
-            is_parsed = true;
+            data.is_parsed = true;
             id_1 = s_split[0];
             reg_code_1 = s_split[1];
             tp_1 = uint16_t(strutils::stoi_with_strip(s_split[2]));
@@ -48,8 +52,8 @@ namespace libnav
         }
         else if(s_split.size() && s_split[0] == "99")
         {
-            is_parsed = true;
-            is_last = true;
+            data.is_parsed = true;
+            data.is_last = true;
         }
     }
 
@@ -173,12 +177,13 @@ namespace libnav
 			while (getline(file, line))
 			{
                 awy_line_t awy_line(line);
-                if(!awy_line.is_parsed && i > N_AWY_LINES_IGNORE)
+                if(!awy_line.data.is_parsed && i > N_AWY_LINES_IGNORE)
                 {
                     out_code = DbErr::PARTIAL_LOAD;
                 }
 
-                if(!awy_line.is_last && awy_line.is_parsed && !awy_line.is_airac)
+                if(!awy_line.data.is_last && awy_line.data.is_parsed 
+                    && !awy_line.data.is_airac)
                 {
                     std::string token = awy_line.id_1 + "_" + awy_line.id_2 
                         + "_" + awy_line.awy_names;
@@ -198,11 +203,11 @@ namespace libnav
                         add_to_awy_db(p1, p2, awy_line.awy_names, awy_line.path_restr);
                     }
                 }
-                else if(awy_line.is_airac)
+                else if(awy_line.data.is_airac)
                 {
-                    airac_cycle = awy_line.airac_cycle;
+                    airac_cycle = awy_line.data.airac_cycle;
                 }
-                else if(awy_line.is_last)
+                else if(awy_line.data.is_last)
                 {
                     break;
                 }

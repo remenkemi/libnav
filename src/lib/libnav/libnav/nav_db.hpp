@@ -47,6 +47,8 @@ namespace libnav
 
 		DbErr is_arpt_loaded();
 
+		DbErr is_wpt_loaded();
+
 		DbErr is_navaid_loaded();
 
 		//These member functions are just wrappers around ArptDB member functions.

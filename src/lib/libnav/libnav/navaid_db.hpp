@@ -11,10 +11,13 @@
 #include <sstream>
 #include "geo_utils.hpp"
 #include "common.hpp"
+#include "str_utils.hpp"
 
 
 namespace libnav
 {
+	constexpr int N_FIX_COL_NORML = 7;
+	constexpr int N_NAVAID_COL_NORML = 11;
 	constexpr double VOR_MAX_SLANT_ANGLE_DEG = 40;
 	constexpr double DME_DME_PHI_MIN_DEG = 30;
 	constexpr double DME_DME_PHI_MAX_DEG = 180 - DME_DME_PHI_MIN_DEG;
@@ -77,7 +80,7 @@ namespace libnav
 	struct navaid_entry_t
 	{
 		uint16_t max_recv;
-		double elevation, freq;
+		double elev_ft, freq, mag_var;
 	};
 
 	struct waypoint_entry_t
@@ -96,9 +99,31 @@ namespace libnav
 		waypoint_entry_t data;
 	};
 
-	typedef std::vector<libnav::waypoint_t> wpt_tile_t;
 
-	typedef std::unordered_map<std::string, std::vector<libnav::waypoint_entry_t>> wpt_db_t;
+	struct wpt_line_t
+	// This is used to store the contents of 1 line of earth_nav.dat
+    {
+        earth_data_line_t data;
+
+		waypoint_t wpt;
+        std::string desc;
+
+
+        wpt_line_t(std::string& s);
+    };
+
+	struct navaid_line_t
+	// This is used to store the contents of 1 line of earth_nav.dat
+    {
+        earth_data_line_t data;
+
+		waypoint_t wpt;
+		navaid_entry_t navaid;
+        std::string desc;  // Spoken name of the navaid
+
+
+        navaid_line_t(std::string& s);
+    };
 
 
 	class WaypointEntryCompare
@@ -117,6 +142,9 @@ namespace libnav
 
 	class NavaidDB
 	{
+		typedef std::unordered_map<std::string, 
+			std::vector<libnav::waypoint_entry_t>> wpt_db_t;
+
 	public:
 
 		DbErr err_code;
@@ -124,15 +152,17 @@ namespace libnav
 
 		NavaidDB(std::string wpt_path, std::string navaid_path);
 
-		DbErr is_loaded();
+		DbErr wpt_loaded();
+		 
+		DbErr navaids_loaded();
 
 		int get_wpt_cycle();
 
 		int get_navaid_cycle();
 
-		bool load_waypoints();
+		DbErr load_waypoints();
 
-		bool load_navaids();
+		DbErr load_navaids();
 
 		bool is_wpt(std::string id);
 
@@ -157,8 +187,8 @@ namespace libnav
 		std::string sim_wpt_db_path;
 		std::string sim_navaid_db_path;
 
-		std::future<bool> wpt_loaded;
-		std::future<bool> navaid_loaded;
+		std::future<DbErr> wpt_task;
+		std::future<DbErr> navaid_task;
 
 		std::mutex wpt_db_mutex;
 		std::mutex navaid_db_mutex;

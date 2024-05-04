@@ -90,6 +90,82 @@ namespace libnav
 	}
 
 
+	wpt_line_t::wpt_line_t(std::string& s)
+	{
+		data.is_parsed = false;
+        data.is_airac = false;
+        data.is_last = false;
+
+		std::vector<std::string> s_split = strutils::str_split(s, ' ', 
+			N_FIX_COL_NORML-1);
+
+        if(int(s_split.size()) == N_FIX_COL_NORML && 
+			s_split[3] == "data" && s_split[4] == "cycle")
+        {
+            data.is_parsed = true;
+            data.is_airac = true;
+            data.airac_cycle = strutils::stoi_with_strip(s_split[AIRAC_CYCLE_WORD-1]);
+        }
+        else if(int(s_split.size()) == N_FIX_COL_NORML)
+        {
+            data.is_parsed = true;
+			wpt.data.type = NavaidType::WAYPOINT;
+			wpt.data.pos.lat_deg = double(strutils::stof_with_strip(s_split[0]));
+			wpt.data.pos.lon_deg = double(strutils::stof_with_strip(s_split[1]));
+			wpt.id = s_split[2];
+			wpt.data.area_code = s_split[3];
+			wpt.data.country_code = s_split[4];
+			wpt.data.arinc_type = uint32_t(strutils::stoi_with_strip(s_split[5]));
+            desc = s_split[6];
+        }
+        else if(s_split.size() && s_split[0] == "99")
+        {
+            data.is_parsed = true;
+            data.is_last = true;
+        }
+	}
+
+	navaid_line_t::navaid_line_t(std::string& s)
+	{
+		data.is_parsed = false;
+        data.is_airac = false;
+        data.is_last = false;
+
+		std::vector<std::string> s_split = strutils::str_split(s, ' ', 
+			N_NAVAID_COL_NORML-1);
+
+        if(int(s_split.size()) == N_NAVAID_COL_NORML && 
+			s_split[3] == "data" && s_split[4] == "cycle")
+        {
+            data.is_parsed = true;
+            data.is_airac = true;
+            data.airac_cycle = strutils::stoi_with_strip(s_split[AIRAC_CYCLE_WORD-1]);
+        }
+        else if(int(s_split.size()) == N_NAVAID_COL_NORML)
+        {
+            data.is_parsed = true;
+			navaid_type_t xp_type = navaid_type_t(strutils::stoi_with_strip(
+					s_split[0]));
+			wpt.data.type = xp_type_to_libnav(xp_type);
+			wpt.data.pos.lat_deg = double(strutils::stof_with_strip(s_split[1]));
+			wpt.data.pos.lon_deg = double(strutils::stof_with_strip(s_split[2]));
+			navaid.elev_ft = double(strutils::stof_with_strip(s_split[3]));
+			navaid.freq = double(strutils::stof_with_strip(s_split[4]));
+			navaid.max_recv = uint16_t(strutils::stoi_with_strip(s_split[5]));
+			navaid.mag_var = double(strutils::stof_with_strip(s_split[6]));
+			wpt.id = s_split[7];
+			wpt.data.area_code = s_split[8];
+			wpt.data.country_code = s_split[9];
+            desc = s_split[10];
+        }
+        else if(s_split.size() && s_split[0] == "99")
+        {
+            data.is_parsed = true;
+            data.is_last = true;
+        }
+	}
+
+
 	bool WaypointEntryCompare::operator()(waypoint_entry_t w1, waypoint_entry_t w2)
 	{
 		double d1 = w1.pos.get_great_circle_distance_nm(ac_pos);
@@ -125,27 +201,23 @@ namespace libnav
 		}
 		else
 		{
-			wpt_loaded = std::async(std::launch::async, [](NavaidDB* db) -> 
-				bool {return db->load_waypoints(); }, this);
-			navaid_loaded = std::async(std::launch::async, [](NavaidDB* db) -> 
-				bool {return db->load_navaids(); }, this);
+			wpt_task = std::async(std::launch::async, [](NavaidDB* db) -> 
+				DbErr {return db->load_waypoints(); }, this);
+			navaid_task = std::async(std::launch::async, [](NavaidDB* db) -> 
+				DbErr {return db->load_navaids(); }, this);
 		}
 	}
 
 	// Public member functions:
 
-	DbErr NavaidDB::is_loaded()
+	DbErr NavaidDB::wpt_loaded()
 	{
-		if(err_code == DbErr::ERR_NONE && (wpt_loaded.get() && navaid_loaded.get()))
-		{
-			err_code = DbErr::SUCCESS;
-		}
-		else
-		{
-			err_code = DbErr::FILE_NOT_FOUND;
-		}
+		return wpt_task.get();
+	}
 
-		return err_code;
+	DbErr NavaidDB::navaids_loaded()
+	{
+		return navaid_task.get();
 	}
 
 	int NavaidDB::get_wpt_cycle()
@@ -169,112 +241,84 @@ namespace libnav
 
 	}
 
-	bool NavaidDB::load_waypoints()
+	DbErr NavaidDB::load_waypoints()
 	{
 		std::ifstream file(sim_wpt_db_path);
 		if (file.is_open())
 		{
+			DbErr out_code = DbErr::SUCCESS;
 			std::string line;
-			int i = 0;
-			int limit = N_NAVAID_LINES_IGNORE;
-			while (getline(file, line) && line != "99")
+			int i = 1;
+			while (getline(file, line))
 			{
-				if (i >= limit)
+				wpt_line_t fix_line(line);
+				if (i > N_NAVAID_LINES_IGNORE && fix_line.data.is_parsed 
+					&& !fix_line.data.is_last)
 				{
-					// Construct a waypoint_t entry.
-					std::stringstream s(line);
-					std::string desc;
-					waypoint_t wpt = {};
-					wpt.data.type = NavaidType::WAYPOINT;
-					s >> wpt.data.pos.lat_deg >> wpt.data.pos.lon_deg >> wpt.id >> 
-						wpt.data.area_code >> wpt.data.country_code >> 
-						wpt.data.arinc_type;
+					std::string unique_ident = get_fix_unique_ident(fix_line.wpt);
 
-					getline(s, desc);
-					if(desc.length())
-					{
-						desc = desc.substr(1, desc.length() - 1);
-					}
-
-					std::string unique_ident = get_fix_unique_ident(wpt);
-
-					add_to_map_with_mutex(unique_ident, desc, wpt_desc_mutex, wpt_desc_db);
-					add_to_wpt_cache(wpt);
+					add_to_map_with_mutex(unique_ident, fix_line.desc, 
+						wpt_desc_mutex, wpt_desc_db);
+					add_to_wpt_cache(fix_line.wpt);
 				}
-				else if(i+1 == AIRAC_CYCLE_LINE)
+				else if(fix_line.data.is_airac)
 				{
-					wpt_airac_cycle = get_airac_cycle(line);
+					wpt_airac_cycle = fix_line.data.airac_cycle;
+				}
+				else if(fix_line.data.is_last)
+				{
+					break;
+				}
+				else if(i > N_NAVAID_LINES_IGNORE && !fix_line.data.is_parsed)
+				{
+					out_code = DbErr::PARTIAL_LOAD;
 				}
 				i++;
 			}
 			file.close();
-			return true;
+			return out_code;
 		}
-		return false;
+		return DbErr::FILE_NOT_FOUND;
 	}
 
-	bool NavaidDB::load_navaids()
+	DbErr NavaidDB::load_navaids()
 	{
 		std::ifstream file(sim_navaid_db_path);
 		if (file.is_open())
 		{
+			DbErr out_code = DbErr::SUCCESS;
 			std::string line;
-			int i = 0;
+			int i = 1;
 			while (getline(file, line))
 			{
-				std::string check_val;
-				std::stringstream s(line);
-				s >> check_val;
-				if (i >= N_NAVAID_LINES_IGNORE && check_val != "99")
+				navaid_line_t navaid_line(line);
+				if (i > N_NAVAID_LINES_IGNORE && navaid_line.data.is_parsed 
+					&& !navaid_line.data.is_last)
 				{
-					// Construct a navaid entry.
-					std::stringstream s(line);
-					uint16_t type, max_recv;
-					double lat, lon, elevation, mag_var;
-					uint32_t freq;
-					std::string id;
-					std::string area_code;
-					std::string desc;  // Spoken name of the navaid
+					std::string unique_ident = get_fix_unique_ident(navaid_line.wpt);
 
-					waypoint_t wpt;
-					navaid_entry_t navaid;
-
-					s >> type >> lat >> lon >> elevation >> freq >> max_recv >> mag_var >> 
-						id >> wpt.data.area_code >> wpt.data.country_code;
-
-					getline(s, desc);
-					if(desc.length())
-					{
-						desc = desc.substr(1, desc.length() - 1);
-					}
-
-					wpt.id = id;
-					wpt.data.type = xp_type_to_libnav(type);
-					navaid.max_recv = max_recv;
-					wpt.data.pos.lat_deg = lat;
-					wpt.data.pos.lon_deg = lon;
-					navaid.elevation = elevation;
-					navaid.freq = freq;
-
-					std::string unique_ident = get_fix_unique_ident(wpt);
-
-					add_to_map_with_mutex(unique_ident, desc, navaid_desc_mutex, navaid_desc_db);
-					add_to_navaid_cache(wpt, navaid);
+					add_to_map_with_mutex(unique_ident, navaid_line.desc, 
+						navaid_desc_mutex, navaid_desc_db);
+					add_to_navaid_cache(navaid_line.wpt, navaid_line.navaid);
 				}
-				else if(i+1 == AIRAC_CYCLE_LINE)
+				else if(navaid_line.data.is_airac)
 				{
-					navaid_airac_cycle = get_airac_cycle(line);
+					navaid_airac_cycle = navaid_line.data.airac_cycle;
 				}
-				else if (check_val == "99")
+				else if (navaid_line.data.is_last)
 				{
 					break;
+				}
+				else if(i > N_NAVAID_LINES_IGNORE && !navaid_line.data.is_parsed)
+				{
+					out_code = DbErr::PARTIAL_LOAD;
 				}
 				i++;
 			}
 			file.close();
-			return true;
+			return out_code;
 		}
-		return false;
+		return DbErr::FILE_NOT_FOUND;
 	}
 
 	bool NavaidDB::is_wpt(std::string id) 
@@ -641,7 +685,7 @@ namespace radnav_util
 			if (lat_dist_nm)
 			{
 				
-				double v_dist_nm = abs(ac_pos.alt_ft - nav_data->elevation) * geo::FT_TO_NM;
+				double v_dist_nm = abs(ac_pos.alt_ft - nav_data->elev_ft) * geo::FT_TO_NM;
 				double slant_deg = atan(v_dist_nm / lat_dist_nm) * geo::RAD_TO_DEG;
 
 				if (slant_deg > 0 && slant_deg < libnav::VOR_MAX_SLANT_ANGLE_DEG)
