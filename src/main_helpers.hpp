@@ -53,6 +53,7 @@ namespace dbg
             db = std::make_shared<libnav::NavDB>(arpt_db_ptr, navaid_db_ptr);
 
             libnav::DbErr err_arpt = db->is_arpt_loaded();
+            libnav::DbErr err_wpt = db->is_wpt_loaded();
             libnav::DbErr err_nav = db->is_navaid_loaded();
             libnav::DbErr err_awy = awy_db->get_err();
 
@@ -62,6 +63,10 @@ namespace dbg
             if(err_arpt != libnav::DbErr::SUCCESS)
             {
                 std::cout << "Unable to load airport database\n";
+            }
+            if(err_wpt != libnav::DbErr::SUCCESS)
+            {
+                std::cout << "Unable to load waypoint database\n";
             }
             if(err_nav != libnav::DbErr::SUCCESS)
             {
