@@ -23,9 +23,19 @@ namespace libnav
 		PARTIAL_LOAD
 	};
 
+	// N_COL_AIRAC is the Number of columns in a line declaring the airac cycle
+	// of earth_*.dat file
+	constexpr int N_COL_AIRAC = 16;  
 	constexpr int AIRAC_CYCLE_WORD = 6;
 	constexpr int AIRAC_CYCLE_LINE = 2;
 	constexpr char AIRAC_WORD_SEP = ' ';
+
+
+	struct earth_data_line_t  // General variables to describe a line of earth*.dat
+	{
+		int airac_cycle;
+        bool is_parsed=false, is_last=false, is_airac=false;
+	};
 
 
 	inline bool does_file_exist(std::string name)

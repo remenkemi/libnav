@@ -217,16 +217,16 @@ namespace strutils
 		@Return: vector of strings
 	*/
 
-	inline std::string strip(std::string& in, char tgt)
+	inline std::string strip(std::string& in, char sep=' ')
     {
         size_t i_first = 0;
         size_t i_last = in.length()-1;
 
-        while(in[i_first] == tgt)
+        while(in[i_first] == sep)
         {
             i_first++;
         }
-        while(in[i_last] == tgt)
+        while(in[i_last] == sep)
         {
             i_last--;
         }
@@ -239,18 +239,29 @@ namespace strutils
 		Description: splits the string by a designated character
 		@param in: input string
 		@param sep: separator
+		@param n_split: maximum number of columns to separate
 		@Return: vector of strings
 	*/
 
-	inline std::vector<std::string> str_split(std::string& in, char sep=' ')
+	inline std::vector<std::string> str_split(std::string& in, char sep=' ', 
+		int n_split = INT32_MAX)
 	{
 		std::stringstream s(in);
 		std::string tmp;
 		std::vector<std::string> out;
 
-		while(std::getline(s, tmp, sep))
+		while(n_split && std::getline(s, tmp, sep))
 		{
 			if(tmp != "")
+			{
+				n_split--;
+				out.push_back(strip(tmp, '\r'));
+			}
+		}
+		if(!n_split)
+		{
+			std::getline(s, tmp);
+			if(tmp.length())
 				out.push_back(strip(tmp, '\r'));
 		}
 
