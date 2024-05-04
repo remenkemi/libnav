@@ -31,25 +31,6 @@ namespace libnav
     NavaidType xp_awy_type_to_libnav(navaid_type_t type);
 
 
-    struct awy_line_t  // This is used to store the contents of 1 line of awy.dat
-    {
-        earth_data_line_t data;
-
-        std::string id_1;
-        std::string reg_code_1;
-        navaid_type_t tp_1;
-        std::string id_2;
-        std::string reg_code_2;
-        navaid_type_t tp_2;
-        char path_restr;
-
-        uint32_t lower_fl;
-        uint32_t upper_fl;
-        std::string awy_names;
-
-        awy_line_t(std::string& s);
-    };
-
     struct alt_restr_t
     {
         uint32_t lower, upper;
@@ -69,6 +50,19 @@ namespace libnav
 
         awy_point_t(std::string nm="", NavaidType tp=NavaidType::NONE, 
             std::string r_c="", uint32_t lower=0, uint32_t upper=0);
+    };
+
+    struct awy_line_t  // This is used to store the contents of 1 line of awy.dat
+    {
+        earth_data_line_t data;
+
+        awy_point_t p1, p2;
+        char path_restr;
+
+        uint32_t lower_fl, upper_fl;
+        std::string awy_names;
+
+        awy_line_t(std::string& s);
     };
 
 
