@@ -20,16 +20,6 @@ namespace libnav
     constexpr char AWY_RESTR_BWD = 'B';
     constexpr char AWY_RESTR_NONE = 'N';
 
-    enum XPLM_awy_navaid_types
-    {
-        XP_AWY_WPT = 11,
-        XP_AWY_NDB = 2,
-        XP_AWY_VHF = 3
-    };
-
-
-    NavaidType xp_awy_type_to_libnav(navaid_type_t type);
-
 
     struct alt_restr_t
     {
@@ -38,8 +28,7 @@ namespace libnav
 
     struct awy_entry_t
     {
-        NavaidType type;
-        std::string reg_code;  // Region code of navaid/fix
+        std::string xp_type, reg_code;  // Region code of navaid/fix
     };
 
     struct awy_point_t
@@ -48,8 +37,10 @@ namespace libnav
         awy_entry_t data;
         alt_restr_t alt_restr;
 
-        awy_point_t(std::string nm="", NavaidType tp=NavaidType::NONE, 
+        awy_point_t(std::string nm="", std::string tp="", 
             std::string r_c="", uint32_t lower=0, uint32_t upper=0);
+
+        std::string get_uid();
     };
 
     struct awy_line_t  // This is used to store the contents of 1 line of awy.dat

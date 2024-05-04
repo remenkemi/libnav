@@ -3,33 +3,19 @@
 
 namespace libnav
 {
-    NavaidType xp_awy_type_to_libnav(navaid_type_t type)
-    {
-        switch (type)
-        {
-        case XP_AWY_WPT:
-            return NavaidType::WAYPOINT;
-        case XP_AWY_NDB:
-            return NavaidType::NDB;
-        case XP_AWY_VHF:
-            return NavaidType(static_cast<int>(NavaidType::DME) + 
-                static_cast<int>(NavaidType::DME_ONLY) + 
-                static_cast<int>(NavaidType::VOR) + 
-                static_cast<int>(NavaidType::VOR_DME));
-        default:
-            return NavaidType::NONE;
-        }
-    }
-
-
-    awy_point_t::awy_point_t(std::string nm, NavaidType tp, std::string r_c, 
+    awy_point_t::awy_point_t(std::string nm, std::string tp, std::string r_c, 
         uint32_t lower, uint32_t upper)
     {
         id = nm;
-        data.type = tp;
+        data.xp_type = tp;
         data.reg_code = r_c;
         alt_restr.lower = lower;
         alt_restr.upper = upper;
+    }
+
+    std::string awy_point_t::get_uid()
+    {
+        return id + "_" + data.reg_code + "_" + data.xp_type;
     }
 
     awy_line_t::awy_line_t(std::string& s)
@@ -50,14 +36,12 @@ namespace libnav
         {
             data.is_parsed = true;
 
-            uint16_t tp_1 = uint16_t(strutils::stoi_with_strip(s_split[2]));
-            NavaidType type_1 = xp_awy_type_to_libnav(tp_1);
+            std::string tp_1 = s_split[2];
             std::string id_1 = s_split[0];
             std::string reg_code_1 = s_split[1];
             
             
-            uint16_t tp_2 = uint16_t(strutils::stoi_with_strip(s_split[5]));
-            NavaidType type_2 = xp_awy_type_to_libnav(tp_2);
+            std::string tp_2 = s_split[5];
             std::string id_2 = s_split[3];
             std::string reg_code_2 = s_split[4];
             
@@ -67,8 +51,8 @@ namespace libnav
             upper_fl = uint32_t(strutils::stoi_with_strip(s_split[9]));
             awy_names = s_split[10];
 
-            p1 = awy_point_t(id_1, type_1, reg_code_1, lower_fl, upper_fl);
-            p2 = awy_point_t(id_2, type_2, reg_code_2, lower_fl, upper_fl);
+            p1 = awy_point_t(id_1, tp_1, reg_code_1, lower_fl, upper_fl);
+            p2 = awy_point_t(id_2, tp_2, reg_code_2, lower_fl, upper_fl);
         }
         else if(s_split.size() && s_split[0] == "99")
         {
@@ -233,31 +217,34 @@ namespace libnav
     {
         std::vector<std::string> awy_names = strutils::str_split(awy_nm, AWY_NAME_SEP);
 
+        std::string uid_1 = p1.get_uid();
+        std::string uid_2 = p2.get_uid();
+
         for(int i = 0; i < int(awy_names.size()); i++)
         {
-            bool p1_found = awy_data[awy_names[i]].find(p1.id) != 
+            bool p1_found = awy_data[awy_names[i]].find(uid_1) != 
                 awy_data[awy_names[i]].end();
-            bool p2_found = awy_data[awy_names[i]].find(p2.id) != 
+            bool p2_found = awy_data[awy_names[i]].find(uid_2) != 
                 awy_data[awy_names[i]].end();
 
             if(!p1_found)
             {
-                awy_db[awy_names[i]][p1.id] = {};
-                awy_data[awy_names[i]][p1.id] = p1.data;
+                awy_db[awy_names[i]][uid_1] = {};
+                awy_data[awy_names[i]][uid_1] = p1.data;
             }
             if(!p2_found)
             {
-                awy_db[awy_names[i]][p2.id] = {};
-                awy_data[awy_names[i]][p2.id] = p2.data;
+                awy_db[awy_names[i]][uid_2] = {};
+                awy_data[awy_names[i]][uid_2] = p2.data;
             }
 
             if(restr == AWY_RESTR_FWD || restr == AWY_RESTR_NONE)
             {
-                awy_db[awy_names[i]][p1.id][p2.id] = p2.alt_restr;
+                awy_db[awy_names[i]][uid_1][uid_2] = p2.alt_restr;
             }
             if(restr == AWY_RESTR_BWD || restr == AWY_RESTR_NONE)
             {
-                awy_db[awy_names[i]][p2.id][p1.id] = p1.alt_restr;
+                awy_db[awy_names[i]][uid_2][uid_1] = p1.alt_restr;
             }
         }
     }
