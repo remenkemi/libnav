@@ -26,8 +26,6 @@ namespace libnav
 	//Number of lines at the beginning of the .dat file to ignore
 	constexpr int N_NAVAID_LINES_IGNORE = 3;
 
-	typedef uint16_t navaid_type_t;
-
 
 	enum XPLM_navaid_types
 	{
@@ -45,32 +43,6 @@ namespace libnav
 		XP_NAV_VOR_DME = 15,
 		XP_NAV_ILS_DME = 18
 	};
-
-	enum class NavaidType 
-	{
-		NONE = 0,
-		WAYPOINT = 1,
-		NDB = 2,
-		VOR = 4,
-		ILS_LOC = 8,
-		ILS_LOC_ONLY = 16,
-		ILS_GS = 32,
-		ILS_FULL = 64,
-		DME = 128,
-		DME_ONLY = 256,
-		VOR_DME = 512,
-		ILS_DME = 1024,
-		VHF_NAVAID = 2047 - WAYPOINT - NDB,
-		NAVAID = 2047,
-		OUTER_MARKER = 2048,
-		MIDDLE_MARKER = 4096,
-		INNER_MARKER = 8192,
-		MARKER = OUTER_MARKER + MIDDLE_MARKER + INNER_MARKER,
-		// Used only by CIFP parser:
-		RWY = 16384,
-		APT = 32768
-	};
-
 
 	NavaidType xp_type_to_libnav(navaid_type_t tp);
 
