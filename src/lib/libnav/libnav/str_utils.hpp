@@ -204,9 +204,9 @@ namespace strutils
 		
 		if (mag_var < 180)
 		{
-			return "E" + str_mag_var;
+			return "W" + str_mag_var;
 		}
-		return "W" + str_mag_var;
+		return "E" + str_mag_var;
 	}
 
 	/*
