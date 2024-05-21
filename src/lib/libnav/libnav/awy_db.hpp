@@ -40,6 +40,13 @@ namespace libnav
         awy_point_t(std::string nm="", std::string tp="", 
             std::string r_c="", uint32_t lower=0, uint32_t upper=0);
 
+        /*
+            Function: get_uid
+            Description:
+            forms uid of a waypoint using the following principle:
+            uid=wpt_id+"_"+reg_code+"_"+libnav_type
+        */
+
         std::string get_uid();
     };
 
