@@ -182,8 +182,6 @@ namespace libnav
                         + "_" + awy_line.awy_names;
                     if(used.find(token) == used.end())
                     {
-                        
-
                         used.insert(token);
                         
                         add_to_awy_db(awy_line.p1, awy_line.p2, 
