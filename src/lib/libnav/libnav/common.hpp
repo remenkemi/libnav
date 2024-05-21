@@ -59,7 +59,10 @@ namespace libnav
 
 	// N_COL_AIRAC is the Number of columns in a line declaring the airac cycle
 	// of earth_*.dat file
-	constexpr int N_COL_AIRAC = 16;  
+	constexpr int N_COL_AIRAC = 16;
+	// N_LINES_IGNORE is the number of lines in the beginning of earth_*.dat file
+	// that don't contain the actual data records.
+	constexpr int N_EARTH_LINES_IGNORE = 3;
 	constexpr int AIRAC_CYCLE_WORD = 6;
 	constexpr int AIRAC_CYCLE_LINE = 2;
 	constexpr char AIRAC_WORD_SEP = ' ';

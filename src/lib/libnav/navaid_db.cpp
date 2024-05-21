@@ -274,7 +274,7 @@ namespace libnav
 			while (getline(file, line))
 			{
 				wpt_line_t fix_line(line);
-				if (i > N_NAVAID_LINES_IGNORE && fix_line.data.is_parsed 
+				if (i > N_EARTH_LINES_IGNORE && fix_line.data.is_parsed 
 					&& !fix_line.data.is_last)
 				{
 					std::string unique_ident = get_fix_unique_ident(fix_line.wpt);
@@ -291,7 +291,7 @@ namespace libnav
 				{
 					break;
 				}
-				else if(i > N_NAVAID_LINES_IGNORE && !fix_line.data.is_parsed)
+				else if(i > N_EARTH_LINES_IGNORE && !fix_line.data.is_parsed)
 				{
 					out_code = DbErr::PARTIAL_LOAD;
 				}
@@ -314,7 +314,7 @@ namespace libnav
 			while (getline(file, line))
 			{
 				navaid_line_t navaid_line(line);
-				if (i > N_NAVAID_LINES_IGNORE && navaid_line.data.is_parsed 
+				if (i > N_EARTH_LINES_IGNORE && navaid_line.data.is_parsed 
 					&& !navaid_line.data.is_last)
 				{
 					std::string unique_ident = get_fix_unique_ident(navaid_line.wpt);
@@ -331,7 +331,7 @@ namespace libnav
 				{
 					break;
 				}
-				else if(i > N_NAVAID_LINES_IGNORE && !navaid_line.data.is_parsed)
+				else if(i > N_EARTH_LINES_IGNORE && !navaid_line.data.is_parsed)
 				{
 					out_code = DbErr::PARTIAL_LOAD;
 				}

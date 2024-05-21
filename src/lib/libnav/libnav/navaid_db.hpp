@@ -23,8 +23,6 @@ namespace libnav
 	constexpr double DME_DME_PHI_MAX_DEG = 180 - DME_DME_PHI_MIN_DEG;
 	constexpr double MAX_ANG_DEV_MERGE = 0.03;
 	constexpr size_t NAVAID_ENTRY_CACHE_SZ = 300000;
-	//Number of lines at the beginning of the .dat file to ignore
-	constexpr int N_NAVAID_LINES_IGNORE = 3;
 
 
 	enum XPLM_navaid_types
