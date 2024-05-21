@@ -106,6 +106,12 @@ namespace dbg
         }
     };
 
+    struct awy_filter_data_t
+    {
+        std::string s;
+        Avionics* ptr;
+    };
+
     typedef void (*cmd)(Avionics*, std::vector<std::string>&);
 
 
@@ -224,13 +230,36 @@ namespace dbg
             return;
         }
 
-        std::vector<libnav::awy_point_t> tmp;
-        av->awy_db->get_path(in[0], in[1], in[2], &tmp);
-        for(int i = 0; i < int(tmp.size()); i++)
+        std::vector<libnav::waypoint_entry_t> entry_wpts;
+        std::vector<libnav::waypoint_entry_t> exit_wpts;
+
+        awy_filter_data_t filter_data = {in[0], av};
+        av->db->get_wpt_data(in[1], &entry_wpts, "", "", libnav::NavaidType::NAVAID, 
+            [](libnav::waypoint_t wpt, void* ref) -> bool {
+                awy_filter_data_t *data = reinterpret_cast<awy_filter_data_t*>(ref);
+                return data->ptr->awy_db->is_in_awy(data->s, wpt.get_awy_id());
+            }, &filter_data);
+
+        av->db->get_wpt_data(in[2], &exit_wpts, "", "", libnav::NavaidType::NAVAID, 
+            [](libnav::waypoint_t wpt, void* ref) -> bool {
+                awy_filter_data_t *data = reinterpret_cast<awy_filter_data_t*>(ref);
+                return data->ptr->awy_db->is_in_awy(data->s, wpt.get_awy_id());
+            }, &filter_data);
+
+        
+        if(entry_wpts.size() && exit_wpts.size())
         {
-            std::cout << tmp[i].id << " " << tmp[i].alt_restr.lower 
-                << " " << tmp[i].alt_restr.upper << "\n";
+            libnav::waypoint_t entry_wpt = {in[1], entry_wpts[0]};
+            libnav::waypoint_t exit_wpt = {in[2], exit_wpts[0]};
+            std::vector<libnav::awy_point_t> tmp;
+            av->awy_db->get_path(in[0], entry_wpt.get_awy_id(), exit_wpt.get_awy_id(), &tmp);
+            for(int i = 0; i < int(tmp.size()); i++)
+            {
+                std::cout << tmp[i].id << " " << tmp[i].alt_restr.lower 
+                    << " " << tmp[i].alt_restr.upper << "\n";
+            }
         }
+        
     }
 
     inline void quit(Avionics* av, std::vector<std::string>& in)
