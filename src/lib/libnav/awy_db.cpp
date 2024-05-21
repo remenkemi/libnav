@@ -170,7 +170,7 @@ namespace libnav
 			while (getline(file, line))
 			{
                 awy_line_t awy_line(line);
-                if(!awy_line.data.is_parsed && i > N_AWY_LINES_IGNORE)
+                if(!awy_line.data.is_parsed && i > N_EARTH_LINES_IGNORE)
                 {
                     out_code = DbErr::PARTIAL_LOAD;
                 }

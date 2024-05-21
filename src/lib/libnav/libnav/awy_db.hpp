@@ -13,7 +13,6 @@
 
 namespace libnav
 {
-    constexpr int N_AWY_LINES_IGNORE = 3;
     constexpr int N_AWY_COL_NORML = 11;
     constexpr char AWY_NAME_SEP = '-';
     constexpr char AWY_RESTR_FWD = 'F';
@@ -59,6 +58,7 @@ namespace libnav
 
         uint32_t lower_fl, upper_fl;
         std::string awy_names;
+
 
         awy_line_t(std::string& s);
     };
