@@ -21,7 +21,7 @@ namespace libnav
         {
             data.is_parsed = true;
 
-            uid = s_split[0] + "_" + s_split[1] + "_" + s_split[2] + s_split[3];
+            uid = s_split[0] + "_" + s_split[1] + "_" + s_split[2] + "_" + s_split[3];
 
             hold_data.inbd_crs_mag = strutils::stof_with_strip(s_split[4]);
             hold_data.leg_time_min = strutils::stof_with_strip(s_split[5]);

@@ -318,6 +318,7 @@ namespace dbg
         {
             std::cout << "Inbound magnetic course(degrees): " << hld_data.inbd_crs_mag
                 << "\n" << "Leg time(minutes): " << hld_data.leg_time_min << "\n";
+            std::cout << "DME leg length(nm): " << hld_data.dme_leg_dist_nm << "\n";
             if(hld_data.turn_dir == libnav::HoldTurnDir::LEFT)
             {
                 std::cout << "Turn direction: Left\n";
