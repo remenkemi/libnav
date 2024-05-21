@@ -7,7 +7,8 @@
 
 namespace libnav
 {
-	NavDB::NavDB(std::shared_ptr<libnav::ArptDB> arpt_ptr, std::shared_ptr<libnav::NavaidDB> navaid_ptr)
+	NavDB::NavDB(std::shared_ptr<libnav::ArptDB> arpt_ptr, 
+		std::shared_ptr<libnav::NavaidDB> navaid_ptr)
 	{
 		navaid_db = navaid_ptr;
 		arpt_db = arpt_ptr;
@@ -48,7 +49,8 @@ namespace libnav
 		return arpt_db->get_apt_rwys(icao_code, out);
 	}
 
-	int NavDB::get_rnw_data(std::string apt_icao, std::string rnw_id, runway_entry_t* out)
+	int NavDB::get_rnw_data(std::string apt_icao, std::string rnw_id, 
+		runway_entry_t* out)
 	{
 		return arpt_db->get_rnw_data(apt_icao, rnw_id, out);
 	}
@@ -56,9 +58,11 @@ namespace libnav
 	// Wrappers around NavaidDB member functions.
 
 	int NavDB::get_wpt_data(std::string id, std::vector<waypoint_entry_t>* out, 
-			std::string area_code, std::string country_code, NavaidType type)
+			std::string area_code, std::string country_code, NavaidType type, 
+			navaid_filter_t filt_func, void* ref)
 	{
-		return navaid_db->get_wpt_data(id, out, area_code, country_code, type);
+		return navaid_db->get_wpt_data(id, out, area_code, country_code, 
+			type, filt_func, ref);
 	}
 
 	bool NavDB::is_navaid_of_type(std::string id, NavaidType type)

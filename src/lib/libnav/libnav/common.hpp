@@ -17,7 +17,8 @@ namespace libnav
     {
         XP_FIX_WPT = 11,
         XP_FIX_NDB = 2,
-        XP_FIX_VHF = 3
+        XP_FIX_VHF = 3,
+		XP_FIX_NONE = 0
     };
 
 	enum class DbErr
@@ -92,6 +93,24 @@ namespace libnav
         default:
             return NavaidType::NONE;
         }
+	}
+
+	inline navaid_type_t libnav_to_xp_fix_type(NavaidType type)
+	{
+		navaid_type_t type_int = static_cast<navaid_type_t>(type);
+		if(type_int & static_cast<navaid_type_t>(NavaidType::WAYPOINT))
+		{
+			return XP_FIX_WPT;
+		}
+		if(type_int & static_cast<navaid_type_t>(NavaidType::NDB))
+		{
+			return XP_FIX_NDB;
+		}
+		if(type_int & static_cast<navaid_type_t>(NavaidType::VHF_NAVAID))
+		{
+			return XP_FIX_VHF;
+		}
+		return XP_FIX_NONE;
 	}
 
 	inline navaid_type_t libnav_to_xp_fix(NavaidType type)

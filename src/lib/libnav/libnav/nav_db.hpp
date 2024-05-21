@@ -63,7 +63,8 @@ namespace libnav
 
 		int get_wpt_data(std::string id, std::vector<waypoint_entry_t>* out, 
 			std::string area_code="", std::string country_code="", 
-			NavaidType type=NavaidType::NAVAID);
+			NavaidType type=NavaidType::NAVAID, 
+			navaid_filter_t filt_func=default_navaid_filter, void* ref=NULL);
 
 		std::string get_fix_desc(waypoint_t& fix);
 

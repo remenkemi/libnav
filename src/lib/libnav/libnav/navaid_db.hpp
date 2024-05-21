@@ -69,7 +69,31 @@ namespace libnav
 	{
 		std::string id;
 		waypoint_entry_t data;
+
+
+		/*
+			Function: get_awy_id
+			Description:
+			returns id string in a format used by the air way data base.
+			@return: id string
+		*/
+
+		std::string get_awy_id();
+
+		/*
+			Function: get_hold_id
+			Description:
+			returns id string in a format used by the hold data base.
+			@return: id string
+		*/
+
+		std::string get_hold_id();
 	};
+
+	
+	typedef bool (*navaid_filter_t)(waypoint_t, void*);
+
+	bool default_navaid_filter(waypoint_t in, void* ref);
 
 
 	struct wpt_line_t
@@ -144,7 +168,8 @@ namespace libnav
 		// Otherwise, returns number of items written to out.
 		int get_wpt_data(std::string id, std::vector<waypoint_entry_t>* out, 
 			std::string area_code="", std::string country_code="", 
-			NavaidType type=NavaidType::NAVAID);
+			NavaidType type=NavaidType::NAVAID, 
+			navaid_filter_t filt_func=default_navaid_filter, void* ref=NULL);
 
 		std::string get_fix_desc(waypoint_t& fix);
 

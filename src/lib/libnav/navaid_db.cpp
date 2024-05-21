@@ -90,6 +90,20 @@ namespace libnav
 	}
 
 
+	std::string waypoint_t::get_awy_id()
+	{
+		navaid_type_t xp_type = libnav_to_xp_fix_type(data.type);
+		return id + "_" + data.country_code + "_" + std::to_string(int(xp_type));
+	}
+
+	std::string waypoint_t::get_hold_id()
+	{
+		navaid_type_t xp_type = libnav_to_xp_fix_type(data.type);
+		return id + "_" + data.country_code + "_" + data.area_code + "_" + 
+			std::to_string(int(xp_type));
+	}
+
+
 	wpt_line_t::wpt_line_t(std::string& s)
 	{
 		data.is_parsed = false;
@@ -163,6 +177,14 @@ namespace libnav
             data.is_parsed = true;
             data.is_last = true;
         }
+	}
+
+
+	bool default_navaid_filter(waypoint_t in, void* ref)
+	{
+		(void)in;
+		(void)ref;
+		return true;
 	}
 
 
@@ -346,7 +368,8 @@ namespace libnav
 	}
 
 	int NavaidDB::get_wpt_data(std::string id, std::vector<waypoint_entry_t>* out, 
-		std::string area_code, std::string country_code, NavaidType type)
+		std::string area_code, std::string country_code, NavaidType type, 
+		navaid_filter_t filt_func, void* ref)
 	{
 		if (is_wpt(id))
 		{
@@ -371,7 +394,7 @@ namespace libnav
 				{
 					is_fine = false;
 				}
-				if(is_fine)
+				if(is_fine && filt_func({id, wpt_curr}, ref))
 				{
 					out->push_back(wpt_curr);
 				}
