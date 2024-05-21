@@ -3,6 +3,7 @@
 #include <string>
 #include <libnav/nav_db.hpp>
 #include <libnav/awy_db.hpp>
+#include <libnav/hold_db.hpp>
 #include <libnav/cifp_parser.hpp>
 
 #define UNUSED(x) (void)(x)
@@ -24,7 +25,8 @@ namespace dbg
         std::shared_ptr<libnav::NavaidDB> navaid_db_ptr;
 
         std::shared_ptr<libnav::AwyDB> awy_db;
-        std::shared_ptr<libnav::NavDB> db;
+        std::shared_ptr<libnav::HoldDB> hold_db;
+        std::shared_ptr<libnav::NavDB> nav_db;
 
         std::unordered_map<std::string, std::string> env_vars;
 
@@ -32,7 +34,8 @@ namespace dbg
 
 
         Avionics(std::string apt_dat, std::string custom_apt, std::string custom_rnw,
-            std::string fix_data, std::string navaid_data, std::string awy_data, 
+            std::string fix_data, std::string navaid_data, std::string awy_data,
+            std::string hold_data, 
             std::string cifp_path, double def_lat=AC_LAT_DEF, 
             double def_lon=AC_LON_DEF)
         {
@@ -49,16 +52,19 @@ namespace dbg
 	        navaid_db_ptr = 
                 std::make_shared<libnav::NavaidDB>(fix_data, navaid_data);
             awy_db = std::make_shared<libnav::AwyDB>(awy_data);
+            hold_db = std::make_shared<libnav::HoldDB>(hold_data);
 
-            db = std::make_shared<libnav::NavDB>(arpt_db_ptr, navaid_db_ptr);
+            nav_db = std::make_shared<libnav::NavDB>(arpt_db_ptr, navaid_db_ptr);
 
-            libnav::DbErr err_arpt = db->is_arpt_loaded();
-            libnav::DbErr err_wpt = db->is_wpt_loaded();
-            libnav::DbErr err_nav = db->is_navaid_loaded();
+            libnav::DbErr err_arpt = nav_db->is_arpt_loaded();
+            libnav::DbErr err_wpt = nav_db->is_wpt_loaded();
+            libnav::DbErr err_nav = nav_db->is_navaid_loaded();
             libnav::DbErr err_awy = awy_db->get_err();
+            libnav::DbErr err_hold = hold_db->holds_loaded();
 
             std::cout << navaid_db_ptr->get_wpt_cycle() << " " <<
-                navaid_db_ptr->get_navaid_cycle() << " " << awy_db->get_airac() << "\n";
+                navaid_db_ptr->get_navaid_cycle() << " " << 
+                awy_db->get_airac() << " " << hold_db->get_airac() << "\n";
 
             if(err_arpt != libnav::DbErr::SUCCESS)
             {
@@ -76,6 +82,10 @@ namespace dbg
             {
                 std::cout << "Unable to load airway database\n";
             }
+            if(err_hold != libnav::DbErr::SUCCESS)
+            {
+                std::cout << "Unable to load hold database\n";
+            }
         }
 
         void update()
@@ -86,7 +96,7 @@ namespace dbg
         ~Avionics()
         {
             awy_db.reset();
-            db.reset();
+            nav_db.reset();
             navaid_db_ptr.reset();
             navaid_db_ptr.reset();
             arpt_db_ptr.reset();
@@ -156,13 +166,13 @@ namespace dbg
 
         std::vector<libnav::waypoint_entry_t> found_wpts;
 
-        size_t n_wpts_found = av->db->get_wpt_data(poi_id, &found_wpts);
+        size_t n_wpts_found = av->nav_db->get_wpt_data(poi_id, &found_wpts);
 
         for(size_t i = 0; i < n_wpts_found; i++)
         {
             libnav::waypoint_t wpt = {poi_id, found_wpts[i]};
 
-            std::cout << av->db->get_fix_desc(wpt) << "\n";
+            std::cout << av->nav_db->get_fix_desc(wpt) << "\n";
         }
     }
 
@@ -179,10 +189,8 @@ namespace dbg
         libnav::airport_data_t found_arpt;
         std::vector<libnav::waypoint_entry_t> found_wpts;
 
-        std::shared_ptr<libnav::NavDB> db = av->db;
-
-        size_t n_arpts_found = db->get_airport_data(poi_id, &found_arpt);
-        size_t n_wpts_found = db->get_wpt_data(poi_id, &found_wpts);
+        size_t n_arpts_found = av->nav_db->get_airport_data(poi_id, &found_arpt);
+        size_t n_wpts_found = av->nav_db->get_wpt_data(poi_id, &found_wpts);
 
         if (n_arpts_found)
         {
@@ -234,13 +242,13 @@ namespace dbg
         std::vector<libnav::waypoint_entry_t> exit_wpts;
 
         awy_filter_data_t filter_data = {in[0], av};
-        av->db->get_wpt_data(in[1], &entry_wpts, "", "", libnav::NavaidType::NAVAID, 
+        av->nav_db->get_wpt_data(in[1], &entry_wpts, "", "", libnav::NavaidType::NAVAID, 
             [](libnav::waypoint_t wpt, void* ref) -> bool {
                 awy_filter_data_t *data = reinterpret_cast<awy_filter_data_t*>(ref);
                 return data->ptr->awy_db->is_in_awy(data->s, wpt.get_awy_id());
             }, &filter_data);
 
-        av->db->get_wpt_data(in[2], &exit_wpts, "", "", libnav::NavaidType::NAVAID, 
+        av->nav_db->get_wpt_data(in[2], &exit_wpts, "", "", libnav::NavaidType::NAVAID, 
             [](libnav::waypoint_t wpt, void* ref) -> bool {
                 awy_filter_data_t *data = reinterpret_cast<awy_filter_data_t*>(ref);
                 return data->ptr->awy_db->is_in_awy(data->s, wpt.get_awy_id());
@@ -260,6 +268,72 @@ namespace dbg
             }
         }
         
+    }
+
+    inline libnav::waypoint_entry_t select_desired(std::string& name,
+            std::vector<libnav::waypoint_entry_t>& wpts)
+    {
+        if(wpts.size() == 0)
+        {
+            return {};
+        }
+        if(wpts.size() == 1)
+        {
+            return wpts[0];
+        }
+        std::cout << "Select desired " << name << "\n";
+        for(int i = 0; i < int(wpts.size()); i++)
+        {
+            std::cout << i+1 << ". " << strutils::lat_to_str(wpts[i].pos.lat_deg) 
+                << " " << strutils::lat_to_str(wpts[i].pos.lon_deg) << "\n";
+        }
+        while(1)
+        {
+            std::string tmp;
+            std::getline(std::cin, tmp);
+
+            int num = strutils::stoi_with_strip(tmp);
+            if(num != 0 && num < int(wpts.size()) + 1)
+            {
+                return wpts[num-1];
+            }
+        }
+    }
+
+    inline void hold_info(Avionics* av, std::vector<std::string>& in)
+    {
+        if(in.size() != 1)
+        {
+            std::cout << "Command expects 1 argument: <name of waypoint>\n";
+            return;
+        }
+
+        std::vector<libnav::waypoint_entry_t> wpts;
+        av->nav_db->get_wpt_data(in[0], &wpts);
+        libnav::waypoint_entry_t tgt_data = select_desired(in[0], wpts);
+        libnav::waypoint_t tgt_wpt = {in[0], tgt_data};
+        libnav::hold_data_t hld_data;
+        bool res = av->hold_db->get_hold_data(tgt_wpt.get_hold_id(), &hld_data);
+        if(res)
+        {
+            std::cout << "Inbound magnetic course(degrees): " << hld_data.inbd_crs_mag
+                << "\n" << "Leg time(minutes): " << hld_data.leg_time_min << "\n";
+            if(hld_data.turn_dir == libnav::HoldTurnDir::LEFT)
+            {
+                std::cout << "Turn direction: Left\n";
+            }
+            else
+            {
+                std::cout << "Turn direction: Right\n";
+            }
+            std::cout << "Minimum altitude(feet): " << hld_data.min_alt_ft << "\n";
+            std::cout << "Maximum altitude(feet): " << hld_data.max_alt_ft << "\n";
+            std::cout << "Speed restriction(knots): " << hld_data.spd_kts << "\n";
+        }
+        else
+        {
+            std::cout << "No hold found at selected fix\n";
+        }
     }
 
     inline void quit(Avionics* av, std::vector<std::string>& in)
@@ -282,7 +356,7 @@ namespace dbg
             return;
         }
         
-        libnav::Airport apt(in[0], av->db, av->cifp_dir_path);
+        libnav::Airport apt(in[0], av->nav_db, av->cifp_dir_path);
 
         std::set<std::string> sids = apt.get_all_sids();
 
@@ -300,7 +374,7 @@ namespace dbg
             return;
         }
         
-        libnav::Airport apt(in[0], av->db, av->cifp_dir_path);
+        libnav::Airport apt(in[0], av->nav_db, av->cifp_dir_path);
 
         libnav::arinc_leg_seq_t sid_legs = apt.get_sid(in[1], in[2]);
         for(auto i: sid_legs)
@@ -317,7 +391,7 @@ namespace dbg
             return;
         }
         
-        libnav::Airport apt(in[0], av->db, av->cifp_dir_path);
+        libnav::Airport apt(in[0], av->nav_db, av->cifp_dir_path);
 
         if(apt.err_code != libnav::DbErr::SUCCESS &&
             apt.err_code != libnav::DbErr::PARTIAL_LOAD)
@@ -341,7 +415,7 @@ namespace dbg
             return;
         }
 
-        libnav::Airport apt(in[0], av->db, av->cifp_dir_path);
+        libnav::Airport apt(in[0], av->nav_db, av->cifp_dir_path);
 
         if(apt.err_code != libnav::DbErr::SUCCESS &&
             apt.err_code != libnav::DbErr::PARTIAL_LOAD)
@@ -373,7 +447,7 @@ namespace dbg
             return;
         }
 
-        libnav::Airport apt(in[0], av->db, av->cifp_dir_path);
+        libnav::Airport apt(in[0], av->nav_db, av->cifp_dir_path);
 
         if(apt.err_code != libnav::DbErr::SUCCESS &&
             apt.err_code != libnav::DbErr::PARTIAL_LOAD)
@@ -405,7 +479,7 @@ namespace dbg
             return;
         }
 
-        libnav::Airport apt(in[0], av->db, av->cifp_dir_path);
+        libnav::Airport apt(in[0], av->nav_db, av->cifp_dir_path);
 
         if(apt.err_code != libnav::DbErr::SUCCESS &&
             apt.err_code != libnav::DbErr::PARTIAL_LOAD)
@@ -430,7 +504,7 @@ namespace dbg
             return;
         }
 
-        libnav::Airport apt(in[0], av->db, av->cifp_dir_path);
+        libnav::Airport apt(in[0], av->nav_db, av->cifp_dir_path);
 
         if(apt.err_code != libnav::DbErr::SUCCESS &&
             apt.err_code != libnav::DbErr::PARTIAL_LOAD)
@@ -454,6 +528,7 @@ namespace dbg
         {"name", name}, 
         {"poinfo", display_poi_info}, 
         {"get_path", get_path},
+        {"holdinfo", hold_info},
         {"quit", quit},
         {"q", quit},
         {"allsid", allsid},
