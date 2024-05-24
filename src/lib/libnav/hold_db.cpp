@@ -61,17 +61,21 @@ namespace libnav
         return airac_cycle;
     }
 
-    bool HoldDB::get_hold_data(std::string wpt_id, hold_data_t* out)
+    bool HoldDB::has_hold(std::string& wpt_id)
+    {
+        return hold_db.find(wpt_id) != hold_db.end();
+    }
+
+    std::vector<hold_data_t> HoldDB::get_hold_data(std::string& wpt_id)
     {
         if(hold_db.find(wpt_id) != hold_db.end())
         {
-            *out = hold_db[wpt_id];
-            return true;
+            return hold_db[wpt_id];
         }
-        return false;
+        return {};
     }
 
-    DbErr HoldDB::load_holds(std::string db_path)
+    DbErr HoldDB::load_holds(std::string& db_path)
     {
         DbErr out_code = DbErr::SUCCESS;
         
@@ -91,7 +95,7 @@ namespace libnav
                 if(!hold_line.data.is_last && hold_line.data.is_parsed 
                     && !hold_line.data.is_airac)
                 {
-                    hold_db[hold_line.uid] = hold_line.hold_data;
+                    hold_db[hold_line.uid].push_back(hold_line.hold_data);
                 }
                 else if(hold_line.data.is_airac)
                 {
