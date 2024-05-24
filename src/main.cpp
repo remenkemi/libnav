@@ -4,10 +4,11 @@
 
 int main()
 {
-	dbg::Avionics avncs("test_data/apt.dat", "test_data/777_arpt.dat", 
-		"test_data/777_rnw.dat", "test_data/earth_fix.dat", 
-		"test_data/earth_nav.dat", "test_data/earth_awy.dat", 
-		"test_data/earth_hold.dat", "test_data/CIFP");
+	std::string airac_pref = "test_data/xp12/";
+	dbg::Avionics avncs(airac_pref+"apt.dat", airac_pref+"777_arpt.dat", 
+		airac_pref+"777_rnw.dat", airac_pref+"earth_fix.dat", 
+		airac_pref+"earth_nav.dat", airac_pref+"earth_awy.dat", 
+		airac_pref+"earth_hold.dat", "test_data/CIFP");
 	std::cout << "Avionics loaded\n";
 	
 	while(1)

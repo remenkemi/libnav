@@ -312,24 +312,32 @@ namespace dbg
         av->nav_db->get_wpt_data(in[0], &wpts);
         libnav::waypoint_entry_t tgt_data = select_desired(in[0], wpts);
         libnav::waypoint_t tgt_wpt = {in[0], tgt_data};
-        libnav::hold_data_t hld_data;
-        bool res = av->hold_db->get_hold_data(tgt_wpt.get_hold_id(), &hld_data);
-        if(res)
+        std::string wpt_hold_id = tgt_wpt.get_hold_id();
+
+        std::vector<libnav::hold_data_t> hld_data = 
+            av->hold_db->get_hold_data(wpt_hold_id);
+            
+        if(hld_data.size())
         {
-            std::cout << "Inbound magnetic course(degrees): " << hld_data.inbd_crs_mag
-                << "\n" << "Leg time(minutes): " << hld_data.leg_time_min << "\n";
-            std::cout << "DME leg length(nm): " << hld_data.dme_leg_dist_nm << "\n";
-            if(hld_data.turn_dir == libnav::HoldTurnDir::LEFT)
+            for(int i = 0; i < int(hld_data.size()); i++)
             {
-                std::cout << "Turn direction: Left\n";
+                std::cout << "Inbound magnetic course(degrees): " << hld_data[i].inbd_crs_mag
+                    << "\n" << "Leg time(minutes): " << hld_data[i].leg_time_min << "\n";
+                std::cout << "DME leg length(nm): " << hld_data[i].dme_leg_dist_nm << "\n";
+                if(hld_data[i].turn_dir == libnav::HoldTurnDir::LEFT)
+                {
+                    std::cout << "Turn direction: Left\n";
+                }
+                else
+                {
+                    std::cout << "Turn direction: Right\n";
+                }
+                std::cout << "Minimum altitude(feet): " << hld_data[i].min_alt_ft << "\n";
+                std::cout << "Maximum altitude(feet): " << hld_data[i].max_alt_ft << "\n";
+                std::cout << "Speed restriction(knots): " << hld_data[i].spd_kts << "\n";
+                std::cout << "\n";
             }
-            else
-            {
-                std::cout << "Turn direction: Right\n";
-            }
-            std::cout << "Minimum altitude(feet): " << hld_data.min_alt_ft << "\n";
-            std::cout << "Maximum altitude(feet): " << hld_data.max_alt_ft << "\n";
-            std::cout << "Speed restriction(knots): " << hld_data.spd_kts << "\n";
+            
         }
         else
         {
