@@ -57,6 +57,8 @@ namespace libnav
 		APT = 32768
 	};
 
+	// Data base versions:
+	constexpr int XP12_DB_VERSION = 1200;
 	// N_COL_AIRAC is the Number of columns in a line declaring the airac cycle
 	// of earth_*.dat file
 	constexpr int N_COL_AIRAC = 16;

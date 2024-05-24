@@ -16,9 +16,6 @@
 
 namespace libnav
 {
-	// Data base versions:
-	constexpr int XP12_DB_VERSION = 1200;
-
 	constexpr int N_FIX_COL_NORML_XP12 = 7;
 	constexpr int N_FIX_COL_NORML_XP11 = 6;
 	constexpr int N_NAVAID_COL_NORML = 11;

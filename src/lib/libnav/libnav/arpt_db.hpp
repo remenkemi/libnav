@@ -32,6 +32,9 @@ namespace libnav
 {
 	constexpr double DB_VERSION = 1.0; // Change this if you want to rebuild runway and airport data bases
 	constexpr int N_ARPT_LINES_IGNORE = 3;
+	// N_HEADER_STR_WORDS is the number of words in a string declaring the data base
+	// version.
+	constexpr int N_HEADER_STR_WORDS = 4;
 	// Number of items to ignore at the beginning of the land runway declaration.
 	constexpr int N_RNW_ITEMS_IGNORE_BEGINNING = 8;
 	constexpr int N_RNW_ITEMS_IGNORE_END = 5;
@@ -138,6 +141,8 @@ namespace libnav
 		int get_rnw_data(std::string apt_icao, std::string rnw_id, runway_entry_t* out);
 
 	private:
+		int db_version;  // May be used later
+
 		std::string custom_arpt_db_sign = "ARPTDB";
 		std::string custom_rnw_db_sign = "RNWDB";
 		bool apt_db_created = false;
@@ -168,6 +173,8 @@ namespace libnav
 		std::unordered_map<std::string, std::unordered_map<std::string, runway_entry_t>> rnw_db;
 
 		static bool does_db_exist(std::string path, std::string sign);
+
+		static int get_db_version(std::string& line);
 
 		double parse_runway(std::string line, std::vector<runway_t>* rnw); // Returns runway length in meters
 

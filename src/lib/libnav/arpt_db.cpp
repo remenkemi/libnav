@@ -23,6 +23,8 @@ namespace libnav
 	{
 		err_code = DbErr::ERR_NONE;
 
+		db_version = 0;
+
 		sim_arpt_db_path = sim_arpt_path;
 		custom_arpt_db_path = custom_arpt_path;
 		custom_rnw_db_path = custom_rnw_path;
@@ -210,6 +212,12 @@ namespace libnav
 					{
 						break;
 					}
+				}
+				else
+				{
+					int tmp = get_db_version(line);
+					if(tmp)
+						db_version = tmp;
 				}
 				i++;
 			}
@@ -514,10 +522,24 @@ namespace libnav
 		return false;
 	}
 
+	int ArptDB::get_db_version(std::string& line)
+	{
+		std::vector<std::string> s_split = strutils::str_split(line);
+
+		if(int(s_split.size()) >= N_HEADER_STR_WORDS && 
+			s_split[1] == "Generated" && s_split[2] == "by" && 
+			s_split[3] == "WorldEditor")
+		{
+			return strutils::stoi_with_strip(s_split[0]);
+		}
+		return 0;
+	}
+
 	double ArptDB::parse_runway(std::string line, std::vector<runway_t>* rnw)
 	{
 		std::stringstream s(line);
 		int limit_1 = N_RNW_ITEMS_IGNORE_BEGINNING;
+
 		int limit_2 = N_RNW_ITEMS_IGNORE_END;
 		std::string junk;
 		runway_t rnw_1;
