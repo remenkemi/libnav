@@ -16,7 +16,11 @@
 
 namespace libnav
 {
-	constexpr int N_FIX_COL_NORML = 7;
+	// Data base versions:
+	constexpr int XP12_DB_VERSION = 1200;
+
+	constexpr int N_FIX_COL_NORML_XP12 = 7;
+	constexpr int N_FIX_COL_NORML_XP11 = 6;
 	constexpr int N_NAVAID_COL_NORML = 11;
 	constexpr double VOR_MAX_SLANT_ANGLE_DEG = 40;
 	constexpr double DME_DME_PHI_MIN_DEG = 30;
@@ -103,7 +107,7 @@ namespace libnav
         std::string desc;
 
 
-        wpt_line_t(std::string& s);
+        wpt_line_t(std::string& s, int db_version);
     };
 
 	struct navaid_line_t
@@ -152,7 +156,11 @@ namespace libnav
 
 		int get_wpt_cycle();
 
+		int get_wpt_version();
+
 		int get_navaid_cycle();
+
+		int get_navaid_version();
 
 		DbErr load_waypoints();
 
@@ -176,8 +184,8 @@ namespace libnav
 		~NavaidDB();
 
 	private:
-		int wpt_airac_cycle;
-		int navaid_airac_cycle;
+		int wpt_airac_cycle, wpt_db_version;
+		int navaid_airac_cycle, navaid_db_version;
 
 		std::string sim_wpt_db_path;
 		std::string sim_navaid_db_path;

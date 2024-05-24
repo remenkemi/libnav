@@ -104,23 +104,30 @@ namespace libnav
 	}
 
 
-	wpt_line_t::wpt_line_t(std::string& s)
+	wpt_line_t::wpt_line_t(std::string& s, int db_version)
 	{
 		data.is_parsed = false;
         data.is_airac = false;
         data.is_last = false;
 
-		std::vector<std::string> s_split = strutils::str_split(s, ' ', 
-			N_FIX_COL_NORML-1);
+		int n_col_norml = N_FIX_COL_NORML_XP12;
+		if(db_version < XP12_DB_VERSION)
+		{
+			n_col_norml = N_FIX_COL_NORML_XP11;
+		}
 
-        if(int(s_split.size()) == N_FIX_COL_NORML && 
+		std::vector<std::string> s_split = strutils::str_split(s, ' ', 
+			n_col_norml-1);
+
+        if(int(s_split.size()) == n_col_norml && 
 			s_split[3] == "data" && s_split[4] == "cycle")
         {
             data.is_parsed = true;
             data.is_airac = true;
+			data.db_version = strutils::stoi_with_strip(s_split[0]);
             data.airac_cycle = strutils::stoi_with_strip(s_split[AIRAC_CYCLE_WORD-1]);
         }
-        else if(int(s_split.size()) == N_FIX_COL_NORML)
+        else if(int(s_split.size()) == n_col_norml)
         {
             data.is_parsed = true;
 			wpt.data.type = NavaidType::WAYPOINT;
@@ -130,7 +137,11 @@ namespace libnav
 			wpt.data.area_code = s_split[3];
 			wpt.data.country_code = s_split[4];
 			wpt.data.arinc_type = uint32_t(strutils::stoi_with_strip(s_split[5]));
-            desc = s_split[6];
+			if(db_version >= XP12_DB_VERSION)
+            	desc = s_split[6];
+			else
+				// No spoken name field exists in xp11, so we assume it's the same as the id
+				desc = wpt.id;  
         }
         else if(s_split.size() && s_split[0] == "99")
         {
@@ -153,6 +164,7 @@ namespace libnav
         {
             data.is_parsed = true;
             data.is_airac = true;
+			data.db_version = strutils::stoi_with_strip(s_split[0]);
             data.airac_cycle = strutils::stoi_with_strip(s_split[AIRAC_CYCLE_WORD-1]);
         }
         else if(int(s_split.size()) == N_NAVAID_COL_NORML)
@@ -246,10 +258,20 @@ namespace libnav
 	{
 		return wpt_airac_cycle;
 	}
+	
+	int NavaidDB::get_wpt_version()
+	{
+		return wpt_db_version;
+	}
 
 	int NavaidDB::get_navaid_cycle()
 	{
 		return navaid_airac_cycle;
+	}
+
+	int NavaidDB::get_navaid_version()
+	{
+		return navaid_db_version;
 	}
 
 	void NavaidDB::reset()
@@ -271,9 +293,10 @@ namespace libnav
 			DbErr out_code = DbErr::SUCCESS;
 			std::string line;
 			int i = 1;
+			wpt_db_version = 0;
 			while (getline(file, line))
 			{
-				wpt_line_t fix_line(line);
+				wpt_line_t fix_line(line, wpt_db_version);
 				if (i > N_EARTH_LINES_IGNORE && fix_line.data.is_parsed 
 					&& !fix_line.data.is_last)
 				{
@@ -286,6 +309,7 @@ namespace libnav
 				else if(fix_line.data.is_airac)
 				{
 					wpt_airac_cycle = fix_line.data.airac_cycle;
+					wpt_db_version = fix_line.data.db_version;
 				}
 				else if(fix_line.data.is_last)
 				{
@@ -326,6 +350,7 @@ namespace libnav
 				else if(navaid_line.data.is_airac)
 				{
 					navaid_airac_cycle = navaid_line.data.airac_cycle;
+					navaid_db_version = navaid_line.data.db_version;
 				}
 				else if (navaid_line.data.is_last)
 				{

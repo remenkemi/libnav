@@ -72,7 +72,7 @@ namespace libnav
 
 	struct earth_data_line_t  // General variables to describe a line of earth*.dat
 	{
-		int airac_cycle;
+		int airac_cycle, db_version;
         bool is_parsed=false, is_last=false, is_airac=false;
 	};
 
