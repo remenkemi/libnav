@@ -66,6 +66,11 @@ namespace dbg
                 navaid_db_ptr->get_navaid_cycle() << " " << 
                 awy_db->get_airac() << " " << hold_db->get_airac() << "\n";
 
+            std::cout << "Fix data base version: " << 
+                navaid_db_ptr->get_wpt_version() << "\n";
+            std::cout << "Navaid data base version: " << 
+                navaid_db_ptr->get_navaid_version() << "\n";
+
             if(err_arpt != libnav::DbErr::SUCCESS)
             {
                 std::cout << "Unable to load airport database\n";
@@ -316,7 +321,7 @@ namespace dbg
 
         std::vector<libnav::hold_data_t> hld_data = 
             av->hold_db->get_hold_data(wpt_hold_id);
-            
+
         if(hld_data.size())
         {
             for(int i = 0; i < int(hld_data.size()); i++)
