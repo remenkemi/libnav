@@ -68,7 +68,8 @@ namespace libnav
     {
         typedef std::unordered_map<std::string, std::unordered_map<std::string, alt_restr_t>> graph_t;
         typedef std::unordered_map<std::string, graph_t> awy_db_t;
-        typedef std::unordered_map<std::string, awy_entry_t> awy_data_db_t;
+        typedef std::unordered_map<std::string, awy_entry_t> awy_data_t;
+        typedef std::unordered_map<std::string, awy_data_t> awy_data_db_t;
 
     public:
 
@@ -77,6 +78,8 @@ namespace libnav
         DbErr get_err();
 
         int get_airac();
+
+        int get_db_version();
 
         bool is_in_awy(std::string awy, std::string point);
 
@@ -90,9 +93,9 @@ namespace libnav
         ~AwyDB();
 
     private:
-        int airac_cycle;
+        int airac_cycle, db_version;
         awy_db_t awy_db;
-        std::unordered_map<std::string, awy_data_db_t> awy_data;
+        awy_data_db_t awy_data;
         std::future<DbErr> db_loaded;
 
         void add_to_awy_db(awy_point_t p1, awy_point_t p2, std::string awy_nm, char restr);

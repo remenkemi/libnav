@@ -48,6 +48,8 @@ namespace libnav
 
         int get_airac();
 
+        int get_db_version();
+
         bool has_hold(std::string& wpt_id);
 
         std::vector<hold_data_t> get_hold_data(std::string& wpt_id);
@@ -57,7 +59,7 @@ namespace libnav
         DbErr load_holds(std::string& db_path);
 
     private:
-        int airac_cycle;
+        int airac_cycle, db_version;
         std::unordered_map<std::string, std::vector<hold_data_t>> hold_db;
 
         std::future<DbErr> hold_load_task;

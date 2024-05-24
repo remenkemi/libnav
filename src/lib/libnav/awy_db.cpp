@@ -30,6 +30,7 @@ namespace libnav
         {
             data.is_parsed = true;
             data.is_airac = true;
+            data.db_version = strutils::stoi_with_strip(s_split[0]);
             data.airac_cycle = strutils::stoi_with_strip(s_split[AIRAC_CYCLE_WORD-1]);
         }
         else if(int(s_split.size()) == N_AWY_COL_NORML)
@@ -78,6 +79,11 @@ namespace libnav
     int AwyDB::get_airac()
     {
         return airac_cycle;
+    }
+
+    int AwyDB::get_db_version()
+    {
+        return db_version;
     }
 
     bool AwyDB::is_in_awy(std::string awy, std::string point)
@@ -191,6 +197,7 @@ namespace libnav
                 else if(awy_line.data.is_airac)
                 {
                     airac_cycle = awy_line.data.airac_cycle;
+                    db_version = awy_line.data.db_version;
                 }
                 else if(awy_line.data.is_last)
                 {

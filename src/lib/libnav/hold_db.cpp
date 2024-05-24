@@ -15,6 +15,7 @@ namespace libnav
         {
             data.is_parsed = true;
             data.is_airac = true;
+            data.db_version = strutils::stoi_with_strip(s_split[0]);
             data.airac_cycle = strutils::stoi_with_strip(s_split[AIRAC_CYCLE_WORD-1]);
         }
         else if(int(s_split.size()) == N_HOLD_COL_NORML)
@@ -61,6 +62,11 @@ namespace libnav
         return airac_cycle;
     }
 
+    int HoldDB::get_db_version()
+    {
+        return db_version;
+    }
+
     bool HoldDB::has_hold(std::string& wpt_id)
     {
         return hold_db.find(wpt_id) != hold_db.end();
@@ -100,6 +106,7 @@ namespace libnav
                 else if(hold_line.data.is_airac)
                 {
                     airac_cycle = hold_line.data.airac_cycle;
+                    db_version = hold_line.data.db_version;
                 }
                 else if(hold_line.data.is_last)
                 {
