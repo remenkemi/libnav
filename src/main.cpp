@@ -4,7 +4,7 @@
 
 int main()
 {
-	std::string airac_pref = "test_data/xp11/";
+	std::string airac_pref = "test_data/xp12/";
 	dbg::Avionics avncs(airac_pref+"apt.dat", airac_pref+"777_arpt.dat", 
 		airac_pref+"777_rnw.dat", airac_pref+"earth_fix.dat", 
 		airac_pref+"earth_nav.dat", airac_pref+"earth_awy.dat", 

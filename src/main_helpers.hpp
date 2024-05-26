@@ -5,6 +5,7 @@
 #include <libnav/awy_db.hpp>
 #include <libnav/hold_db.hpp>
 #include <libnav/cifp_parser.hpp>
+#include <libnav/geo_utils.hpp>
 
 #define UNUSED(x) (void)(x)
 
@@ -91,6 +92,26 @@ namespace dbg
             {
                 std::cout << "Unable to load hold database\n";
             }
+
+            auto apt_db = arpt_db_ptr->get_arpt_db();
+
+            std::string tgt = "SBBE";
+            libnav::airport_data_t tgt_data;
+            int ret = arpt_db_ptr->get_airport_data(tgt, &tgt_data);
+
+            if(ret)
+            {
+                for(auto i: apt_db)
+                {
+                    double dist = i.second.pos.get_gc_dist_nm(tgt_data.pos);
+                    if(dist > 200 && dist < 230)
+                    {
+                        double brng_deg = i.second.pos.get_gc_bearing_deg(tgt_data.pos);
+                        std::cout << i.first << " " << brng_deg << "\n";
+                    }
+                }
+            }
+            
         }
 
         void update()
