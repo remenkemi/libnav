@@ -202,15 +202,15 @@ namespace libnav
 
 	bool WaypointEntryCompare::operator()(waypoint_entry_t w1, waypoint_entry_t w2)
 	{
-		double d1 = w1.pos.get_great_circle_distance_nm(ac_pos);
-		double d2 = w2.pos.get_great_circle_distance_nm(ac_pos);
+		double d1 = w1.pos.get_gc_dist_nm(ac_pos);
+		double d2 = w2.pos.get_gc_dist_nm(ac_pos);
 		return d1 < d2;
 	}
 
 	bool WaypointCompare::operator()(waypoint_t w1, waypoint_t w2)
 	{
-		double d1 = w1.data.pos.get_great_circle_distance_nm(ac_pos);
-		double d2 = w2.data.pos.get_great_circle_distance_nm(ac_pos);
+		double d1 = w1.data.pos.get_gc_dist_nm(ac_pos);
+		double d2 = w2.data.pos.get_gc_dist_nm(ac_pos);
 		return d1 < d2;
 	}
 
@@ -366,6 +366,11 @@ namespace libnav
 			return out_code;
 		}
 		return DbErr::FILE_NOT_FOUND;
+	}
+
+	const NavaidDB::wpt_db_t& NavaidDB::get_db()
+	{
+		return wpt_cache;
 	}
 
 	bool NavaidDB::is_wpt(std::string id) 
@@ -728,7 +733,7 @@ namespace radnav_util
 		libnav::navaid_entry_t* nav_data = data.navaid;
 		if (nav_data != nullptr)
 		{
-			double lat_dist_nm = ac_pos.p.get_great_circle_distance_nm(data.pos);
+			double lat_dist_nm = ac_pos.p.get_gc_dist_nm(data.pos);
 
 			if (lat_dist_nm)
 			{
@@ -761,8 +766,8 @@ namespace radnav_util
 	{
 		if (n1 != nullptr && n2 != nullptr)
 		{
-			double b1 = n1->data.pos.get_great_circle_bearing_deg(ac_pos);
-			double b2 = n2->data.pos.get_great_circle_bearing_deg(ac_pos);
+			double b1 = n1->data.pos.get_gc_bearing_deg(ac_pos);
+			double b2 = n2->data.pos.get_gc_bearing_deg(ac_pos);
 			double phi = abs(b1 - b2);
 			if (phi > 180)
 				phi = 360 - phi;

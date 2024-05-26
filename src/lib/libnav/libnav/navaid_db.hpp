@@ -163,6 +163,8 @@ namespace libnav
 
 		DbErr load_navaids();
 
+		const wpt_db_t& get_db();
+
 		bool is_wpt(std::string id);
 
 		bool is_navaid_of_type(std::string id, NavaidType type);

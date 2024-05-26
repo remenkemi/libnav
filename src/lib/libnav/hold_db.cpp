@@ -67,6 +67,11 @@ namespace libnav
         return db_version;
     }
 
+    const HoldDB::hold_db_t& HoldDB::get_db()
+    {
+        return hold_db;
+    }
+
     bool HoldDB::has_hold(std::string& wpt_id)
     {
         return hold_db.find(wpt_id) != hold_db.end();

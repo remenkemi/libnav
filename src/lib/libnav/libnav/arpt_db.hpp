@@ -64,7 +64,7 @@ namespace libnav
 		{
 			if (impl_length_m <= 0)
 			{
-				impl_length_m = start.get_great_circle_distance_nm(end) * geo::NM_TO_M;
+				impl_length_m = start.get_gc_dist_nm(end) * geo::NM_TO_M;
 			}
 			return impl_length_m;
 		}
@@ -108,6 +108,9 @@ namespace libnav
 		typedef std::pair<std::string, airport_data_t> str_arpt_data_t;
 		typedef std::pair<std::string, std::unordered_map<std::string, runway_entry_t>> 
 			str_rnw_t;
+		typedef std::unordered_map<std::string, airport_data_t> airport_db_t;
+		typedef std::unordered_map<std::string, 
+			std::unordered_map<std::string, runway_entry_t>> rnw_db_t;
 
 	public:
 		DbErr err_code;
@@ -116,6 +119,10 @@ namespace libnav
 			std::string custom_rnw_path);
 
 		DbErr is_loaded();
+
+		const airport_db_t& get_arpt_db();
+
+		const rnw_db_t& get_rnw_db();
 
 		//These functions need to be public because they're used in 
 		//other threads when ArptDB object is constructed.
@@ -169,8 +176,8 @@ namespace libnav
 		std::future<void> arpt_db_task;
 		std::future<void> rnw_db_task;
 
-		std::unordered_map<std::string, airport_data_t> arpt_db;
-		std::unordered_map<std::string, std::unordered_map<std::string, runway_entry_t>> rnw_db;
+		airport_db_t arpt_db;
+		rnw_db_t rnw_db;
 
 		static bool does_db_exist(std::string path, std::string sign);
 

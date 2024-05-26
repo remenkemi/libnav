@@ -41,6 +41,8 @@ namespace libnav
 
     class HoldDB
     {
+        typedef std::unordered_map<std::string, std::vector<hold_data_t>> hold_db_t;
+
     public:
         HoldDB(std::string db_path);
 
@@ -49,6 +51,8 @@ namespace libnav
         int get_airac();
 
         int get_db_version();
+
+        const hold_db_t& get_db();
 
         bool has_hold(std::string& wpt_id);
 
@@ -60,7 +64,7 @@ namespace libnav
 
     private:
         int airac_cycle, db_version;
-        std::unordered_map<std::string, std::vector<hold_data_t>> hold_db;
+        hold_db_t hold_db;
 
         std::future<DbErr> hold_load_task;
     };
