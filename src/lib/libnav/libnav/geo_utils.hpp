@@ -50,7 +50,7 @@ namespace geo
 		double lat_deg, lon_deg;
 
 		/*
-			Function: get_great_circle_bearing_deg
+			Function: get_gc_bearing_deg
 			Description:
 			Function that calculates great circle bearing between 2 points on Earth's surface.
 			Param:
@@ -59,7 +59,7 @@ namespace geo
 			Returns a great circle bearing(non-negative value)
 		*/
 
-		double get_great_circle_bearing_deg(point other)
+		double get_gc_bearing_deg(point other)
 		{
 			double lat1_rad = lat_deg * DEG_TO_RAD;
 			double lon1_rad = lon_deg * DEG_TO_RAD;
@@ -104,7 +104,7 @@ namespace geo
 		}
 
 		/*
-			Function: get_great_circle_distance_nm
+			Function: get_gc_dist_nm
 			Description:
 			Function that calculates great circle distance between 2 points on Earth's surface.
 			Param:
@@ -113,7 +113,7 @@ namespace geo
 			Returns a great circle distance(non-negative value)
 		*/
 
-		double get_great_circle_distance_nm(point other)
+		double get_gc_dist_nm(point other)
 		{
 			return get_ang_dist_rad(other) * EARTH_RADIUS_NM;
 		}
