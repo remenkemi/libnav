@@ -86,10 +86,15 @@ namespace libnav
         return db_version;
     }
 
+    const AwyDB::awy_db_t& AwyDB::get_db()
+    {
+        return awy_db;
+    }
+
     bool AwyDB::is_in_awy(std::string awy, std::string point)
     {
-        if(awy_data.find(awy) != awy_data.end() && 
-            awy_data[awy].find(point) != awy_data[awy].end())
+        if(awy_db.find(awy) != awy_db.end() && 
+            awy_db[awy].find(point) != awy_db[awy].end())
         {
             return true;
         }
@@ -137,7 +142,6 @@ namespace libnav
             {
                 awy_point_t curr_wpt;
                 curr_wpt.id = curr;
-                curr_wpt.data = awy_data[awy][curr];
                 curr_wpt.alt_restr = r_past;
                 r_past = awy_db[awy][prev[curr]][curr];
                 out_rev.push_back(curr_wpt);
@@ -145,7 +149,6 @@ namespace libnav
             }
             awy_point_t curr_wpt;
             curr_wpt.id = curr;
-            curr_wpt.data = awy_data[awy][curr];
             curr_wpt.alt_restr = r_past;
             out_rev.push_back(curr_wpt);
 
@@ -227,20 +230,18 @@ namespace libnav
 
         for(int i = 0; i < int(awy_names.size()); i++)
         {
-            bool p1_found = awy_data[awy_names[i]].find(uid_1) != 
-                awy_data[awy_names[i]].end();
-            bool p2_found = awy_data[awy_names[i]].find(uid_2) != 
-                awy_data[awy_names[i]].end();
+            bool p1_found = awy_db[awy_names[i]].find(uid_1) != 
+                awy_db[awy_names[i]].end();
+            bool p2_found = awy_db[awy_names[i]].find(uid_2) != 
+                awy_db[awy_names[i]].end();
 
             if(!p1_found)
             {
                 awy_db[awy_names[i]][uid_1] = {};
-                awy_data[awy_names[i]][uid_1] = p1.data;
             }
             if(!p2_found)
             {
                 awy_db[awy_names[i]][uid_2] = {};
-                awy_data[awy_names[i]][uid_2] = p2.data;
             }
 
             if(restr == AWY_RESTR_FWD || restr == AWY_RESTR_NONE)
