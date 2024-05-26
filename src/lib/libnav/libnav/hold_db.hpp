@@ -46,7 +46,7 @@ namespace libnav
     public:
         HoldDB(std::string db_path);
 
-        DbErr holds_loaded();
+        DbErr get_err();
 
         int get_airac();
 

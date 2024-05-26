@@ -53,7 +53,7 @@ namespace libnav
 				DbErr {return db->load_holds(db_path); }, this, db_path);
     }
 
-    DbErr HoldDB::holds_loaded()
+    DbErr HoldDB::get_err()
     {
         return hold_load_task.get();
     }
