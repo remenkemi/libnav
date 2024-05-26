@@ -15,7 +15,7 @@ namespace libnav
 
     std::string awy_point_t::get_uid()
     {
-        return id + "_" + data.reg_code + "_" + data.xp_type;
+        return id + AUX_ID_SEP + data.reg_code + AUX_ID_SEP + data.xp_type;
     }
 
     awy_line_t::awy_line_t(std::string& s)
@@ -187,8 +187,8 @@ namespace libnav
                 if(!awy_line.data.is_last && awy_line.data.is_parsed 
                     && !awy_line.data.is_airac)
                 {
-                    std::string token = awy_line.p1.id + "_" + awy_line.p2.id 
-                        + "_" + awy_line.awy_names;
+                    std::string token = awy_line.p1.id + AUX_ID_SEP + awy_line.p2.id 
+                        + AUX_ID_SEP + awy_line.awy_names;
                     if(used.find(token) == used.end())
                     {
                         used.insert(token);

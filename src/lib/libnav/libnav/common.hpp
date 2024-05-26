@@ -68,6 +68,7 @@ namespace libnav
 	constexpr int AIRAC_CYCLE_WORD = 6;
 	constexpr int AIRAC_CYCLE_LINE = 2;
 	constexpr char AIRAC_WORD_SEP = ' ';
+	constexpr char AUX_ID_SEP = '_';  // Separator for ids used by hold and airway dbs.
 
 	typedef uint16_t navaid_type_t;
 

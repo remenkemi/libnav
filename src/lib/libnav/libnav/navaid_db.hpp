@@ -171,10 +171,32 @@ namespace libnav
 
 		// get_wpt_data returns 0 if waypoint is not in the database. 
 		// Otherwise, returns number of items written to out.
-		int get_wpt_data(std::string id, std::vector<waypoint_entry_t>* out, 
+		int get_wpt_data(std::string& id, std::vector<waypoint_entry_t>* out, 
 			std::string area_code="", std::string country_code="", 
 			NavaidType type=NavaidType::NAVAID, 
 			navaid_filter_t filt_func=default_navaid_filter, void* ref=NULL);
+
+		/*
+			Function: get_wpt_by_awy_str
+			Description:
+			Gets all matching waypoints using an id used by airway data base.
+			@param awy_str: airway data base id string
+			@param out: pointer to the output vector
+			@return: number of items written to out.
+		*/
+
+		int get_wpt_by_awy_str(std::string& awy_str, std::vector<waypoint_entry_t>* out);
+
+		/*
+			Function: get_wpt_by_hold_str
+			Description:
+			Gets all matching waypoints using an id used by hold data base.
+			@param awy_str: hold data base id string
+			@param out: pointer to the output vector
+			@return: number of items written to out.
+		*/
+
+		int get_wpt_by_hold_str(std::string& hold_str, std::vector<waypoint_entry_t>* out);
 
 		std::string get_fix_desc(waypoint_t& fix);
 
