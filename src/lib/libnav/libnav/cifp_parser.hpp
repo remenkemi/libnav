@@ -6,7 +6,8 @@
 #include <unordered_map>
 #include <set>
 #include <mutex>
-#include "nav_db.hpp"
+#include "arpt_db.hpp"
+#include "navaid_db.hpp"
 #include "common.hpp"
 #include "str_utils.hpp"
 
@@ -140,13 +141,13 @@ namespace libnav
 
 
         int get_pos_from_db(std::string& area_code, 
-            std::shared_ptr<NavDB> nav_db);
+        std::shared_ptr<ArptDB> arpt_db);
 
         void get_rwy_coords(std::string& s, std::string& area_code, 
-            std::shared_ptr<NavDB> nav_db);
+            std::shared_ptr<ArptDB> arpt_db);
 
         arinc_rwy_full_t(std::string& s, std::string& area_code, 
-            std::shared_ptr<NavDB> nav_db);
+            std::shared_ptr<ArptDB> arpt_db);
     };
 
     typedef std::unordered_map<std::string, arinc_rwy_data_t> arinc_rwy_db_t;
@@ -161,7 +162,8 @@ namespace libnav
 
 
         waypoint_t to_waypoint_t(std::string& area_code, 
-            std::shared_ptr<NavDB> nav_db, arinc_rwy_db_t& rwy_db);
+            std::shared_ptr<ArptDB> arpt_db, std::shared_ptr<NavaidDB> navaid_db, 
+            arinc_rwy_db_t& rwy_db);
     };
 
     struct arinc_leg_t
@@ -252,7 +254,8 @@ namespace libnav
 
         arinc_str_t(std::vector<std::string>& in_split);
 
-        arinc_leg_t get_leg(std::string& area_code, std::shared_ptr<NavDB> nav_db, arinc_rwy_db_t& rwy_db);
+        arinc_leg_t get_leg(std::string& area_code, std::shared_ptr<ArptDB> arpt_db,
+            std::shared_ptr<NavaidDB> navaid_db, arinc_rwy_db_t& rwy_db);
     };
 
 
@@ -289,8 +292,9 @@ namespace libnav
         std::string icao_code;
 
 
-        Airport(std::string icao, std::shared_ptr<NavDB> nav_db, 
-            std::string cifp_path="", std::string postfix=".dat");
+        Airport(std::string icao, std::shared_ptr<ArptDB> arpt_db, 
+            std::shared_ptr<NavaidDB> navaid_db, std::string cifp_path="", 
+            std::string postfix=".dat");
 
         str_set_t get_all_sids();
 
@@ -348,9 +352,11 @@ namespace libnav
         str_set_t get_trans_by_proc(std::string& proc_name, 
             proc_db_t db, bool rwy=false);
 
-        DbErr parse_flt_legs(std::shared_ptr<NavDB> nav_db);
+        DbErr parse_flt_legs(std::shared_ptr<ArptDB> arpt_db, 
+            std::shared_ptr<NavaidDB> navaid_db);
 
-        DbErr load_db(std::shared_ptr<NavDB> nav_db, std::string& path, 
+        DbErr load_db(std::shared_ptr<ArptDB> arpt_db, 
+            std::shared_ptr<NavaidDB> navaid_db, std::string& path, 
             std::string& postfix);
     };
 }; // namespace libnav

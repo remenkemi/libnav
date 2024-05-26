@@ -118,7 +118,7 @@ namespace libnav
 		ArptDB(std::string sim_arpt_path, std::string custom_arpt_path,
 			std::string custom_rnw_path);
 
-		DbErr is_loaded();
+		DbErr get_err();
 
 		const airport_db_t& get_arpt_db();
 

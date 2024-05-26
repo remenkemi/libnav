@@ -61,7 +61,7 @@ namespace libnav
 		
 	}
 
-	DbErr ArptDB::is_loaded()
+	DbErr ArptDB::get_err()
 	{
 		if(err_code == DbErr::ERR_NONE)
 		{

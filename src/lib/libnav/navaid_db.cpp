@@ -244,12 +244,12 @@ namespace libnav
 
 	// Public member functions:
 
-	DbErr NavaidDB::wpt_loaded()
+	DbErr NavaidDB::get_wpt_err()
 	{
 		return wpt_task.get();
 	}
 
-	DbErr NavaidDB::navaids_loaded()
+	DbErr NavaidDB::get_navaid_err()
 	{
 		return navaid_task.get();
 	}

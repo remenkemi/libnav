@@ -219,7 +219,8 @@ namespace libnav
     // arinc_fix_entry_t definitions:
 
     waypoint_t arinc_fix_entry_t::to_waypoint_t(std::string& area_code, 
-        std::shared_ptr<NavDB> nav_db, arinc_rwy_db_t& rwy_db)
+        std::shared_ptr<ArptDB> arpt_db, std::shared_ptr<NavaidDB> navaid_db, 
+        arinc_rwy_db_t& rwy_db)
     {
         NavaidType lookup_type = NavaidType::NONE;
         std::string lookup_area = "ENRT";
@@ -241,7 +242,7 @@ namespace libnav
             if(db_subsection == 'A')
             {
                 airport_data_t apt_data;
-                int ret = nav_db->get_airport_data(area_code, &apt_data);
+                int ret = arpt_db->get_airport_data(area_code, &apt_data);
                 if(ret)
                 {
                     return {area_code, {NavaidType::APT, 0, apt_data.pos, 
@@ -260,7 +261,7 @@ namespace libnav
         }
         
         std::vector<waypoint_entry_t> wpts;
-        nav_db->get_wpt_data(fix_ident, &wpts, lookup_area, country_code, lookup_type);
+        navaid_db->get_wpt_data(fix_ident, &wpts, lookup_area, country_code, lookup_type);
 
         //if(wpts.size() > 1)
         //{
@@ -329,12 +330,13 @@ namespace libnav
     // arinc_leg_t definitions:
 
     arinc_leg_t arinc_str_t::get_leg(std::string& area_code, 
-        std::shared_ptr<NavDB> nav_db, arinc_rwy_db_t& rwy_db)
+        std::shared_ptr<ArptDB> arpt_db, std::shared_ptr<NavaidDB> navaid_db, 
+        arinc_rwy_db_t& rwy_db)
     {
         arinc_leg_t out;
         out.rt_type = rt_type;
 
-        out.main_fix = main_fix.to_waypoint_t(area_code, nav_db, rwy_db);
+        out.main_fix = main_fix.to_waypoint_t(area_code, arpt_db, navaid_db, rwy_db);
 
         out.wpt_desc = wpt_desc;
         out.turn_dir = char2dir(turn_dir);
@@ -342,7 +344,7 @@ namespace libnav
         out.leg_type = leg_type;
         out.is_ovfy = tdv == 'Y';
 
-        out.recd_navaid = recd_navaid.to_waypoint_t(area_code, nav_db, rwy_db);
+        out.recd_navaid = recd_navaid.to_waypoint_t(area_code, arpt_db, navaid_db, rwy_db);
         out.arc_radius = arc_radius;
         out.theta = theta;
         out.rho = rho;
@@ -359,7 +361,7 @@ namespace libnav
         out.vert_angle_deg = vert_angle;
         out.vert_scale_ft = vert_scale;
 
-        out.center_fix = center_fix.to_waypoint_t(area_code, nav_db, rwy_db);
+        out.center_fix = center_fix.to_waypoint_t(area_code, arpt_db, navaid_db, rwy_db);
 
         out.multi_cod = multi_cod;
         out.gnss_ind = gnss_ind;
@@ -372,10 +374,10 @@ namespace libnav
     // arinc_rwy_full_t definitions:
 
     int arinc_rwy_full_t::get_pos_from_db(std::string& area_code, 
-        std::shared_ptr<NavDB> nav_db)
+        std::shared_ptr<ArptDB> arpt_db)
     {
         runway_entry_t rnw;
-        int ret = nav_db->get_rnw_data(area_code, id, &rnw);
+        int ret = arpt_db->get_rnw_data(area_code, id, &rnw);
 
         if(ret)
         {
@@ -387,7 +389,7 @@ namespace libnav
     }
 
     void arinc_rwy_full_t::get_rwy_coords(std::string& s, std::string& area_code, 
-        std::shared_ptr<NavDB> nav_db)
+        std::shared_ptr<ArptDB> arpt_db)
     {
         std::vector<std::string> second_part_splt = strutils::str_split(
             s, ARINC_FIELD_SEP);
@@ -403,7 +405,7 @@ namespace libnav
 
             if(data.pos.lat_deg == 0 || data.pos.lon_deg == 0)
             {
-                if(!get_pos_from_db(area_code, nav_db))
+                if(!get_pos_from_db(area_code, arpt_db))
                 {
                     err = DbErr::DATA_BASE_ERROR;
                 }
@@ -411,7 +413,7 @@ namespace libnav
         }
         else
         {
-            if(!get_pos_from_db(area_code, nav_db))
+            if(!get_pos_from_db(area_code, arpt_db))
             {
                 err = DbErr::DATA_BASE_ERROR;
             }
@@ -419,7 +421,7 @@ namespace libnav
     }
 
     arinc_rwy_full_t::arinc_rwy_full_t(std::string& s, std::string& area_code, 
-        std::shared_ptr<NavDB> nav_db)
+        std::shared_ptr<ArptDB> arpt_db)
     {
         /*
             Runway data is grouped into 2 parts separated by ';'. 
@@ -470,7 +472,7 @@ namespace libnav
             pos_str = main_parts[1];
         }
 
-        get_rwy_coords(pos_str, area_code, nav_db);
+        get_rwy_coords(pos_str, area_code, arpt_db);
     }
 
 
@@ -541,8 +543,9 @@ namespace libnav
 
     // public member functions:
 
-    Airport::Airport(std::string icao, std::shared_ptr<NavDB> nav_db, 
-        std::string cifp_path, std::string postfix)
+    Airport::Airport(std::string icao, std::shared_ptr<ArptDB> arpt_db, 
+        std::shared_ptr<NavaidDB> navaid_db, std::string cifp_path,
+        std::string postfix)
     {
         icao_code = icao;
         err_code = DbErr::ERR_NONE;
@@ -556,7 +559,7 @@ namespace libnav
         }
         else
         {
-            err_code = load_db(nav_db, cifp_path, postfix);
+            err_code = load_db(arpt_db, navaid_db, cifp_path, postfix);
         }
     }
 
@@ -697,7 +700,8 @@ namespace libnav
         return out;
     }
 
-    DbErr Airport::parse_flt_legs(std::shared_ptr<NavDB> nav_db)
+    DbErr Airport::parse_flt_legs(std::shared_ptr<ArptDB> arpt_db, 
+        std::shared_ptr<NavaidDB> navaid_db)
     {
         DbErr out = DbErr::SUCCESS;
         while(flt_leg_strings.size())
@@ -719,7 +723,8 @@ namespace libnav
                         trans_name = "NONE";
 
                     arinc_str_t arnc_str(s_split);
-                    arinc_leg_t leg = arnc_str.get_leg(icao_code, nav_db, rwy_db);
+                    arinc_leg_t leg = arnc_str.get_leg(icao_code, arpt_db, 
+                        navaid_db, rwy_db);
 
                     if(n_arinc_legs_used == N_FLT_LEG_CACHE_SZ)
                     {
@@ -777,7 +782,8 @@ namespace libnav
         return out;
     }
 
-    DbErr Airport::load_db(std::shared_ptr<NavDB> nav_db, std::string& path,
+    DbErr Airport::load_db(std::shared_ptr<ArptDB> arpt_db, 
+        std::shared_ptr<NavaidDB> navaid_db, std::string& path,
         std::string& postfix)
     {
         std::string full_path = path + "/" + icao_code + postfix;
@@ -798,7 +804,7 @@ namespace libnav
                 }
                 else
                 {
-                    arinc_rwy_full_t rwy(line, icao_code, nav_db);
+                    arinc_rwy_full_t rwy(line, icao_code, arpt_db);
 
                     if(rwy.err != DbErr::SUCCESS)
                     {
@@ -808,7 +814,7 @@ namespace libnav
                 }
             }
             file.close();
-            return parse_flt_legs(nav_db);
+            return parse_flt_legs(arpt_db, navaid_db);
         }
         else
         {

@@ -147,9 +147,9 @@ namespace libnav
 
 		NavaidDB(std::string wpt_path, std::string navaid_path);
 
-		DbErr wpt_loaded();
+		DbErr get_wpt_err();
 		 
-		DbErr navaids_loaded();
+		DbErr get_navaid_err();
 
 		int get_wpt_cycle();
 
