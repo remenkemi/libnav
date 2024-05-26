@@ -57,7 +57,7 @@ namespace dbg
             libnav::DbErr err_wpt = navaid_db_ptr->get_wpt_err();
             libnav::DbErr err_nav = navaid_db_ptr->get_navaid_err();
             libnav::DbErr err_awy = awy_db->get_err();
-            libnav::DbErr err_hold = hold_db->holds_loaded();
+            libnav::DbErr err_hold = hold_db->get_err();
 
             std::cout << navaid_db_ptr->get_wpt_cycle() << " " <<
                 navaid_db_ptr->get_navaid_cycle() << " " << 
@@ -100,7 +100,7 @@ namespace dbg
                 for(auto i: apt_db)
                 {
                     double dist = i.second.pos.get_gc_dist_nm(tgt_data.pos);
-                    if(dist > 200 && dist < 230)
+                    if(dist > 180 && dist < 230)
                     {
                         double brng_deg = i.second.pos.get_gc_bearing_deg(tgt_data.pos);
                         std::cout << i.first << " " << brng_deg << "\n";
