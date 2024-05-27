@@ -90,6 +90,7 @@ namespace dbg
             }
 
             auto apt_db = arpt_db_ptr->get_arpt_db();
+            auto navaid_db = navaid_db_ptr->get_db();
 
             std::string tgt = "SBBE";
             libnav::airport_data_t tgt_data;
@@ -100,14 +101,28 @@ namespace dbg
                 for(auto i: apt_db)
                 {
                     double dist = i.second.pos.get_gc_dist_nm(tgt_data.pos);
-                    if(dist > 180 && dist < 230)
+                    if(dist > 170 && dist < 230)
                     {
                         double brng_deg = i.second.pos.get_gc_bearing_deg(tgt_data.pos);
                         std::cout << i.first << " " << brng_deg << "\n";
                     }
                 }
+
+                for(auto i: navaid_db)
+                {
+                    for(auto j: i.second)
+                    {
+                        if(j.type != libnav::NavaidType::NONE && 
+                            j.type != libnav::NavaidType::WAYPOINT)
+                        {
+                            double dist = j.pos.get_gc_dist_nm(tgt_data.pos);
+                            double brng = j.pos.get_gc_bearing_deg(tgt_data.pos);
+                            if(dist < 80)
+                                std::cout << i.first << " " << dist << " " << brng << "\n";
+                        }
+                    }
+                }
             }
-            
         }
 
         void update()

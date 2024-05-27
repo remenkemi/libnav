@@ -6,11 +6,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -fPIC -g")
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_subdirectory(src/lib)
+add_subdirectory(src/)
 
-add_executable(navcmd "src/main.cpp")
+add_executable(navcmd "src/test/main.cpp")
 target_link_libraries(navcmd PUBLIC libnav)
-target_include_directories(navcmd PUBLIC src/lib/libnav)
+target_include_directories(navcmd PUBLIC src/libnav)
 
 set(PLUGIN_BUILD_DIR "${PROJECT_SOURCE_DIR}")
 
