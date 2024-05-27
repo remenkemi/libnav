@@ -1,6 +1,6 @@
 # libnav
 
-This library provides parsers for x-plane's CIFP, earth_hold.dat, earth_awy.dat, earth_fix.dat, earth_nav.dat and apt.dat files. The library also provides various utility functions for working with lat,lon points(great circle distance, bearing, pbd points and more) and strings(decimal lat/lon to dms, etc).
+This library provides parsers for x-plane's CIFP, earth_hold.dat, earth_awy.dat, earth_fix.dat, earth_nav.dat and apt.dat files. The library also provides various utility functions for working with lat,lon points(great circle distance, bearing, pbd points and more) and strings(decimal lat/lon to dms, etc). Each data base is loaded in its own thread. This means your program can also perform other tasks while the data bases are loading. Each data base interface is implemented in a thread-safe manner.
 
 ## Getting started
 
