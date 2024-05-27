@@ -131,8 +131,10 @@ namespace libnav
         {
             data.is_parsed = true;
 			wpt.data.type = NavaidType::WAYPOINT;
-			wpt.data.pos.lat_deg = double(strutils::stof_with_strip(s_split[0]));
-			wpt.data.pos.lon_deg = double(strutils::stof_with_strip(s_split[1]));
+			wpt.data.pos.lat_rad = double(strutils::stof_with_strip(s_split[0])) 
+				* geo::DEG_TO_RAD;
+			wpt.data.pos.lon_rad = double(strutils::stof_with_strip(s_split[1])) 
+				* geo::DEG_TO_RAD;
 			wpt.id = s_split[2];
 			wpt.data.area_code = s_split[3];
 			wpt.data.country_code = s_split[4];
@@ -173,8 +175,10 @@ namespace libnav
 			navaid_type_t xp_type = navaid_type_t(strutils::stoi_with_strip(
 					s_split[0]));
 			wpt.data.type = xp_type_to_libnav(xp_type);
-			wpt.data.pos.lat_deg = double(strutils::stof_with_strip(s_split[1]));
-			wpt.data.pos.lon_deg = double(strutils::stof_with_strip(s_split[2]));
+			wpt.data.pos.lat_rad = double(strutils::stof_with_strip(s_split[1])) 
+				* geo::DEG_TO_RAD;
+			wpt.data.pos.lon_rad = double(strutils::stof_with_strip(s_split[2])) 
+				* geo::DEG_TO_RAD;
 			navaid.elev_ft = double(strutils::stof_with_strip(s_split[3]));
 			navaid.freq = double(strutils::stof_with_strip(s_split[4]));
 			navaid.max_recv = uint16_t(strutils::stoi_with_strip(s_split[5]));
@@ -526,8 +530,8 @@ namespace libnav
 						break;
 					}
 
-					double lat_dev = abs(wpt.data.pos.lat_deg - tmp_wpt.pos.lat_deg);
-					double lon_dev = abs(wpt.data.pos.lon_deg - tmp_wpt.pos.lon_deg);
+					double lat_dev = abs(wpt.data.pos.lat_rad - tmp_wpt.pos.lat_rad);
+					double lon_dev = abs(wpt.data.pos.lon_rad - tmp_wpt.pos.lon_rad);
 					double ang_dev = lat_dev + lon_dev;
 					NavaidType type_sum = make_composite(wpt.data.type, tmp_wpt.type);
 					bool is_comp = type_sum != NavaidType::NONE;
@@ -786,8 +790,8 @@ namespace radnav_util
 	{
 		if (n1 != nullptr && n2 != nullptr)
 		{
-			double b1 = n1->data.pos.get_gc_bearing_deg(ac_pos);
-			double b2 = n2->data.pos.get_gc_bearing_deg(ac_pos);
+			double b1 = geo::rad_to_pos_deg(n1->data.pos.get_gc_bearing_rad(ac_pos));
+			double b2 = geo::rad_to_pos_deg(n2->data.pos.get_gc_bearing_rad(ac_pos));
 			double phi = abs(b1 - b2);
 			if (phi > 180)
 				phi = 360 - phi;

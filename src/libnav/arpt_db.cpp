@@ -152,12 +152,12 @@ namespace libnav
 								runway_t rnw = tmp_rnw.runways.at(i);
 								std::pair<std::string, runway_entry_t> tmp = std::make_pair(rnw.id, rnw.data);
 								apt_runways.insert(tmp);
-								tmp_arpt.data.pos.lat_deg += rnw.data.start.lat_deg;
-								tmp_arpt.data.pos.lon_deg += rnw.data.start.lon_deg;
+								tmp_arpt.data.pos.lat_rad += rnw.data.start.lat_rad;
+								tmp_arpt.data.pos.lon_rad += rnw.data.start.lon_rad;
 							}
 
-							tmp_arpt.data.pos.lat_deg /= n_runways;
-							tmp_arpt.data.pos.lon_deg /= n_runways;
+							tmp_arpt.data.pos.lat_rad /= n_runways;
+							tmp_arpt.data.pos.lon_rad /= n_runways;
 
 							// Update queues
 
@@ -264,8 +264,10 @@ namespace libnav
 				airport_t data = arpt_queue[0];
 				arpt_queue.erase(arpt_queue.begin());
 
-				std::string arpt_lat = strutils::double_to_str(data.data.pos.lat_deg, precision);
-				std::string arpt_lon = strutils::double_to_str(data.data.pos.lon_deg, precision);
+				std::string arpt_lat = strutils::double_to_str(data.data.pos.lat_rad 
+					* geo::RAD_TO_DEG, precision);
+				std::string arpt_lon = strutils::double_to_str(data.data.pos.lon_rad 
+					* geo::RAD_TO_DEG, precision);
 				std::string arpt_icao_pos = data.icao + " " + arpt_lat + " " + arpt_lon;
 
 				out << arpt_icao_pos << " " << data.data.elevation_ft << " " << data.data.transition_alt_ft << " " << data.data.transition_level << "\n";
@@ -301,16 +303,16 @@ namespace libnav
 				for (int i = 0; i < int(data.runways.size()); i++)
 				{
 					std::string rnw_start_lat = strutils::double_to_str(
-						data.runways[i].data.start.lat_deg, precision);
+						data.runways[i].data.start.lat_rad * geo::RAD_TO_DEG, precision);
 
 					std::string rnw_start_lon = strutils::double_to_str(
-						data.runways[i].data.start.lon_deg, precision);
+						data.runways[i].data.start.lon_rad * geo::RAD_TO_DEG, precision);
 
 					std::string rnw_end_lat = strutils::double_to_str(
-						data.runways[i].data.end.lat_deg, precision);
+						data.runways[i].data.end.lat_rad * geo::RAD_TO_DEG, precision);
 
 					std::string rnw_end_lon = strutils::double_to_str(
-						data.runways[i].data.end.lon_deg, precision);
+						data.runways[i].data.end.lon_rad * geo::RAD_TO_DEG, precision);
 
 
 					std::string rnw_start = rnw_start_lat + " " + rnw_start_lon;
@@ -352,7 +354,9 @@ namespace libnav
 					std::string icao;
 					airport_data_t tmp;
 					std::stringstream s(line);
-					s >> icao >> tmp.pos.lat_deg >> tmp.pos.lon_deg >> tmp.elevation_ft >> tmp.transition_alt_ft >> tmp.transition_level;
+					s >> icao >> tmp.pos.lat_rad >> tmp.pos.lon_rad >> tmp.elevation_ft >> tmp.transition_alt_ft >> tmp.transition_level;
+					tmp.pos.lat_rad *= geo::DEG_TO_RAD;
+					tmp.pos.lon_rad *= geo::DEG_TO_RAD;
 					std::pair<std::string, airport_data_t> tmp_pair = std::make_pair(icao, tmp);
 					arpt_db.insert(tmp_pair);
 				}
@@ -402,7 +406,11 @@ namespace libnav
 						curr_icao = icao;
 						runways.clear();
 					}
-					s >> rnw_id >> tmp.start.lat_deg >> tmp.start.lon_deg >> tmp.end.lat_deg >> tmp.end.lon_deg >> tmp.displ_threshold_m;
+					s >> rnw_id >> tmp.start.lat_rad >> tmp.start.lon_rad >> tmp.end.lat_rad >> tmp.end.lon_rad >> tmp.displ_threshold_m;
+					tmp.start.lat_rad *= geo::DEG_TO_RAD;
+					tmp.start.lon_rad *= geo::DEG_TO_RAD;
+					tmp.end.lat_rad *= geo::DEG_TO_RAD;
+					tmp.end.lon_rad *= geo::DEG_TO_RAD;
 					std::pair<std::string, runway_entry_t> str_rnw_entry = std::make_pair(rnw_id, tmp);
 					runways.insert(str_rnw_entry);
 				}
@@ -558,16 +566,22 @@ namespace libnav
 		{
 			s >> junk;
 		}
-		s >> rnw_1.id >> rnw_1.data.start.lat_deg >> rnw_1.data.start.lon_deg >> rnw_1.data.displ_threshold_m;
+		s >> rnw_1.id >> rnw_1.data.start.lat_rad >> rnw_1.data.start.lon_rad >> rnw_1.data.displ_threshold_m;
 		for (int i = 0; i < limit_2; i++)
 		{
 			s >> junk;
 		}
-		s >> rnw_2.id >> rnw_1.data.end.lat_deg >> rnw_1.data.end.lon_deg >> rnw_2.data.displ_threshold_m;
-		rnw_2.data.start.lat_deg = rnw_1.data.end.lat_deg;
-		rnw_2.data.start.lon_deg = rnw_1.data.end.lon_deg;
-		rnw_2.data.end.lat_deg = rnw_1.data.start.lat_deg;
-		rnw_2.data.end.lon_deg = rnw_1.data.start.lon_deg;
+		s >> rnw_2.id >> rnw_1.data.end.lat_rad >> rnw_1.data.end.lon_rad >> rnw_2.data.displ_threshold_m;
+		
+		rnw_1.data.start.lat_rad *= geo::DEG_TO_RAD;
+		rnw_1.data.start.lon_rad *= geo::DEG_TO_RAD;
+		rnw_1.data.end.lat_rad *= geo::DEG_TO_RAD;
+		rnw_1.data.end.lon_rad *= geo::DEG_TO_RAD;
+		
+		rnw_2.data.start.lat_rad = rnw_1.data.end.lat_rad;
+		rnw_2.data.start.lon_rad = rnw_1.data.end.lon_rad;
+		rnw_2.data.end.lat_rad = rnw_1.data.start.lat_rad;
+		rnw_2.data.end.lon_rad = rnw_1.data.start.lon_rad;
 
 		rnw_1.id = strutils::normalize_rnw_id(rnw_1.id);
 		rnw_2.id = strutils::normalize_rnw_id(rnw_2.id);

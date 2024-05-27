@@ -400,10 +400,10 @@ namespace libnav
             std::string lon_stripped = strutils::strip(second_part_splt[1], ' ');
             data.thresh_displ_ft = strutils::stoi_with_strip(second_part_splt[2]);
 
-            data.pos.lat_deg = strutils::str_to_lat(lat_stripped);
-            data.pos.lon_deg = strutils::str_to_lon(lon_stripped);
+            data.pos.lat_rad = strutils::str_to_lat(lat_stripped) * geo::DEG_TO_RAD;
+            data.pos.lon_rad = strutils::str_to_lon(lon_stripped) * geo::DEG_TO_RAD;
 
-            if(data.pos.lat_deg == 0 || data.pos.lon_deg == 0)
+            if(data.pos.lat_rad == 0 || data.pos.lon_rad == 0)
             {
                 if(!get_pos_from_db(area_code, arpt_db))
                 {

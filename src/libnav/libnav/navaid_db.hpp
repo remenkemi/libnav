@@ -22,7 +22,7 @@ namespace libnav
 	constexpr double VOR_MAX_SLANT_ANGLE_DEG = 40;
 	constexpr double DME_DME_PHI_MIN_DEG = 30;
 	constexpr double DME_DME_PHI_MAX_DEG = 180 - DME_DME_PHI_MIN_DEG;
-	constexpr double MAX_ANG_DEV_MERGE = 0.03;
+	constexpr double MAX_ANG_DEV_MERGE = 0.0006;
 	constexpr size_t NAVAID_ENTRY_CACHE_SZ = 300000;
 
 

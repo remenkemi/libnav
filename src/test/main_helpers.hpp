@@ -92,19 +92,32 @@ namespace dbg
             auto apt_db = arpt_db_ptr->get_arpt_db();
             auto navaid_db = navaid_db_ptr->get_db();
 
-            std::string tgt = "SBBE";
-            libnav::airport_data_t tgt_data;
-            int ret = arpt_db_ptr->get_airport_data(tgt, &tgt_data);
+            libnav::airport_data_t tgt1_data;
+            libnav::airport_data_t tgt2_data;
+            int ret1 = arpt_db_ptr->get_airport_data("SBBE", &tgt1_data);
+            int ret2 = arpt_db_ptr->get_airport_data("SBMQ", &tgt2_data);
 
-            if(ret)
+            if(ret1 && ret2)
             {
+                geo::point check = geo::get_pos_from_intc(tgt1_data.pos, 
+                    tgt2_data.pos, 50 * geo::DEG_TO_RAD, 100 * geo::DEG_TO_RAD);
+                double brng_1 = tgt1_data.pos.get_gc_bearing_rad(check);
+                double brng_2 = tgt2_data.pos.get_gc_bearing_rad(check);
+                std::cout << geo::rad_to_pos_deg(brng_1) << " " << geo::rad_to_pos_deg(brng_2)
+                     << "\n";
+                std::cout << strutils::lat_to_str(check.lat_rad * geo::RAD_TO_DEG) << " " << 
+                    strutils::lon_to_str(check.lon_rad * geo::RAD_TO_DEG) << "\n";
+                std::cout << strutils::lat_to_str(tgt1_data.pos.lat_rad * geo::RAD_TO_DEG) << " " << 
+                    strutils::lon_to_str(tgt1_data.pos.lon_rad * geo::RAD_TO_DEG) << "\n";
+                std::cout << strutils::lat_to_str(tgt2_data.pos.lat_rad * geo::RAD_TO_DEG) << " " << 
+                    strutils::lon_to_str(tgt2_data.pos.lon_rad * geo::RAD_TO_DEG) << "\n";
                 for(auto i: apt_db)
                 {
-                    double dist = i.second.pos.get_gc_dist_nm(tgt_data.pos);
+                    double dist = i.second.pos.get_gc_dist_nm(tgt1_data.pos);
                     if(dist > 170 && dist < 230)
                     {
-                        double brng_deg = i.second.pos.get_gc_bearing_deg(tgt_data.pos);
-                        std::cout << i.first << " " << brng_deg << "\n";
+                        double brng_rad = i.second.pos.get_gc_bearing_rad(tgt1_data.pos);
+                        std::cout << i.first << " " << geo::rad_to_pos_deg(brng_rad) << "\n";
                     }
                 }
 
@@ -115,10 +128,11 @@ namespace dbg
                         if(j.type != libnav::NavaidType::NONE && 
                             j.type != libnav::NavaidType::WAYPOINT)
                         {
-                            double dist = j.pos.get_gc_dist_nm(tgt_data.pos);
-                            double brng = j.pos.get_gc_bearing_deg(tgt_data.pos);
+                            double dist = j.pos.get_gc_dist_nm(tgt1_data.pos);
+                            double brng = j.pos.get_gc_bearing_rad(tgt1_data.pos);
+                            double brng_deg = geo::rad_to_pos_deg(brng);
                             if(dist < 80)
-                                std::cout << i.first << " " << dist << " " << brng << "\n";
+                                std::cout << i.first << " " << dist << " " << brng_deg << "\n";
                         }
                     }
                 }
@@ -231,18 +245,23 @@ namespace dbg
 
         if (n_arpts_found)
         {
-            std::string lat_str = strutils::lat_to_str(found_arpt.pos.lat_deg);
-            std::string lon_str = strutils::lon_to_str(found_arpt.pos.lon_deg);
+            std::string lat_str = strutils::lat_to_str(found_arpt.pos.lat_rad 
+                * geo::RAD_TO_DEG);
+            std::string lon_str = strutils::lon_to_str(found_arpt.pos.lon_rad 
+                * geo::RAD_TO_DEG);
             std::cout << poi_id << " " << lat_str << " " << lon_str << "\n";
         }
         else if (n_wpts_found)
         {
-            libnav::sort_wpt_entry_by_dist(&found_wpts, { av->ac_lat, av->ac_lon });
+            libnav::sort_wpt_entry_by_dist(&found_wpts, { av->ac_lat 
+                * geo::DEG_TO_RAD, av->ac_lon * geo::DEG_TO_RAD });
 
             for (size_t i = 0; i < n_wpts_found; i++)
             {
-                std::string lat_str = strutils::lat_to_str(found_wpts[i].pos.lat_deg);
-                std::string lon_str = strutils::lon_to_str(found_wpts[i].pos.lon_deg);
+                std::string lat_str = strutils::lat_to_str(found_wpts[i].pos.lat_rad 
+                    * geo::RAD_TO_DEG);
+                std::string lon_str = strutils::lon_to_str(found_wpts[i].pos.lon_rad 
+                    * geo::RAD_TO_DEG);
                 libnav::NavaidType wpt_type = found_wpts[i].type;
                 std::string type_str = libnav::navaid_to_str(wpt_type);
                 if (wpt_type == libnav::NavaidType::WAYPOINT)
@@ -254,8 +273,10 @@ namespace dbg
                 {
                     libnav::navaid_entry_t* navaid_data = found_wpts[i].navaid;
                     double freq = navaid_data->freq;
-                    std::string lat_dms = strutils::lat_to_str(found_wpts[i].pos.lat_deg);
-                    std::string lon_dms = strutils::lon_to_str(found_wpts[i].pos.lon_deg);
+                    std::string lat_dms = strutils::lat_to_str(found_wpts[i].pos.lat_rad
+                        * geo::RAD_TO_DEG);
+                    std::string lon_dms = strutils::lon_to_str(found_wpts[i].pos.lon_rad
+                        * geo::RAD_TO_DEG);
                     std::cout << poi_id << " " << lat_dms << " " << lon_dms << " " << type_str << " " << 
                         strutils::freq_to_str(freq) << "\n";
                 }
@@ -323,8 +344,10 @@ namespace dbg
         std::cout << "Select desired " << name << "\n";
         for(int i = 0; i < int(wpts.size()); i++)
         {
-            std::cout << i+1 << ". " << strutils::lat_to_str(wpts[i].pos.lat_deg) 
-                << " " << strutils::lat_to_str(wpts[i].pos.lon_deg) << "\n";
+            std::cout << i+1 << ". " << strutils::lat_to_str(wpts[i].pos.lat_rad 
+                * geo::RAD_TO_DEG) 
+                << " " << strutils::lat_to_str(wpts[i].pos.lon_rad
+                * geo::RAD_TO_DEG) << "\n";
         }
         while(1)
         {
