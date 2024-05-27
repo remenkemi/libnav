@@ -61,6 +61,8 @@ namespace geo
 
 		double get_gc_bearing_deg(point other)
 		{
+			// This is a c++ interpreation of an algorithm that can be found here:
+			// https://www.movable-type.co.uk/scripts/latlong.html
 			double lat1_rad = lat_deg * DEG_TO_RAD;
 			double lon1_rad = lon_deg * DEG_TO_RAD;
 			double lat2_rad = other.lat_deg * DEG_TO_RAD;
@@ -91,6 +93,8 @@ namespace geo
 
 		double get_ang_dist_rad(point other)
 		{
+			// This is a c++ interpreation of an algorithm that can be found here:
+			// https://www.movable-type.co.uk/scripts/latlong.html
 			double lat1_rad = lat_deg * DEG_TO_RAD;
 			double lon1_rad = lon_deg * DEG_TO_RAD;
 			double lat2_rad = other.lat_deg * DEG_TO_RAD;
@@ -155,18 +159,73 @@ namespace geo
 
 	inline point get_pos_from_brng_dist(point ref, double brng_deg, double dist_nm)
 	{
+		// This is a c++ interpreation of an algorithm that can be found here:
+		// https://www.movable-type.co.uk/scripts/latlong.html
 		double ref_lat_rad = ref.lat_deg * DEG_TO_RAD;
 		double ref_lon_rad = ref.lon_deg * DEG_TO_RAD;
 		double brng_rad = brng_deg * DEG_TO_RAD;
 		double ang_dist_rad = dist_nm / EARTH_RADIUS_NM;
 		point ret{};
-		double tmp_lat = asin(sin(ref_lat_rad) * cos(ang_dist_rad) + cos(ref_lat_rad) * sin(ang_dist_rad) * cos(brng_rad));
+		double tmp_lat = asin(sin(ref_lat_rad) * cos(ang_dist_rad) + 
+			cos(ref_lat_rad) * sin(ang_dist_rad) * cos(brng_rad));
 		double tmp_lon = atan2(sin(brng_rad) * sin(ang_dist_rad) * cos(ref_lat_rad),
 			cos(ang_dist_rad) - sin(ref_lat_rad) * sin(tmp_lat));
 		ret.lat_deg = tmp_lat * RAD_TO_DEG;
 		ret.lon_deg = (ref_lon_rad + tmp_lon) * RAD_TO_DEG;
 
 		return ret;
+	}
+
+	inline point get_pos_from_intc(point ref1, point ref2, double brng1_deg, 
+		double brng2_deg)
+	{
+		// This is a c++ interpreation of an algorithm that can be found here:
+		// https://www.movable-type.co.uk/scripts/latlong.html
+		double ref1_lat_rad = ref1.lat_deg * DEG_TO_RAD;
+		double ref1_lon_rad = ref1.lon_deg * DEG_TO_RAD;
+		double brng1_rad = brng1_deg * DEG_TO_RAD;
+
+		double ref2_lat_rad = ref2.lat_deg * DEG_TO_RAD;
+		double ref2_lon_rad = ref2.lon_deg * DEG_TO_RAD;
+		double brng2_rad = brng2_deg * DEG_TO_RAD;
+
+		double delta_lat = ref1_lat_rad - ref2_lat_rad;
+		double delta_lon = ref1_lon_rad - ref2_lon_rad;
+		double tmp = sin(delta_lat/2)*sin(delta_lat/2)+cos(ref1_lat_rad) * 
+			cos(ref2_lat_rad) * sin(delta_lon/2)*sin(delta_lon/2);
+		double ang_dist12_rad = 2 * asin(sqrt(tmp));
+
+		double theta_a = acos((sin(ref2_lat_rad) - sin(ref1_lat_rad) * cos(ang_dist12_rad)) 
+			/ (sin(ang_dist12_rad) * cos(ref1_lat_rad)));
+		double theta_b = acos((sin(ref1_lat_rad) - sin(ref2_lat_rad) * cos(ang_dist12_rad)) 
+			/ (sin(ang_dist12_rad) * cos(ref2_lat_rad)));
+
+		double theta12 = theta_a;
+		double theta21 = 2 * M_PI - theta_b;
+		if(sin(-delta_lon) <= 0)
+		{
+			theta12 = 2 * M_PI - theta_a;
+			theta21 = theta_b;
+		}
+
+		double alpha1 = brng1_rad - theta12;
+		double alpha2 = theta21 - brng2_rad;
+
+		double alpha3 = acos(-cos(alpha1)*cos(alpha2)+sin(alpha1)*sin(alpha2)
+			*cos(ang_dist12_rad));
+		
+		double ang_dist13_rad = atan2(sin(ang_dist12_rad)*sin(alpha1)*sin(alpha2),
+			cos(alpha2)+cos(alpha1)*cos(alpha3));
+
+		double tgt_lat_rad = asin(sin(ref1_lat_rad)*cos(ang_dist13_rad)+
+			cos(ref1_lat_rad)*sin(ang_dist13_rad)*cos(brng1_rad));
+		
+		double delta_lon_tgt = atan2(sin(brng1_rad) * sin(ang_dist13_rad) * 
+			cos(ref1_lat_rad), cos(ang_dist13_rad)-sin(ref1_lat_rad)*sin(tgt_lat_rad));
+
+		double tgt_lon_rad = ref1_lon_rad + delta_lon_tgt;
+
+		return {tgt_lat_rad * RAD_TO_DEG, tgt_lon_rad * RAD_TO_DEG};
 	}
 
 	struct point3d
