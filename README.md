@@ -9,6 +9,7 @@ The documentation for each symbol is located in its respective .hpp file. Most o
 ## Compiling
 
 This is a static library. It's compiled as part of a demo app that allows you to interface x-plane's data bases. For more info look at the main.cpp file located in src/test
+### Compiling on linux/mac
 To compile you will need to create a directory called build(inside the repository's directory) and in that call cmake .. and make. Like in the example below.
 ```text
 cd {your path to libnav repository}
@@ -17,3 +18,13 @@ cd build
 cmake ..
 make
 ```
+### Compiling on windows using mingw:
+The process of compiling this with mingw is similar to how you'd compile it on linux. See the sequence of commands below:
+```text
+cd {your path to libnav repository}
+mkdir build
+cd build
+cmake .. -G "MSYS Makefiles"
+cmake --build .
+```
+After compilation the library itself should be in your libnav/build/src/libnav directory. The file should be called something like liblibnav.a
