@@ -30,4 +30,4 @@ cmake --build .
 After compilation the library itself should be in your libnav/build/src/libnav directory. The file should be called something like liblibnav.a
 
 ## Using pre-compiled version
-If you want to compile the library yourself, you can download the pre-compiled version [here](https://github.com/BRUHegg/libnav-redist/).
+If you don't want to compile the library yourself, you can download the pre-compiled version [here](https://github.com/BRUHegg/libnav-redist/).
