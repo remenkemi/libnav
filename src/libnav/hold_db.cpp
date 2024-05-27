@@ -47,6 +47,9 @@ namespace libnav
         }
     }
 
+    // HoldDB member function definitions:
+    // Public member functions:
+
     HoldDB::HoldDB(std::string db_path)
     {
         hold_load_task = std::async(std::launch::async, [](HoldDB* db, std::string db_path) -> 

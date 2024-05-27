@@ -1,3 +1,17 @@
+/*
+	This project is licensed under
+	Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License (CC BY-NC-SA 4.0).
+
+	A SUMMARY OF THIS LICENSE CAN BE FOUND HERE: https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+	Author: discord/bruh4096#4512
+
+	This file contains declarations of member functions for Airport class and other 
+    arinc424-related functions/structures. These allow you to work with arinc424 format
+    and load procedures for any airport in x-plane's CIFP data base.
+*/
+
+
 #include <string>
 #include <sstream>
 #include <fstream>
