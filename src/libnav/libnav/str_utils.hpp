@@ -20,6 +20,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <iostream>
+#include <cstdint>
 
 
 namespace strutils
@@ -297,7 +298,7 @@ namespace strutils
 		std::string s_stripped = strip(s, s_char);
 		if(s_stripped != "")
 		{
-			return atof(s_stripped.c_str());
+			return float(atof(s_stripped.c_str()));
 		}
 
 		return 0;

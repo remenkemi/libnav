@@ -434,7 +434,7 @@ namespace libnav
 				}
 			}
 		}
-		return out->size();
+		return int(out->size());
 	}
 
 	int NavaidDB::get_wpt_by_awy_str(std::string& awy_str, 

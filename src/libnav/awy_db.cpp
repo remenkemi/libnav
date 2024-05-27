@@ -164,13 +164,13 @@ namespace libnav
             curr_wpt.alt_restr = r_past;
             out_rev.push_back(curr_wpt);
 
-            for(int i = out_rev.size() - 1; i > -1; i--)
+            for(int i = int(out_rev.size()) - 1; i > -1; i--)
             {
                 out->push_back(out_rev[i]);
             }
         }
 
-        return out->size();
+        return int(out->size());
     }
 
     AwyDB::~AwyDB()

@@ -70,7 +70,7 @@ namespace libnav
     {
         if(s.length() == 3)
         {
-            float num = atof(s.substr(0, 2).c_str());
+            float num = float(atof(s.substr(0, 2).c_str()));
             int exp = s[2] - '0';
 
             if(exp != 0)
@@ -92,9 +92,9 @@ namespace libnav
             if(s[3] == 'T')
             {
                 *is_true = true;
-                return atof(s.substr(0, 3).c_str());
+                return float(atof(s.substr(0, 3).c_str()));
             }
-            return atof(s.c_str()) * 0.1;
+            return float(atof(s.c_str()) * 0.1);
         }
         return 0;
     }
@@ -108,9 +108,9 @@ namespace libnav
             if(s[0] == 'T')
             {
                 *as_time = true;
-                return atof(s.substr(1, 3).c_str()) * 0.1;
+                return float(atof(s.substr(1, 3).c_str()) * 0.1);
             }
-            return atof(s.c_str()) * 0.1;
+            return float(atof(s.c_str()) * 0.1);
         }
         return 0;
     }
@@ -325,7 +325,7 @@ namespace libnav
 
         speed_desc = in_split[26][0];
         spd_lim = strutils::stoi_with_strip(in_split[27]);
-        vert_angle = strutils::stof_with_strip(in_split[28]) * 0.01;
+        vert_angle = float(strutils::stof_with_strip(in_split[28]) * 0.01);
         vert_scale = strutils::stoi_with_strip(in_split[29]);
 
         center_fix.fix_ident = strutils::strip(in_split[30], ' ');
@@ -394,7 +394,7 @@ namespace libnav
         if(ret)
         {
             data.pos = rnw.start;
-            data.thresh_displ_ft = rnw.displ_threshold_m * geo::M_TO_FT;
+            data.thresh_displ_ft = int(double(rnw.displ_threshold_m) * geo::M_TO_FT);
         }
 
         return ret;
@@ -463,8 +463,8 @@ namespace libnav
                 return;
             }
 
-            data.grad_deg = strutils::stof_with_strip(first_part_splt[1]) * 0.001;
-            data.ellips_height_m = strutils::stof_with_strip(first_part_splt[2]) * 0.1;
+            data.grad_deg = float(strutils::stof_with_strip(first_part_splt[1]) * 0.001);
+            data.ellips_height_m = float(strutils::stof_with_strip(first_part_splt[2]) * 0.1);
             data.thresh_elev_msl_ft = strutils::stoi_with_strip(first_part_splt[3]);
 
             data.tch_tp = char2tch_type(first_part_splt[4][0]);
