@@ -575,17 +575,27 @@ namespace libnav
         }
     }
 
-    Airport::str_set_t Airport::get_all_sids()
+    std::vector<std::string> Airport::get_rwys()
+    {
+        std::vector<std::string> out;
+        for(auto i: rwy_db)
+        {
+            out.push_back(i.first);
+        }
+        return out;
+    }
+
+    Airport::str_umap_t Airport::get_all_sids()
     {
         return get_all_proc(sid_db);
     }
 
-    Airport::str_set_t Airport::get_all_stars()
+    Airport::str_umap_t Airport::get_all_stars()
     {
         return get_all_proc(star_db);
     }
 
-    Airport::str_set_t Airport::get_all_appch()
+    Airport::str_umap_t Airport::get_all_appch()
     {
         return get_all_proc(appch_db);
     }
@@ -645,12 +655,15 @@ namespace libnav
 
     // private member functions:
 
-    Airport::str_set_t Airport::get_all_proc(proc_db_t& db)
+    Airport::str_umap_t Airport::get_all_proc(proc_db_t& db)
     {
-        str_set_t out;
+        str_umap_t out;
         for(auto i: db)
         {
-            out.insert(i.first);
+            for(auto j: i.second)
+            {
+                out[i.first].insert(j.first);
+            }
         }
 
         return out;

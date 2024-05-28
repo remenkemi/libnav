@@ -310,11 +310,13 @@ namespace libnav
             std::shared_ptr<NavaidDB> navaid_db, std::string cifp_path="", 
             std::string postfix=".dat");
 
-        str_set_t get_all_sids();
+        std::vector<std::string> get_rwys();
 
-        str_set_t get_all_stars();
+        str_umap_t get_all_sids();
 
-        str_set_t get_all_appch();
+        str_umap_t get_all_stars();
+
+        str_umap_t get_all_appch();
 
         arinc_leg_seq_t get_sid(std::string& proc_name, std::string& trans);
 
@@ -345,6 +347,12 @@ namespace libnav
         //std::mutex star_mutex;
         //std::mutex appch_mutex;
 
+        /*
+            Storage of procedures:
+            The procedures are stored in the following way:
+            [proc_name][trans][legs]
+        */
+
         proc_db_t sid_db;
         proc_db_t star_db;
         proc_db_t appch_db;
@@ -355,7 +363,7 @@ namespace libnav
         std::queue<proc_typed_str_t> flt_leg_strings;
 
 
-        str_set_t get_all_proc(proc_db_t& db);
+        str_umap_t get_all_proc(proc_db_t& db);
 
         arinc_leg_seq_t get_proc(std::string& proc_name, std::string& trans, 
             proc_db_t& db);
