@@ -4,7 +4,7 @@ This library provides parsers for x-plane's CIFP, earth_hold.dat, earth_awy.dat,
 
 ## Getting started
 
-The documentation for each symbol is located in its respective .hpp file. Most of the symbols have been documented by now. Documentation using doxygen is planned. There is also a demo project available (here)[https://github.com/BRUHegg/libnav-demo]. The compilation process for the demo is analogous to how you'd compile this library.
+The documentation for each symbol is located in its respective .hpp file. Most of the symbols have been documented by now. Documentation using doxygen is planned. There is also a demo project available [here](https://github.com/BRUHegg/libnav-demo). The compilation process for the demo is analogous to how you'd compile this library.
 
 ## Compiling
 
