@@ -419,6 +419,23 @@ namespace dbg
         std::exit(0);
     }
 
+    inline void allrwy(Avionics* av, std::vector<std::string>& in)
+    {
+        if(in.size() != 1)
+        {
+            std::cout << "Invalid arguments provided\n";
+            return;
+        }
+        
+        libnav::Airport apt(in[0], av->arpt_db_ptr, av->navaid_db_ptr, av->cifp_dir_path);
+
+        std::vector<std::string> rwys = apt.get_rwys();
+        for(auto i: rwys)
+        {
+            std::cout << i << "\n";
+        }
+    }
+
     inline void allsid(Avionics* av, std::vector<std::string>& in)
     {
         if(in.size() != 1)
@@ -429,11 +446,15 @@ namespace dbg
         
         libnav::Airport apt(in[0], av->arpt_db_ptr, av->navaid_db_ptr, av->cifp_dir_path);
 
-        std::set<std::string> sids = apt.get_all_sids();
+        auto sids = apt.get_all_sids();
 
         for(auto i: sids)
         {
-            std::cout << i << "\n";
+            std::cout << "SID: " << i.first << "\n";
+            for(auto j: i.second)
+            {
+                std::cout << "Transition " << j << "\n";
+            }
         }
     }
 
@@ -602,6 +623,7 @@ namespace dbg
         {"holdinfo", hold_info},
         {"quit", quit},
         {"q", quit},
+        {"allrwy", allrwy},
         {"allsid", allsid},
         {"getsid", getsid},
         {"getstar", getstar},
