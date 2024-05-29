@@ -338,6 +338,8 @@ namespace libnav
 
         str_set_t get_trans_by_star(std::string& star);
 
+        str_set_t get_trans_by_appch(std::string& appch);
+
         ~Airport();
 
     private:

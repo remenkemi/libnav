@@ -650,6 +650,11 @@ namespace libnav
         return get_trans_by_proc(star, star_db);
     }
 
+    Airport::str_set_t Airport::get_trans_by_appch(std::string& appch)
+    {
+        return get_trans_by_proc(appch, appch_db);
+    }
+
     Airport::~Airport()
     {
         if(arinc_legs != nullptr)
