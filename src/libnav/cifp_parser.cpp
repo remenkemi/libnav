@@ -585,6 +585,11 @@ namespace libnav
         return out;
     }
 
+    const arinc_rwy_db_t& Airport::get_rwy_db()
+    {
+        return rwy_db;
+    }
+
     Airport::str_umap_t Airport::get_all_sids()
     {
         return get_all_proc(sid_db);
