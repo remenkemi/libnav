@@ -132,7 +132,7 @@ namespace strutils
 		{
 			double digit_pairs[4];
 			int curr_idx = 0;
-			for(int i = 1; i < N_LAT_STR_LENGTH + 1; i += 2)
+			for(size_t i = 1; i < N_LAT_STR_LENGTH + 1; i += 2)
 			{
 				int curr_pair = (s[i] - '0') * 10 + (s[i+1] - '0');
 				digit_pairs[curr_idx] = double(curr_pair);
@@ -186,7 +186,7 @@ namespace strutils
 			double digit_pairs[4];
 			digit_pairs[0] = (s[1] - '0') * 100 + (s[2] - '0') * 10 + (s[3] - '0');
 			int curr_idx = 1;
-			for(int i = 4; i < N_LON_STR_LENGTH + 1; i += 2)
+			for(size_t i = 4; i < N_LON_STR_LENGTH + 1; i += 2)
 			{
 				int curr_pair = (s[i] - '0') * 10 + (s[i+1] - '0');
 				digit_pairs[curr_idx] = double(curr_pair);
@@ -332,13 +332,13 @@ namespace strutils
 		}
 		if(id.length() > 2 && id.length() < 6 && id[0] == 'R' && id[1] == 'W')
 		{
-			int i = 2;
-			while(i < int(id.length()) && !isalpha(id[i]))
+			size_t i = 2;
+			while(i < id.length() && !isalpha(id[i]))
 			{
 				i++;
 			}
 
-			if(i >= int(id.length()-1))
+			if(i >= id.length()-1)
 			{
 				std::string num_part = id.substr(2, id.length()-2);
 				return normalize_rnw_id(num_part);

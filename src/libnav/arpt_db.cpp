@@ -145,9 +145,9 @@ namespace libnav
 							tmp_arpt.data.transition_level > 0)
 						{
 							std::unordered_map<std::string, runway_entry_t> apt_runways;
-							int n_runways = int(tmp_rnw.runways.size());
+							size_t n_runways = tmp_rnw.runways.size();
 
-							for (int i = 0; i < n_runways; i++)
+							for (size_t i = 0; i < n_runways; i++)
 							{
 								runway_t rnw = tmp_rnw.runways.at(i);
 								std::pair<std::string, runway_entry_t> tmp = std::make_pair(rnw.id, rnw.data);
@@ -156,8 +156,8 @@ namespace libnav
 								tmp_arpt.data.pos.lon_rad += rnw.data.start.lon_rad;
 							}
 
-							tmp_arpt.data.pos.lat_rad /= n_runways;
-							tmp_arpt.data.pos.lon_rad /= n_runways;
+							tmp_arpt.data.pos.lat_rad /= double(n_runways);
+							tmp_arpt.data.pos.lon_rad /= double(n_runways);
 
 							// Update queues
 
@@ -300,7 +300,7 @@ namespace libnav
 				uint8_t precision = N_DOUBLE_OUT_PRECISION;
 				rnw_data_t data = rnw_queue[0];
 				rnw_queue.erase(rnw_queue.begin());
-				for (int i = 0; i < int(data.runways.size()); i++)
+				for (size_t i = 0; i < data.runways.size(); i++)
 				{
 					std::string rnw_start_lat = strutils::double_to_str(
 						data.runways[i].data.start.lat_rad * geo::RAD_TO_DEG, precision);

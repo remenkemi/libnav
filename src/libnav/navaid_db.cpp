@@ -388,7 +388,7 @@ namespace libnav
 		if (is_wpt(id))
 		{
 			std::lock_guard<std::mutex> lock(wpt_db_mutex);
-			for(int i = 0; i < int(wpt_cache[id].size()); i++)
+			for(size_t i = 0; i < wpt_cache[id].size(); i++)
 			{
 				NavaidType curr_type = wpt_cache[id][i].type;
 				if((static_cast<int>(curr_type) & static_cast<int>(type)) == 
@@ -409,8 +409,8 @@ namespace libnav
 		{
 			std::lock_guard<std::mutex> lock(wpt_db_mutex);
 			std::vector<waypoint_entry_t>* waypoints = &wpt_cache.at(id);
-			int n_waypoints = int(waypoints->size());
-			for (int i = 0; i < n_waypoints; i++)
+			size_t n_waypoints = waypoints->size();
+			for (size_t i = 0; i < n_waypoints; i++)
 			{
 				waypoint_entry_t wpt_curr = waypoints->at(i);
 
@@ -512,7 +512,7 @@ namespace libnav
 			bool is_colocated = false;
 			bool is_duplicate = false;
 			std::vector<waypoint_entry_t>* entries = &wpt_cache.at(wpt.id);
-			for (int i = 0; i < int(entries->size()); i++)
+			for (size_t i = 0; i < entries->size(); i++)
 			{
 				if (entries->at(i).navaid != nullptr)
 				{

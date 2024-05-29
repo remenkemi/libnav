@@ -166,7 +166,7 @@ namespace libnav
 
             for(int i = int(out_rev.size()) - 1; i > -1; i--)
             {
-                out->push_back(out_rev[i]);
+                out->push_back(out_rev[size_t(i)]);
             }
         }
 
@@ -240,7 +240,7 @@ namespace libnav
         std::string uid_1 = p1.get_uid();
         std::string uid_2 = p2.get_uid();
 
-        for(int i = 0; i < int(awy_names.size()); i++)
+        for(size_t i = 0; i < awy_names.size(); i++)
         {
             bool p1_found = awy_db[awy_names[i]].find(uid_1) != 
                 awy_db[awy_names[i]].end();

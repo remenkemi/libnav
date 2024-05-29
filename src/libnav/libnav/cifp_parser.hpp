@@ -96,7 +96,7 @@ namespace libnav
     // Number of columns in string containing SID/STAR/APPCH
     constexpr size_t N_ARINC_FLT_PROC_COL = 38;
     // Maximum number of characters for the data designator(comes before the :)
-    constexpr int ARINC_MAX_TP_LENGTH = 5;
+    constexpr size_t ARINC_MAX_TP_LENGTH = 5;
     // Number of columns in the first part of a runway entry
     constexpr int N_ARINC_RWY_COL_FIRST = 8;
     constexpr int N_ARINC_RWY_COL_SECOND = 3;

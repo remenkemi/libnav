@@ -20,14 +20,14 @@ namespace libnav
     ProcType str2proc_type(std::string s)
     {
         char tmp[ARINC_MAX_TP_LENGTH+1];
-        int sz = 0;
+        size_t sz = 0;
 
-        while (sz < int(s.length()) && sz < ARINC_MAX_TP_LENGTH && s[sz] != ':')
+        while (sz < s.length() && sz < ARINC_MAX_TP_LENGTH && s[sz] != ':')
         {
             tmp[sz] = s[sz];
             sz++;
         }
-        tmp[sz] = 0;//
+        tmp[sz] = 0;
         
         if(strcmp(tmp, "SID") == 0)
         {
@@ -683,7 +683,7 @@ namespace libnav
             {
                 arinc_leg_seq_t proc_legs;
 
-                for(int i = 0; i < int(db[proc_name][trans].size()); i++)
+                for(size_t i = 0; i < db[proc_name][trans].size(); i++)
                 {
                     int leg_idx = db[proc_name][trans][i];
                     proc_legs.push_back(arinc_legs[leg_idx]);
