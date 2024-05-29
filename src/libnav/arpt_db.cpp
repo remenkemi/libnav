@@ -449,7 +449,7 @@ namespace libnav
 		Returns 1 if any data has been written to out. Otherwise, returns 0.
 	*/
 
-	int ArptDB::get_airport_data(std::string icao_code, airport_data_t* out)
+	bool ArptDB::get_airport_data(std::string icao_code, airport_data_t* out)
 	{
 		if (is_airport(icao_code))
 		{

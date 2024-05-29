@@ -240,7 +240,7 @@ namespace dbg
         libnav::airport_data_t found_arpt;
         std::vector<libnav::waypoint_entry_t> found_wpts;
 
-        size_t n_arpts_found = av->arpt_db_ptr->get_airport_data(poi_id, &found_arpt);
+        size_t n_arpts_found = size_t(av->arpt_db_ptr->get_airport_data(poi_id, &found_arpt));
         size_t n_wpts_found = av->navaid_db_ptr->get_wpt_data(poi_id, &found_wpts);
 
         if (n_arpts_found)
@@ -321,7 +321,7 @@ namespace dbg
             libnav::waypoint_t exit_wpt = {in[2], exit_wpts[0]};
             std::vector<libnav::awy_point_t> tmp;
             av->awy_db->get_path(in[0], entry_wpt.get_awy_id(), exit_wpt.get_awy_id(), &tmp);
-            for(int i = 0; i < int(tmp.size()); i++)
+            for(size_t i = 0; i < tmp.size(); i++)
             {
                 std::cout << tmp[i].id << " " << tmp[i].alt_restr.lower 
                     << " " << tmp[i].alt_restr.upper << "\n";
@@ -342,7 +342,7 @@ namespace dbg
             return wpts[0];
         }
         std::cout << "Select desired " << name << "\n";
-        for(int i = 0; i < int(wpts.size()); i++)
+        for(size_t i = 0; i < wpts.size(); i++)
         {
             std::cout << i+1 << ". " << strutils::lat_to_str(wpts[i].pos.lat_rad 
                 * geo::RAD_TO_DEG) 
@@ -354,8 +354,8 @@ namespace dbg
             std::string tmp;
             std::getline(std::cin, tmp);
 
-            int num = strutils::stoi_with_strip(tmp);
-            if(num != 0 && num < int(wpts.size()) + 1)
+            size_t num = size_t(strutils::stoi_with_strip(tmp));
+            if(num != 0 && num < wpts.size() + 1)
             {
                 return wpts[num-1];
             }
@@ -381,7 +381,7 @@ namespace dbg
 
         if(hld_data.size())
         {
-            for(int i = 0; i < int(hld_data.size()); i++)
+            for(size_t i = 0; i < hld_data.size(); i++)
             {
                 std::cout << "Inbound magnetic course(degrees): " << hld_data[i].inbd_crs_mag
                     << "\n" << "Leg time(minutes): " << hld_data[i].leg_time_min << "\n";
@@ -458,6 +458,28 @@ namespace dbg
         }
     }
 
+    inline void allapch(Avionics* av, std::vector<std::string>& in)
+    {
+        if(in.size() != 1)
+        {
+            std::cout << "Invalid arguments provided\n";
+            return;
+        }
+        
+        libnav::Airport apt(in[0], av->arpt_db_ptr, av->navaid_db_ptr, av->cifp_dir_path);
+
+        auto appr = apt.get_all_appch();
+
+        for(auto i: appr)
+        {
+            std::cout << "Approach: " << i.first << "\n";
+            for(auto j: i.second)
+            {
+                std::cout << "Transition " << j << "\n";
+            }
+        }
+    }
+
     inline void getsid(Avionics* av, std::vector<std::string>& in)
     {
         if(in.size() != 3)
@@ -479,7 +501,7 @@ namespace dbg
     {
         if(in.size() != 3)
         {
-            std::cout << "Command expected 3 arguments: <airport icao> <runway id>\n";
+            std::cout << "Command expected 3 arguments: <airport icao> <SID name> <transition>\n";
             return;
         }
         
@@ -494,6 +516,30 @@ namespace dbg
 
         libnav::arinc_leg_seq_t star_legs = apt.get_star(in[1], in[2]);
         for(auto i: star_legs)
+        {
+            std::cout << i.main_fix.id << " " << i.leg_type << "\n";
+        }
+    }
+
+    inline void getappch(Avionics* av, std::vector<std::string>& in)
+    {
+        if(in.size() != 3)
+        {
+            std::cout << "Command expected 3 arguments: <airport icao> <approach name> <transition>\n";
+            return;
+        }
+        
+        libnav::Airport apt(in[0], av->arpt_db_ptr, av->navaid_db_ptr, av->cifp_dir_path);
+
+        if(apt.err_code != libnav::DbErr::SUCCESS &&
+            apt.err_code != libnav::DbErr::PARTIAL_LOAD)
+        {
+            std::cout << "Invalid airport icao\n";
+            return;
+        }
+
+        libnav::arinc_leg_seq_t appch_legs = apt.get_appch(in[1], in[2]);
+        for(auto i: appch_legs)
         {
             std::cout << i.main_fix.id << " " << i.leg_type << "\n";
         }
@@ -625,8 +671,10 @@ namespace dbg
         {"q", quit},
         {"allrwy", allrwy},
         {"allsid", allsid},
+        {"allapch", allapch},
         {"getsid", getsid},
         {"getstar", getstar},
+        {"getappch", getappch},
         {"lssid", lssid},
         {"lsstar", lsstar},
         {"lssidtrans", lssidtrans},

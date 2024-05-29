@@ -141,7 +141,7 @@ namespace libnav
 
 		bool is_airport(std::string icao_code);
 
-		int get_airport_data(std::string icao_code, airport_data_t* out);
+		bool get_airport_data(std::string icao_code, airport_data_t* out);
 
 		int get_apt_rwys(std::string icao_code, runway_data* out);
 
@@ -189,4 +189,4 @@ namespace libnav
 
 		void add_to_rnw_queue(rnw_data_t rnw);
 	};
-}; // namespace libnav
+} // namespace libnav

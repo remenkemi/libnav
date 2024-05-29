@@ -401,7 +401,7 @@ namespace libnav
 		return false;
 	}
 
-	int NavaidDB::get_wpt_data(std::string& id, std::vector<waypoint_entry_t>* out, 
+	size_t NavaidDB::get_wpt_data(std::string& id, std::vector<waypoint_entry_t>* out, 
 		std::string area_code, std::string country_code, NavaidType type, 
 		navaid_filter_t filt_func, void* ref)
 	{
@@ -434,10 +434,10 @@ namespace libnav
 				}
 			}
 		}
-		return int(out->size());
+		return out->size();
 	}
 
-	int NavaidDB::get_wpt_by_awy_str(std::string& awy_str, 
+	size_t NavaidDB::get_wpt_by_awy_str(std::string& awy_str, 
 		std::vector<waypoint_entry_t>* out)
 	{
 		std::vector<std::string> awy_split = strutils::str_split(awy_str, AUX_ID_SEP);
@@ -447,7 +447,7 @@ namespace libnav
 		return get_wpt_data(awy_split[0], out, "ENRT", awy_split[1], tp);
 	}
 
-	int NavaidDB::get_wpt_by_hold_str(std::string& hold_str, 
+	size_t NavaidDB::get_wpt_by_hold_str(std::string& hold_str, 
 		std::vector<waypoint_entry_t>* out)
 	{
 		std::vector<std::string> hold_split = strutils::str_split(hold_str, AUX_ID_SEP);
