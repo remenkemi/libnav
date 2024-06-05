@@ -90,6 +90,46 @@ namespace libnav
 	}
 
 
+	// navaid_entry_t definitions:
+
+	bool navaid_entry_t::cmp(navaid_entry_t const& other)
+	{
+		return max_recv == other.max_recv && elev_ft == other.elev_ft &&
+			elev_ft == other.elev_ft && freq == other.freq && 
+			mag_var == other.mag_var;
+	}
+
+	bool navaid_entry_t::operator==(navaid_entry_t const& other)
+	{
+		return cmp(other);
+	}
+
+	bool navaid_entry_t::operator!=(navaid_entry_t const& other)
+	{
+		return !cmp(other);
+	}
+
+	// waypoint_entry_t definitions:
+
+	bool waypoint_entry_t::cmp(waypoint_entry_t const& other)
+	{
+		return type == other.type && arinc_type == other.arinc_type &&
+			pos == other.pos && area_code == other.area_code && 
+			country_code == other.country_code && navaid == other.navaid;
+	}
+
+	bool waypoint_entry_t::operator==(waypoint_entry_t const& other)
+	{
+		return cmp(other);
+	}
+
+	bool waypoint_entry_t::operator!=(waypoint_entry_t const& other)
+	{
+		return !cmp(other);
+	}
+
+	// waypoint_t definitions:
+
 	std::string waypoint_t::get_awy_id()
 	{
 		navaid_type_t xp_type = libnav_to_xp_fix_type(data.type);
@@ -101,6 +141,16 @@ namespace libnav
 		navaid_type_t xp_type = libnav_to_xp_fix_type(data.type);
 		return id + "_" + data.country_code + "_" + data.area_code + "_" + 
 			std::to_string(int(xp_type));
+	}
+
+	bool waypoint_t::operator==(waypoint_t const& other)
+	{
+		return id == other.id && data == other.data;
+	}
+
+	bool waypoint_t::operator!=(waypoint_t const& other)
+	{
+		return id != other.id || data != other.data;
 	}
 
 

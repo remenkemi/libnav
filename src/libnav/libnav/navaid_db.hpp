@@ -65,6 +65,13 @@ namespace libnav
 	{
 		uint16_t max_recv;
 		double elev_ft, freq, mag_var;
+
+
+		bool cmp(navaid_entry_t const& other);
+
+		bool operator==(navaid_entry_t const& other);
+
+		bool operator!=(navaid_entry_t const& other);
 	};
 
 	struct waypoint_entry_t
@@ -75,6 +82,13 @@ namespace libnav
 		std::string area_code;
 		std::string country_code;
 		navaid_entry_t* navaid = nullptr;
+
+
+		bool cmp(waypoint_entry_t const& other);
+
+		bool operator==(waypoint_entry_t const& other);
+
+		bool operator!=(waypoint_entry_t const& other);
 	};
 
 	struct waypoint_t
@@ -100,6 +114,11 @@ namespace libnav
 		*/
 
 		std::string get_hold_id();
+
+
+		bool operator==(waypoint_t const& other);
+
+		bool operator!=(waypoint_t const& other);
 	};
 
 	

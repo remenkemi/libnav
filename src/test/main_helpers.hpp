@@ -374,6 +374,7 @@ namespace dbg
         av->navaid_db_ptr->get_wpt_data(in[0], &wpts);
         libnav::waypoint_entry_t tgt_data = select_desired(in[0], wpts);
         libnav::waypoint_t tgt_wpt = {in[0], tgt_data};
+
         std::string wpt_hold_id = tgt_wpt.get_hold_id();
 
         std::vector<libnav::hold_data_t> hld_data = 

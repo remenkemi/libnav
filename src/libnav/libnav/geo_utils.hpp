@@ -57,6 +57,12 @@ namespace geo
 	{
 		double lat_rad, lon_rad;
 
+
+		bool operator==(point const& other)
+		{
+			return lat_rad == other.lat_rad && lon_rad == other.lon_rad;
+		}
+
 		/*
 			Function: get_gc_bearing_rad
 			Description:
