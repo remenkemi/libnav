@@ -30,7 +30,7 @@
 
 namespace libnav
 {
-	constexpr double DB_VERSION = 1.0; // Change this if you want to rebuild runway and airport data bases
+	constexpr double DB_VERSION = 1.5; // Change this if you want to rebuild runway and airport data bases
 	constexpr int N_ARPT_LINES_IGNORE = 3;
 	// N_HEADER_STR_WORDS is the number of words in a string declaring the data base
 	// version.
@@ -106,7 +106,7 @@ namespace libnav
 	typedef std::unordered_map<std::string, airport_data_t> airport_db_t;
 	typedef std::unordered_map<std::string, 
 		std::unordered_map<std::string, runway_entry_t>> rnw_db_t;
-		
+
 
 	class ArptDB
 	{
