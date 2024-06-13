@@ -77,11 +77,12 @@ namespace libnav
     };
 
 
+    typedef std::unordered_map<std::string, std::unordered_map<std::string, alt_restr_t>> graph_t;
+    typedef std::unordered_map<std::string, graph_t> awy_db_t;
+    
+
     class AwyDB
     {
-        typedef std::unordered_map<std::string, std::unordered_map<std::string, alt_restr_t>> graph_t;
-        typedef std::unordered_map<std::string, graph_t> awy_db_t;
-
     public:
 
         AwyDB(std::string awy_path);

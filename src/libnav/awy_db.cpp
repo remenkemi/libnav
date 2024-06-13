@@ -98,7 +98,7 @@ namespace libnav
         return db_version;
     }
 
-    const AwyDB::awy_db_t& AwyDB::get_db()
+    const awy_db_t& AwyDB::get_db()
     {
         return awy_db;
     }

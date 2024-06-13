@@ -167,11 +167,13 @@ namespace libnav
 		bool operator()(waypoint_t w1, waypoint_t w2);
 	};
 
-	class NavaidDB
-	{
-		typedef std::unordered_map<std::string, 
+
+	typedef std::unordered_map<std::string, 
 			std::vector<libnav::waypoint_entry_t>> wpt_db_t;
 
+
+	class NavaidDB
+	{
 	public:
 
 		DbErr err_code;

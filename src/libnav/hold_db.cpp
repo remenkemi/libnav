@@ -71,7 +71,7 @@ namespace libnav
         return db_version;
     }
 
-    const HoldDB::hold_db_t& HoldDB::get_db()
+    const hold_db_t& HoldDB::get_db()
     {
         return hold_db;
     }

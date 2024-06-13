@@ -54,10 +54,11 @@ namespace libnav
     };
 
 
+    typedef std::unordered_map<std::string, std::vector<hold_data_t>> hold_db_t;
+
+
     class HoldDB
     {
-        typedef std::unordered_map<std::string, std::vector<hold_data_t>> hold_db_t;
-
     public:
         HoldDB(std::string db_path);
 

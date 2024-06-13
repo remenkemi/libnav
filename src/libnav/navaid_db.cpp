@@ -422,7 +422,7 @@ namespace libnav
 		return DbErr::FILE_NOT_FOUND;
 	}
 
-	const NavaidDB::wpt_db_t& NavaidDB::get_db()
+	const wpt_db_t& NavaidDB::get_db()
 	{
 		return wpt_cache;
 	}

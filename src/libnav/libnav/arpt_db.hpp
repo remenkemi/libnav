@@ -103,14 +103,16 @@ namespace libnav
 	};
 
 
+	typedef std::unordered_map<std::string, airport_data_t> airport_db_t;
+	typedef std::unordered_map<std::string, 
+		std::unordered_map<std::string, runway_entry_t>> rnw_db_t;
+		
+
 	class ArptDB
 	{
 		typedef std::pair<std::string, airport_data_t> str_arpt_data_t;
 		typedef std::pair<std::string, std::unordered_map<std::string, runway_entry_t>> 
 			str_rnw_t;
-		typedef std::unordered_map<std::string, airport_data_t> airport_db_t;
-		typedef std::unordered_map<std::string, 
-			std::unordered_map<std::string, runway_entry_t>> rnw_db_t;
 
 	public:
 		DbErr err_code;

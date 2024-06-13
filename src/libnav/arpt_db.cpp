@@ -88,12 +88,12 @@ namespace libnav
 		return err_code;
 	}
 
-	const ArptDB::airport_db_t& ArptDB::get_arpt_db()
+	const airport_db_t& ArptDB::get_arpt_db()
 	{
 		return arpt_db;
 	}
 
-	const ArptDB::rnw_db_t& ArptDB::get_rnw_db()
+	const rnw_db_t& ArptDB::get_rnw_db()
 	{
 		return rnw_db;
 	}
