@@ -291,14 +291,16 @@ namespace libnav
     std::vector<std::string> get_all_rwys_by_mask(std::string mask, 
         arinc_rwy_db_t& rwy_db);
 
+	
+	typedef std::set<std::string> str_set_t;
+    typedef std::unordered_map<std::string, str_set_t> str_umap_t;
 
     class Airport
     {
         typedef std::unordered_map<std::string, std::vector<int>> trans_db_t;
         typedef std::unordered_map<std::string, trans_db_t> proc_db_t;
         typedef std::pair<std::string, ProcType> proc_typed_str_t;
-        typedef std::set<std::string> str_set_t;
-        typedef std::unordered_map<std::string, str_set_t> str_umap_t;
+        
 
     public:
         DbErr err_code;
@@ -377,9 +379,38 @@ namespace libnav
 
         str_set_t get_trans_by_proc(std::string& proc_name, 
             proc_db_t db, bool rwy=false);
+			
+		/*
+            Function: parse_flt_legs
+            Description:
+            Parses flight legs. It takes them from flt_leg_strings. The function populates
+            SID/STAR/Approach and runway data bases.
+            @param arpt_db: pointer to airport data base
+            @param navaid_db: pointer to navaid data base
+            @return: error code. Can be either of the following: 
+                DbErr::SUCCESS
+                DbErr::PARTIAL_LOAD
+                DbErr::BAD_ALLOC
+        */
 
         DbErr parse_flt_legs(std::shared_ptr<ArptDB> arpt_db, 
             std::shared_ptr<NavaidDB> navaid_db);
+
+		/*
+            Function: load_db
+            Description:
+            Loads a CIFP data base
+            @param arpt_db: pointer to airport data base
+            @param navaid_db: pointer to navaid data base
+            @param path: path to directory of target data base file
+            @param postfix: file extension of target data base e.g. .dat
+            @return: error code. Can be either of the following: 
+                DbErr::SUCCESS
+                DbErr::DATA_BASE_ERROR
+                DbErr::FILE_NOT_FOUND
+                DbErr::PARTIAL_LOAD
+                DbErr::BAD_ALLOC
+        */
 
         DbErr load_db(std::shared_ptr<ArptDB> arpt_db, 
             std::shared_ptr<NavaidDB> navaid_db, std::string& path, 
