@@ -551,14 +551,31 @@ namespace libnav
         return {};
     }
 
+    std::string get_full_appr_nm(std::string nm, appr_pref_db_t& pref_db)
+    {
+        if(nm.size() > 1 && nm[1] >= '0' && nm[1] <= '9' && pref_db.find(nm[0]) != pref_db.end())
+        {
+            std::string nm_sub = nm.substr(1, nm.size()-1);
+            return pref_db[nm[0]] + nm_sub;
+        }
+        else if(nm.size() > 1 && (nm[1] < '0' || nm[1] > '9'))
+        {
+            return nm;
+        }
+        return "";
+    }
+
     // Airport class definitions
 
     // public member functions:
 
     Airport::Airport(std::string icao, std::shared_ptr<ArptDB> arpt_db, 
         std::shared_ptr<NavaidDB> navaid_db, std::string cifp_path,
-        std::string postfix)
+        std::string postfix, bool use_pr, appr_pref_db_t pr_db)
     {
+        use_appch_prefix = use_pr;
+        appch_prefix_db = pr_db;
+
         icao_code = icao;
         err_code = DbErr::ERR_NONE;
 
@@ -590,17 +607,17 @@ namespace libnav
         return rwy_db;
     }
 
-    Airport::str_umap_t Airport::get_all_sids()
+    str_umap_t Airport::get_all_sids()
     {
         return get_all_proc(sid_db);
     }
 
-    Airport::str_umap_t Airport::get_all_stars()
+    str_umap_t Airport::get_all_stars()
     {
         return get_all_proc(star_db);
     }
 
-    Airport::str_umap_t Airport::get_all_appch()
+    str_umap_t Airport::get_all_appch()
     {
         return get_all_proc(appch_db);
     }
@@ -620,37 +637,37 @@ namespace libnav
         return get_proc(proc_name, trans, appch_db);
     }
 
-    Airport::str_set_t Airport::get_sid_by_rwy(std::string& rwy_id)
+    str_set_t Airport::get_sid_by_rwy(std::string& rwy_id)
     {
         return get_proc_by_rwy(rwy_id, sid_per_rwy);
     }
 
-    Airport::str_set_t Airport::get_star_by_rwy(std::string& rwy_id)
+    str_set_t Airport::get_star_by_rwy(std::string& rwy_id)
     {
         return get_proc_by_rwy(rwy_id, star_per_rwy);
     }
 
-    Airport::str_set_t Airport::get_rwy_by_sid(std::string& sid)
+    str_set_t Airport::get_rwy_by_sid(std::string& sid)
     {
         return get_trans_by_proc(sid, sid_db, true);
     }
 
-    Airport::str_set_t Airport::get_rwy_by_star(std::string& star)
+    str_set_t Airport::get_rwy_by_star(std::string& star)
     {
         return get_trans_by_proc(star, star_db, true);
     }
 
-    Airport::str_set_t Airport::get_trans_by_sid(std::string& sid)
+    str_set_t Airport::get_trans_by_sid(std::string& sid)
     {
         return get_trans_by_proc(sid, sid_db);
     }
 
-    Airport::str_set_t Airport::get_trans_by_star(std::string& star)
+    str_set_t Airport::get_trans_by_star(std::string& star)
     {
         return get_trans_by_proc(star, star_db);
     }
 
-    Airport::str_set_t Airport::get_trans_by_appch(std::string& appch)
+    str_set_t Airport::get_trans_by_appch(std::string& appch)
     {
         return get_trans_by_proc(appch, appch_db);
     }
@@ -665,7 +682,7 @@ namespace libnav
 
     // private member functions:
 
-    Airport::str_umap_t Airport::get_all_proc(proc_db_t& db)
+    str_umap_t Airport::get_all_proc(proc_db_t& db)
     {
         str_umap_t out;
         for(auto i: db)
@@ -700,7 +717,7 @@ namespace libnav
         return {};
     }
 
-    Airport::str_set_t Airport::get_proc_by_rwy(std::string& rwy_id, 
+    str_set_t Airport::get_proc_by_rwy(std::string& rwy_id, 
         str_umap_t& umap)
     {
         if(umap.find(rwy_id) != umap.end())
@@ -712,7 +729,7 @@ namespace libnav
         return {};
     }
 
-    Airport::str_set_t Airport::get_trans_by_proc(std::string& proc_name, 
+    str_set_t Airport::get_trans_by_proc(std::string& proc_name, 
         proc_db_t db, bool rwy)
     {
         str_set_t out;
@@ -800,7 +817,12 @@ namespace libnav
                         }
                         else
                         {
-                            appch_db[proc_name][i].push_back(
+                            std::string appr_nm = proc_name;
+                            if(use_appch_prefix)
+                            {
+                                appr_nm = get_full_appr_nm(appr_nm, appch_prefix_db);
+                            }
+                            appch_db[appr_nm][i].push_back(
                                 n_arinc_legs_used);
                         }   
                     }
