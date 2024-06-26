@@ -822,8 +822,11 @@ namespace libnav
                             {
                                 appr_nm = get_full_appr_nm(appr_nm, appch_prefix_db);
                             }
-                            appch_db[appr_nm][i].push_back(
-                                n_arinc_legs_used);
+                            if(appr_nm != "")
+                            {
+                                appch_db[appr_nm][i].push_back(
+                                    n_arinc_legs_used);
+                            }
                         }   
                     }
 
