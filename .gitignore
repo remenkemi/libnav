@@ -1,4 +1,5 @@
 build/
 refs/
 test_data/
+navcmd.*
 navcmd
