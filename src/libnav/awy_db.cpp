@@ -149,6 +149,10 @@ namespace libnav
             }
 
             std::string curr = end;
+            if(prev.find(curr) == prev.end())
+            {
+                return 0;
+            }
             alt_restr_t r_past = awy_db[awy][prev[curr]][curr];
             while(prev[curr] != curr)
             {
