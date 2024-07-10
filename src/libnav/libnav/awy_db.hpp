@@ -76,9 +76,17 @@ namespace libnav
         awy_line_t(std::string& s);
     };
 
+    struct awy_to_awy_data_t;
+
 
     typedef std::unordered_map<std::string, std::unordered_map<std::string, alt_restr_t>> graph_t;
     typedef std::unordered_map<std::string, graph_t> awy_db_t;
+    typedef bool (*awy_path_func_t)(std::string&, void*);
+
+
+    bool awy_wpt_to_wpt_func(std::string& curr, void* ref);
+
+    bool awy_awy_to_awy_func(std::string& curr, void* ref);
     
 
     class AwyDB
@@ -97,8 +105,14 @@ namespace libnav
 
         bool is_in_awy(std::string awy, std::string point);
 
-        int get_path(std::string awy, std::string start, 
+        size_t get_ww_path(std::string awy, std::string start, 
             std::string end, std::vector<awy_point_t>* out);
+
+        size_t get_aa_path(std::string awy, std::string start, 
+            std::string next_awy, std::vector<awy_point_t>* out);
+
+        size_t get_path(std::string awy, std::string start, 
+            std::vector<awy_point_t>* out, awy_path_func_t path_func, void* ref);
 
         // You aren't supposed to call this function.
         // It's public to allow for the concurrent loading
@@ -112,5 +126,12 @@ namespace libnav
         std::future<DbErr> db_loaded;
 
         void add_to_awy_db(awy_point_t p1, awy_point_t p2, std::string awy_nm, char restr);
-    };    
+    };
+
+
+    struct awy_to_awy_data_t
+    {
+        std::string tgt_awy;
+        AwyDB *db_ptr;
+    };
 }; // namespace libnav

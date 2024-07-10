@@ -320,7 +320,7 @@ namespace dbg
             libnav::waypoint_t entry_wpt = {in[1], entry_wpts[0]};
             libnav::waypoint_t exit_wpt = {in[2], exit_wpts[0]};
             std::vector<libnav::awy_point_t> tmp;
-            av->awy_db->get_path(in[0], entry_wpt.get_awy_id(), exit_wpt.get_awy_id(), &tmp);
+            av->awy_db->get_ww_path(in[0], entry_wpt.get_awy_id(), exit_wpt.get_awy_id(), &tmp);
             for(size_t i = 0; i < tmp.size(); i++)
             {
                 std::cout << tmp[i].id << " " << tmp[i].alt_restr.lower 
@@ -328,6 +328,37 @@ namespace dbg
             }
         }
         
+    }
+
+    inline void get_aa_path(Avionics* av, std::vector<std::string>& in)
+    {
+        if(in.size() != 3)
+        {
+            std::cout << "Command expects 3 arguments: <airway name> <entry point> <next airway>\n";
+            return;
+        }
+
+        std::vector<libnav::waypoint_entry_t> entry_wpts;
+
+        awy_filter_data_t filter_data = {in[0], av};
+        av->navaid_db_ptr->get_wpt_data(in[1], &entry_wpts, "", "", 
+            libnav::NavaidType::NAVAID, 
+            [](libnav::waypoint_t wpt, void* ref) -> bool {
+                awy_filter_data_t *data = reinterpret_cast<awy_filter_data_t*>(ref);
+                return data->ptr->awy_db->is_in_awy(data->s, wpt.get_awy_id());
+            }, &filter_data);
+
+        if(entry_wpts.size())
+        {
+            libnav::waypoint_t entry_wpt = {in[1], entry_wpts[0]};
+            std::vector<libnav::awy_point_t> tmp;
+            av->awy_db->get_aa_path(in[0], entry_wpt.get_awy_id(), in[2], &tmp);
+            for(size_t i = 0; i < tmp.size(); i++)
+            {
+                std::cout << tmp[i].id << " " << tmp[i].alt_restr.lower 
+                    << " " << tmp[i].alt_restr.upper << "\n";
+            }
+        }
     }
 
     inline libnav::waypoint_entry_t select_desired(std::string& name,
@@ -667,6 +698,7 @@ namespace dbg
         {"name", name}, 
         {"poinfo", display_poi_info}, 
         {"get_path", get_path},
+        {"get_aa_path", get_aa_path},
         {"holdinfo", hold_info},
         {"quit", quit},
         {"q", quit},

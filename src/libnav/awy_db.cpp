@@ -74,6 +74,18 @@ namespace libnav
         }
     }
 
+    bool awy_wpt_to_wpt_func(std::string& curr, void* ref)
+    {
+        std::string *str_ptr = reinterpret_cast<std::string*>(ref);
+        return curr == *str_ptr;
+    }
+
+    bool awy_awy_to_awy_func(std::string& curr, void* ref)
+    {
+        awy_to_awy_data_t *data = reinterpret_cast<awy_to_awy_data_t*>(ref);
+        return data->db_ptr->is_in_awy(data->tgt_awy, curr);
+    }
+
     // AwyDB member function definitions:
     // Public member functions:
 
@@ -113,68 +125,91 @@ namespace libnav
         return false;
     }
 
-    int AwyDB::get_path(std::string awy, std::string start, 
-            std::string end, std::vector<awy_point_t>* out)
+    size_t AwyDB::get_ww_path(std::string awy, std::string start, 
+        std::string end, std::vector<awy_point_t>* out)
     {
         if(is_in_awy(awy, start) && is_in_awy(awy, end))
         {
-            std::unordered_map<std::string, std::string> prev;
-            std::unordered_map<std::string, int> used;
-            std::queue<std::string> q;
-            std::vector<awy_point_t> out_rev;
+            return get_path(awy, start, out, awy_wpt_to_wpt_func, &end);
+        }
 
-            q.push(start);
-            prev[start] = start;
+        return 0;
+    }
 
-            while(q.size())
+    size_t AwyDB::get_aa_path(std::string awy, std::string start, 
+        std::string next_awy, std::vector<awy_point_t>* out)
+    {
+        if(is_in_awy(awy, start))
+        {
+            awy_to_awy_data_t awy_data = {next_awy, this};
+            return get_path(awy, start, out, awy_awy_to_awy_func, &awy_data);
+        }
+
+        return 0;
+    }
+
+    size_t AwyDB::get_path(std::string awy, std::string start, 
+            std::vector<awy_point_t>* out, awy_path_func_t path_func, void* ref)
+    {
+        std::unordered_map<std::string, std::string> prev;
+        std::unordered_map<std::string, int> used;
+        std::queue<std::string> q;
+        std::vector<awy_point_t> out_rev;
+
+        std::string end;
+
+        q.push(start);
+        prev[start] = start;
+
+        while(q.size())
+        {
+            std::string curr = q.front();
+            q.pop();
+            used[curr] = 1;
+
+            if(path_func(curr, ref))
             {
-                std::string curr = q.front();
-                q.pop();
-                used[curr] = 1;
+                end = curr;
+                break;
+            }
 
-                if(curr == end)
+            for(auto it: awy_db[awy][curr])
+            {
+                std::string tmp = it.first;
+                if(used.find(tmp) == used.end())
                 {
-                    break;
+                    prev[tmp] = curr;
+                    q.push(tmp);
                 }
-
-                for(auto it: awy_db[awy][curr])
-                {
-                    std::string tmp = it.first;
-                    if(used.find(tmp) == used.end())
-                    {
-                        prev[tmp] = curr;
-                        q.push(tmp);
-                    }
-                }
-            }
-
-            std::string curr = end;
-            if(prev.find(curr) == prev.end())
-            {
-                return 0;
-            }
-            alt_restr_t r_past = awy_db[awy][prev[curr]][curr];
-            while(prev[curr] != curr)
-            {
-                awy_point_t curr_wpt;
-                curr_wpt.id = curr;
-                curr_wpt.alt_restr = r_past;
-                r_past = awy_db[awy][prev[curr]][curr];
-                out_rev.push_back(curr_wpt);
-                curr = prev[curr];
-            }
-            awy_point_t curr_wpt;
-            curr_wpt.id = curr;
-            curr_wpt.alt_restr = r_past;
-            out_rev.push_back(curr_wpt);
-
-            for(int i = int(out_rev.size()) - 1; i > -1; i--)
-            {
-                out->push_back(out_rev[size_t(i)]);
             }
         }
 
-        return int(out->size());
+        std::string curr = end;
+        if(prev.find(curr) == prev.end())
+        {
+            return 0;
+        }
+        alt_restr_t r_past = awy_db[awy][prev[curr]][curr];
+        while(prev[curr] != curr)
+        {
+            awy_point_t curr_wpt;
+            curr_wpt.id = curr;
+            curr_wpt.alt_restr = r_past;
+            r_past = awy_db[awy][prev[curr]][curr];
+            out_rev.push_back(curr_wpt);
+            curr = prev[curr];
+        }
+        awy_point_t curr_wpt;
+        curr_wpt.id = curr;
+        curr_wpt.alt_restr = r_past;
+        out_rev.push_back(curr_wpt);
+
+        for(int i = int(out_rev.size()) - 1; i > -1; i--)
+        {
+            out->push_back(out_rev[size_t(i)]);
+        }
+
+        return out->size();
     }
 
     AwyDB::~AwyDB()
