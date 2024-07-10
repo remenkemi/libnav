@@ -105,11 +105,47 @@ namespace libnav
 
         bool is_in_awy(std::string awy, std::string point);
 
+        /*
+            Fucntion: get_ww_path
+            Description:
+            Gets airway path from start waypoint to end waypoint
+            @param awy: airway name
+            @param start: start waypoint(airway id)
+            @param end: end waypoint(airway id)
+            @param out: pointer to output vector
+            @return size of out
+        */
+
         size_t get_ww_path(std::string awy, std::string start, 
             std::string end, std::vector<awy_point_t>* out);
 
+        /*
+            Fucntion: get_aa_path
+            Description:
+            Gets airway path that starts at start waypoint and ends at the intersection
+            of awy and next_awy
+            @param awy: airway that start waypoint belongs to
+            @param start: start waypoint(airway id)
+            @param next_awy: airway to intersect with
+            @param out: pointer to output vector
+            @return size of out
+        */
+
         size_t get_aa_path(std::string awy, std::string start, 
             std::string next_awy, std::vector<awy_point_t>* out);
+
+        /*
+            Fucntion: get_path
+            Description:
+            Traverses the airway and returns path given a termination function.
+            @param awy: airway to be traversed
+            @param start: start waypoint(airway id)
+            @param out: pointer to output vector
+            @param path_func: termination function. Must return true when traversing
+            has to be stopped
+            @param ref: pointer to miscellaneous data passed to path_func
+            @return size of out
+        */
 
         size_t get_path(std::string awy, std::string start, 
             std::vector<awy_point_t>* out, awy_path_func_t path_func, void* ref);
