@@ -11,6 +11,8 @@
     and load procedures for any airport in x-plane's CIFP data base.
 */
 
+#pragma once
+
 
 #include <string>
 #include <sstream>
