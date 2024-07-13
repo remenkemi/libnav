@@ -178,8 +178,8 @@ namespace geo
 			cos(ref_lat_rad) * sin(ang_dist_rad) * cos(brng_rad));
 		double tmp_lon = atan2(sin(brng_rad) * sin(ang_dist_rad) * cos(ref_lat_rad),
 			cos(ang_dist_rad) - sin(ref_lat_rad) * sin(tmp_lat));
-		ret.lat_rad = tmp_lat * RAD_TO_DEG;
-		ret.lon_rad = (ref_lon_rad + tmp_lon) * RAD_TO_DEG;
+		ret.lat_rad = tmp_lat;
+		ret.lon_rad = (ref_lon_rad + tmp_lon);
 
 		return ret;
 	}
@@ -313,9 +313,9 @@ namespace geo
 			for (int i = 0; i < 2; i++)
 			{
 				double tmp_1 = sin(theta_ua) * cos(psi_rad[i]);
-				arr[i].lat_rad = asin(sin(lat_u_rad) * cos(theta_ua) + cos(lat_u_rad) * tmp_1) * RAD_TO_DEG;
+				arr[i].lat_rad = asin(sin(lat_u_rad) * cos(theta_ua) + cos(lat_u_rad) * tmp_1);
 				arr[i].lon_rad = (atan2(sin(psi_rad[i]) * sin(theta_ua), cos(lat_u_rad) * cos(theta_ua) - 
-					sin(lat_u_rad) * tmp_1) + lon_u_rad) * RAD_TO_DEG;
+					sin(lat_u_rad) * tmp_1) + lon_u_rad);
 			}
 			return 2;
 		}
