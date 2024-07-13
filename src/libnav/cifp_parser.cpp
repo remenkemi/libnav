@@ -230,9 +230,9 @@ namespace libnav
 
     // arinc_fix_entry_t definitions:
 
-    waypoint_t arinc_fix_entry_t::to_waypoint_t(std::string& area_code, 
+    bool arinc_fix_entry_t::to_waypoint_t(std::string& area_code, 
         std::shared_ptr<ArptDB> arpt_db, std::shared_ptr<NavaidDB> navaid_db, 
-        arinc_rwy_db_t& rwy_db)
+        arinc_rwy_db_t& rwy_db, waypoint_t *out)
     {
         NavaidType lookup_type = NavaidType::NONE;
         std::string lookup_area = "ENRT";
@@ -257,13 +257,14 @@ namespace libnav
                 int ret = arpt_db->get_airport_data(area_code, &apt_data);
                 if(ret)
                 {
-                    return {area_code, {NavaidType::APT, 0, apt_data.pos, 
+                    *out = {area_code, {NavaidType::APT, 0, apt_data.pos, 
                         area_code, country_code}};
+                    return true;
                 }
             }
             else if(db_subsection == 'G')
             {
-                return get_rnw_wpt(rwy_db, fix_ident, area_code, country_code);
+                return get_rnw_wpt(rwy_db, fix_ident, area_code, country_code, out);
             }
             lookup_area = area_code;
         }
@@ -284,10 +285,23 @@ namespace libnav
 
         if(wpts.size())
         {
-            return {fix_ident, wpts[0]};
+            *out = {fix_ident, wpts[0]};
+            return true;
         }
 
-        return {};
+        return false;
+    }
+
+    // arinc_leg_t definitions:
+
+    double arinc_leg_t::get_mag_var_deg()
+    {
+        if(recd_navaid.data.navaid)
+        {
+            return recd_navaid.data.navaid->mag_var;
+        }
+
+        return 0;
     }
 
     // arinc_str_t definitions:
@@ -296,6 +310,7 @@ namespace libnav
     {
         rt_type = in_split[1][0];
         
+
         main_fix.fix_ident = in_split[4];
         main_fix.country_code = in_split[5];
         main_fix.db_section = in_split[6][0];
@@ -348,7 +363,8 @@ namespace libnav
         arinc_leg_t out;
         out.rt_type = rt_type;
 
-        out.main_fix = main_fix.to_waypoint_t(area_code, arpt_db, navaid_db, rwy_db);
+        out.has_main_fix = main_fix.to_waypoint_t(area_code, arpt_db, navaid_db, 
+            rwy_db, &out.main_fix);
 
         out.wpt_desc = wpt_desc;
         out.turn_dir = char2dir(turn_dir);
@@ -356,7 +372,8 @@ namespace libnav
         out.leg_type = leg_type;
         out.is_ovfy = tdv == 'Y';
 
-        out.recd_navaid = recd_navaid.to_waypoint_t(area_code, arpt_db, navaid_db, rwy_db);
+        out.has_recd_navaid = recd_navaid.to_waypoint_t(area_code, arpt_db, navaid_db, 
+            rwy_db, &out.recd_navaid);
         out.arc_radius = arc_radius;
         out.theta = theta;
         out.rho = rho;
@@ -373,7 +390,8 @@ namespace libnav
         out.vert_angle_deg = vert_angle;
         out.vert_scale_ft = vert_scale;
 
-        out.center_fix = center_fix.to_waypoint_t(area_code, arpt_db, navaid_db, rwy_db);
+        out.has_center_fix = center_fix.to_waypoint_t(area_code, arpt_db, navaid_db, 
+            rwy_db, &out.center_fix);
 
         out.multi_cod = multi_cod;
         out.gnss_ind = gnss_ind;
@@ -488,8 +506,8 @@ namespace libnav
     }
 
 
-    waypoint_t get_rnw_wpt(arinc_rwy_db_t& rwy_db, std::string& id, std::string& area_cd, 
-        std::string& country_cd)
+    bool get_rnw_wpt(arinc_rwy_db_t& rwy_db, std::string& id, std::string& area_cd, 
+        std::string& country_cd, waypoint_t *out)
     {
         std::string tmp = id;
         size_t tmp_length = tmp.length();
@@ -502,16 +520,15 @@ namespace libnav
         
         if(rwy_db.find(tmp) != rwy_db.end())
         {
-            waypoint_t out;
-            out.data.pos = rwy_db[tmp].pos;
-            out.id = tmp;
-            out.data.type = NavaidType::RWY;
-            out.data.area_code = area_cd;
-            out.data.country_code = country_cd;
+            out->data.pos = rwy_db[tmp].pos;
+            out->id = tmp;
+            out->data.type = NavaidType::RWY;
+            out->data.area_code = area_cd;
+            out->data.country_code = country_cd;
 
-            return out;
+            return true;
         }
-        return {};
+        return false;
     }
 
     std::vector<std::string> get_all_rwys_by_mask(std::string mask, 

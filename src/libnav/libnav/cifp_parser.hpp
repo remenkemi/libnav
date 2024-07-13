@@ -197,15 +197,16 @@ namespace libnav
         char db_subsection;  //Ref: arinc424 spec, section 5.5
 
 
-        waypoint_t to_waypoint_t(std::string& area_code, 
+        bool to_waypoint_t(std::string& area_code, 
             std::shared_ptr<ArptDB> arpt_db, std::shared_ptr<NavaidDB> navaid_db, 
-            arinc_rwy_db_t& rwy_db);
+            arinc_rwy_db_t& rwy_db, waypoint_t *out);
     };
 
     struct arinc_leg_t
     {
         char rt_type;  // Column 2. Ref: arinc424 spec, section 5.7
 
+        bool has_main_fix;
         waypoint_t main_fix;  // Columns 5-8
         std::string wpt_desc;  //Column 9. Ref: arinc424 spec, section 5.17
         
@@ -214,6 +215,7 @@ namespace libnav
         std::string leg_type;  // Column 12: Ref: arinc424 spec, section 5.21
         bool is_ovfy;
 
+        bool has_recd_navaid;
         waypoint_t recd_navaid;  // Columns 14-17. Recommended navaid.
 
         float arc_radius;  // Column 18. Arc radius *1000 nm. Ref: arinc424 spec, section 5.204
@@ -234,6 +236,7 @@ namespace libnav
         float vert_angle_deg; 
         int vert_scale_ft;  // Column 30. Vertical deviation scale in feet. Ref: arinc424 spec, section 5.293
 
+        bool has_center_fix;
         waypoint_t center_fix;  // Column 31-34. Center fix for RF/AF leg.
 
         char multi_cod;  // Column 35 Multi-Code / TAA Center. Ref: arinc424 spec, section 5.130/5.272
@@ -242,6 +245,10 @@ namespace libnav
 
         char rt_qual1;  // Column 37. Ref: arinc424 spec, section 5.7
         char rt_qual2;  // Column 38. Ref: arinc424 spec, section 5.7
+
+
+        // Gets mag var from the recommended navaid
+        double get_mag_var_deg();
     };
 
     struct arinc_str_t
@@ -305,10 +312,12 @@ namespace libnav
         @param id: id of the target runway. Can have "RW" prefix, but not necessary.
         @param area_cd: area code.
         @param country_cd: country code.
-        @return waypoint_t: waypoint with the position at the start of the selected runway.
+        @param out: location where to write the waypoint with the position at 
+        the start of the selected runway.
+        @return true if waypoint was written, otherwise false.
     */
-    waypoint_t get_rnw_wpt(arinc_rwy_db_t& rwy_db, std::string& id, std::string& area_cd, 
-        std::string& country_cd);
+    bool get_rnw_wpt(arinc_rwy_db_t& rwy_db, std::string& id, std::string& area_cd, 
+        std::string& country_cd, waypoint_t *out);
 
     std::vector<std::string> get_all_rwys_by_mask(std::string mask, 
         arinc_rwy_db_t& rwy_db);
