@@ -1,5 +1,6 @@
 build/
 refs/
 test_data/
+.vscode/
 navcmd.*
 navcmd
