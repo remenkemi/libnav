@@ -304,6 +304,25 @@ namespace libnav
         return 0;
     }
 
+    void arinc_leg_t::set_main_fix(waypoint_t fix)
+    {
+        main_fix = fix;
+        has_main_fix = true;
+    }
+
+    void arinc_leg_t::set_recd_fix(waypoint_t fix)
+    {
+        assert(fix.data.navaid != nullptr);
+        recd_navaid = fix;
+        has_recd_navaid = true;
+    }
+
+    void arinc_leg_t::set_ctr_fix(waypoint_t fix)
+    {
+        center_fix = fix;
+        has_center_fix = true;
+    }
+
     // arinc_str_t definitions:
 
     arinc_str_t::arinc_str_t(std::vector<std::string>& in_split)

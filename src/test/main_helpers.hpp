@@ -92,51 +92,11 @@ namespace dbg
             auto apt_db = arpt_db_ptr->get_arpt_db();
             auto navaid_db = navaid_db_ptr->get_db();
 
-            libnav::airport_data_t tgt1_data;
-            libnav::airport_data_t tgt2_data;
-            int ret1 = arpt_db_ptr->get_airport_data("SBBE", &tgt1_data);
-            int ret2 = arpt_db_ptr->get_airport_data("SBMQ", &tgt2_data);
-
-            if(ret1 && ret2)
-            {
-                geo::point check = geo::get_pos_from_intc(tgt1_data.pos, 
-                    tgt2_data.pos, 50 * geo::DEG_TO_RAD, 100 * geo::DEG_TO_RAD);
-                double brng_1 = tgt1_data.pos.get_gc_bearing_rad(check);
-                double brng_2 = tgt2_data.pos.get_gc_bearing_rad(check);
-                std::cout << geo::rad_to_pos_deg(brng_1) << " " << geo::rad_to_pos_deg(brng_2)
-                     << "\n";
-                std::cout << strutils::lat_to_str(check.lat_rad * geo::RAD_TO_DEG) << " " << 
-                    strutils::lon_to_str(check.lon_rad * geo::RAD_TO_DEG) << "\n";
-                std::cout << strutils::lat_to_str(tgt1_data.pos.lat_rad * geo::RAD_TO_DEG) << " " << 
-                    strutils::lon_to_str(tgt1_data.pos.lon_rad * geo::RAD_TO_DEG) << "\n";
-                std::cout << strutils::lat_to_str(tgt2_data.pos.lat_rad * geo::RAD_TO_DEG) << " " << 
-                    strutils::lon_to_str(tgt2_data.pos.lon_rad * geo::RAD_TO_DEG) << "\n";
-                for(auto i: apt_db)
-                {
-                    double dist = i.second.pos.get_gc_dist_nm(tgt1_data.pos);
-                    if(dist > 170 && dist < 230)
-                    {
-                        double brng_rad = i.second.pos.get_gc_bearing_rad(tgt1_data.pos);
-                        std::cout << i.first << " " << geo::rad_to_pos_deg(brng_rad) << "\n";
-                    }
-                }
-
-                for(auto i: navaid_db)
-                {
-                    for(auto j: i.second)
-                    {
-                        if(j.type != libnav::NavaidType::NONE && 
-                            j.type != libnav::NavaidType::WAYPOINT)
-                        {
-                            double dist = j.pos.get_gc_dist_nm(tgt1_data.pos);
-                            double brng = j.pos.get_gc_bearing_rad(tgt1_data.pos);
-                            double brng_deg = geo::rad_to_pos_deg(brng);
-                            if(dist < 80)
-                                std::cout << i.first << " " << dist << " " << brng_deg << "\n";
-                        }
-                    }
-                }
-            }
+            
+            geo::point a = {0.88620446987426393, -0.032602314035019953};
+            geo::point b = {0.88933687994841504, -0.023475648495750793};
+            double brng = b.get_gc_bearing_rad(a);
+            std::cout << brng * geo::RAD_TO_DEG + 360 << "\n";
         }
 
         void update()

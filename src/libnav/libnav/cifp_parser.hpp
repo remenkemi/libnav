@@ -249,6 +249,15 @@ namespace libnav
 
         // Gets mag var from the recommended navaid
         double get_mag_var_deg();
+
+        // Use the following functions if you ever need to set any leg's fix manually.
+        // NEVER set the leg fixes manually.
+
+        void set_main_fix(waypoint_t fix);
+
+        void set_recd_fix(waypoint_t fix);
+
+        void set_ctr_fix(waypoint_t fix);
     };
 
     struct arinc_str_t
