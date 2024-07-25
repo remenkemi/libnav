@@ -296,7 +296,7 @@ namespace libnav
 
     double arinc_leg_t::get_mag_var_deg()
     {
-        if(recd_navaid.data.navaid)
+        if(has_recd_navaid && recd_navaid.data.navaid)
         {
             return recd_navaid.data.navaid->mag_var;
         }
