@@ -211,20 +211,21 @@ namespace libnav
         std::string wpt_desc;  //Column 9. Ref: arinc424 spec, section 5.17
         
         TurnDir turn_dir;
-        float rnp;
+        double rnp;
         std::string leg_type;  // Column 12: Ref: arinc424 spec, section 5.21
         bool is_ovfy;
 
         bool has_recd_navaid;
         waypoint_t recd_navaid;  // Columns 14-17. Recommended navaid.
 
-        float arc_radius;  // Column 18. Arc radius *1000 nm. Ref: arinc424 spec, section 5.204
-        float theta;  // Column 19. magnetic bearing from recd_navaid to main_fix *10. Ref: arinc424 spec, section 5.24
-        float rho;  // Column 20. geodetic distance from recd_navaid to main_fix *10. Ref: arinc424 spec, section 5.25
+        double arc_radius;  // Column 18. Arc radius *1000 nm. Ref: arinc424 spec, section 5.204
+        double theta;  // Column 19. magnetic bearing from recd_navaid to main_fix *10. Ref: arinc424 spec, section 5.24
+        double tru_theta; // theta in true degrees
+        double rho;  // Column 20. geodetic distance from recd_navaid to main_fix *10. Ref: arinc424 spec, section 5.25
         bool outbd_crs_true;
-        float outbd_crs_deg;  // Treated as magnetic if outbd_crs_true is false.
+        double outbd_crs_deg;  // Treated as magnetic if outbd_crs_true is false.
         bool outbd_dist_as_time;
-        float outbd_dist_time;
+        double outbd_dist_time;
         
         AltMode alt_desc;  // Column 23
         int alt1_ft;
@@ -233,7 +234,7 @@ namespace libnav
 
         SpeedMode speed_desc;  // Column 27. Ref: arinc424 spec, section 5.261
         int spd_lim_kias;  // Column 28. Speed limit in KIAS. Ref: arinc424 spec, section 5.28
-        float vert_angle_deg; 
+        double vert_angle_deg; 
         int vert_scale_ft;  // Column 30. Vertical deviation scale in feet. Ref: arinc424 spec, section 5.293
 
         bool has_center_fix;
@@ -276,9 +277,9 @@ namespace libnav
 
         arinc_fix_entry_t recd_navaid;  // Columns 14-17. Recommended navaid.
 
-        float arc_radius;  // Column 18. Arc radius *1000 nm. Ref: arinc424 spec, section 5.204
-        float theta;  // Column 19. magnetic bearing from recd_navaid to main_fix *10. Ref: arinc424 spec, section 5.24
-        float rho;  // Column 20. geodetic distance from recd_navaid to main_fix *10. Ref: arinc424 spec, section 5.25
+        double arc_radius;  // Column 18. Arc radius *1000 nm. Ref: arinc424 spec, section 5.204
+        double theta;  // Column 19. magnetic bearing from recd_navaid to main_fix *10. Ref: arinc424 spec, section 5.24
+        double rho;  // Column 20. geodetic distance from recd_navaid to main_fix *10. Ref: arinc424 spec, section 5.25
         std::string outbd_mag_crs;  // Column 21. Magnetic course from main_fix *10. If true, has T at the end. 
             // Ref: arinc424 spec, section 5.26
         std::string outbd_dist_time;  // Column 22. Distance in nm/time(min) from main_fix to next wpt. *10. 
@@ -291,7 +292,7 @@ namespace libnav
 
         char speed_desc;  // Column 27. Ref: arinc424 spec, section 5.261
         int spd_lim;  // Column 28. Speed limit in KIAS. Ref: arinc424 spec, section 5.28
-        float vert_angle;  // Column 29. Vertical angle in deg*100. Ref: arinc424 spec, section 5.70
+        double vert_angle;  // Column 29. Vertical angle in deg*100. Ref: arinc424 spec, section 5.70
         int vert_scale;  // Column 30. Vertical deviation scale in feet. Ref: arinc424 spec, section 5.293
 
         arinc_fix_entry_t center_fix;  // Column 31-34. Center fix for RF/AF leg.

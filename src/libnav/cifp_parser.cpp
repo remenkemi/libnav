@@ -296,9 +296,16 @@ namespace libnav
 
     double arinc_leg_t::get_mag_var_deg()
     {
-        if(has_recd_navaid && recd_navaid.data.navaid)
+        if(has_recd_navaid)
         {
-            return recd_navaid.data.navaid->mag_var;
+            if(theta != 0)
+            {
+                return theta - tru_theta;
+            }
+            else if(recd_navaid.data.navaid)
+            {
+                return recd_navaid.data.navaid->mag_var;
+            }
         }
 
         return 0;
@@ -346,9 +353,9 @@ namespace libnav
         recd_navaid.db_section = in_split[15][0];
         recd_navaid.db_subsection = in_split[16][0];
 
-        arc_radius = strutils::stof_with_strip(in_split[17]);
-        theta = strutils::stof_with_strip(in_split[18]);
-        rho = strutils::stof_with_strip(in_split[19]);
+        arc_radius = double(strutils::stof_with_strip(in_split[17]));
+        theta = double(strutils::stof_with_strip(in_split[18]));
+        rho = double(strutils::stof_with_strip(in_split[19]));
         outbd_mag_crs = strutils::strip(in_split[20], ' ');
         outbd_dist_time = strutils::strip(in_split[21], ' ');
 
@@ -359,7 +366,7 @@ namespace libnav
 
         speed_desc = in_split[26][0];
         spd_lim = strutils::stoi_with_strip(in_split[27]);
-        vert_angle = float(strutils::stof_with_strip(in_split[28]) * 0.01);
+        vert_angle = double(strutils::stof_with_strip(in_split[28]) * 0.01);
         vert_scale = strutils::stoi_with_strip(in_split[29]);
 
         center_fix.fix_ident = strutils::strip(in_split[30], ' ');
@@ -395,6 +402,11 @@ namespace libnav
             rwy_db, &out.recd_navaid);
         out.arc_radius = arc_radius;
         out.theta = theta;
+        if(theta != 0 && out.has_recd_navaid && out.has_main_fix)
+        {
+            out.tru_theta = out.recd_navaid.data.pos.get_gc_bearing_rad(
+                out.main_fix.data.pos) * geo::RAD_TO_DEG;
+        }
         out.rho = rho;
         out.outbd_crs_deg = str2outbd_crs(outbd_mag_crs, &out.outbd_crs_true);
         out.outbd_dist_time = str2outbd_dist(outbd_dist_time, &out.outbd_dist_as_time);
