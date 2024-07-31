@@ -401,11 +401,16 @@ namespace libnav
         out.has_recd_navaid = recd_navaid.to_waypoint_t(area_code, arpt_db, navaid_db, 
             rwy_db, &out.recd_navaid);
         out.arc_radius = arc_radius;
-        out.theta = theta;
+        out.theta = theta * 0.1;
         if(theta != 0 && out.has_recd_navaid && out.has_main_fix)
         {
             out.tru_theta = out.recd_navaid.data.pos.get_gc_bearing_rad(
                 out.main_fix.data.pos) * geo::RAD_TO_DEG;
+            
+            if(out.tru_theta < 0)
+            {
+                out.tru_theta += 360;
+            }
         }
         out.rho = rho;
         out.outbd_crs_deg = str2outbd_crs(outbd_mag_crs, &out.outbd_crs_true);
