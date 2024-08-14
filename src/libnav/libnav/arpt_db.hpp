@@ -30,7 +30,7 @@
 
 namespace libnav
 {
-	constexpr double DB_VERSION = 1.5; // Change this if you want to rebuild runway and airport data bases
+	constexpr double DB_VERSION = 1.6; // Change this if you want to rebuild runway and airport data bases
 	constexpr int N_ARPT_LINES_IGNORE = 3;
 	// N_HEADER_STR_WORDS is the number of words in a string declaring the data base
 	// version.
@@ -41,7 +41,7 @@ namespace libnav
 	// Number of indices after the decimal in the string representation of a double number
 	constexpr int N_DOUBLE_OUT_PRECISION = 9;
 	// If the longest runway of the airport is less than this, the airport will not be included in the database
-	constexpr double MIN_RWY_LENGTH_M = 2000;
+	constexpr double MIN_RWY_LENGTH_M = 1000;
 	constexpr char DEFAULT_COMMENT_CHAR = '#';
 
 
@@ -118,7 +118,7 @@ namespace libnav
 		DbErr err_code;
 
 		ArptDB(std::string sim_arpt_path, std::string custom_arpt_path,
-			std::string custom_rnw_path);
+			std::string custom_rnw_path, double min_rwy_l_m = MIN_RWY_LENGTH_M);
 
 		DbErr get_err();
 
@@ -151,6 +151,7 @@ namespace libnav
 
 	private:
 		int db_version;  // May be used later
+		double min_rwy_length_m;
 
 		std::string custom_arpt_db_sign = "ARPTDB";
 		std::string custom_rnw_db_sign = "RNWDB";

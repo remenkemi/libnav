@@ -18,12 +18,13 @@ namespace libnav
 {
 	// Public member functions
 
-	ArptDB::ArptDB(std::string sim_arpt_path, std::string custom_arpt_path, 
-		std::string custom_rnw_path)
+	ArptDB::ArptDB(std::string sim_arpt_path, std::string custom_arpt_path,
+		std::string custom_rnw_path, double min_rwy_l_m)
 	{
 		err_code = DbErr::ERR_NONE;
 
 		db_version = 0;
+		min_rwy_length_m = min_rwy_l_m;
 
 		sim_arpt_db_path = sim_arpt_path;
 		custom_arpt_db_path = custom_arpt_path;
@@ -139,7 +140,7 @@ namespace libnav
 						 || row_code == static_cast<int>(XPLMArptRowCode::DB_EOF)))
 					{
 						// Offload airport data
-						double threshold = MIN_RWY_LENGTH_M;
+						double threshold = min_rwy_length_m;
 
 						if (max_rnw_length_m >= threshold && tmp_arpt.data.transition_alt_ft + 
 							tmp_arpt.data.transition_level > 0)
