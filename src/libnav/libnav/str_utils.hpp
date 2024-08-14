@@ -49,6 +49,43 @@ namespace strutils
 		return s.str();
 	}
 
+	inline double strtod(std::string s)
+    {
+        size_t d_idx = 0;
+
+        while(s[d_idx] != '.' && d_idx < s.size())
+            d_idx++;
+
+        double out = 0;
+        double curr_p = 1;
+
+        bool is_neg = s[0] == '-';
+        
+        if(d_idx)
+        {
+            for(size_t i = d_idx - 1; i >= size_t(is_neg); i--)
+            {
+                out += double(s[i] - '0') * curr_p;
+                curr_p *= 10;
+                if(i == size_t(is_neg))
+                    break;
+            }
+        }
+
+        curr_p = 0.1;
+
+        for(size_t i = d_idx+1; i < s.size(); i++)
+        {
+            out += double(s[i] - '0') * curr_p;
+            curr_p *= 0.1;
+        }
+
+        if(is_neg)
+            out *= -1;
+
+        return out;
+    }
+
 	/*
 		Converts a double frequency to Boeing-style string representation
 	*/
