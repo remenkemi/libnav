@@ -30,7 +30,7 @@
 
 namespace libnav
 {
-	constexpr double DB_VERSION = 1.6; // Change this if you want to rebuild runway and airport data bases
+	constexpr double DB_VERSION = 1.7; // Change this if you want to rebuild runway and airport data bases
 	constexpr int N_ARPT_LINES_IGNORE = 3;
 	// N_HEADER_STR_WORDS is the number of words in a string declaring the data base
 	// version.
