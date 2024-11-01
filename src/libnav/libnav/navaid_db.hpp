@@ -82,7 +82,7 @@ namespace libnav
 		std::string area_code;
 		std::string country_code;
 		navaid_entry_t* navaid = nullptr;
-
+		
 
 		bool cmp(waypoint_entry_t const& other);
 

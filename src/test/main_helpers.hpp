@@ -437,8 +437,9 @@ namespace dbg
         }
         
         libnav::Airport apt(in[0], av->arpt_db_ptr, av->navaid_db_ptr, av->cifp_dir_path);
+        libnav::Airport apt1(apt);
 
-        auto sids = apt.get_all_sids();
+        auto sids = apt1.get_all_sids();
 
         for(auto i: sids)
         {
@@ -481,8 +482,9 @@ namespace dbg
         }
         
         libnav::Airport apt(in[0], av->arpt_db_ptr, av->navaid_db_ptr, av->cifp_dir_path);
+        libnav::Airport apt1(apt);
 
-        libnav::arinc_leg_seq_t sid_legs = apt.get_sid(in[1], in[2]);
+        libnav::arinc_leg_seq_t sid_legs = apt1.get_sid(in[1], in[2]);
         for(auto i: sid_legs)
         {
             std::cout << i.main_fix.id << " " << i.leg_type << "\n";

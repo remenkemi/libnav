@@ -355,6 +355,8 @@ namespace libnav
             std::shared_ptr<NavaidDB> navaid_db, std::string cifp_path="", 
             std::string postfix=".dat", bool use_pr=false, appr_pref_db_t pr_db = APPR_PREF);
 
+        Airport(Airport& copy);
+
         std::vector<std::string> get_rwys();
 
         const arinc_rwy_db_t& get_rwy_db();

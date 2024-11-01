@@ -645,6 +645,33 @@ namespace libnav
         }
     }
 
+    Airport::Airport(Airport& copy): appch_prefix_db(), rwy_db(),
+        arinc_legs(new arinc_leg_t[N_FLT_LEG_CACHE_SZ]), 
+        sid_db(), star_db(), appch_db(), sid_per_rwy(), star_per_rwy()
+    {
+        assert(flt_leg_strings.size() == 0); // Make sure the other airport isn't being updated
+        
+        err_code = copy.err_code;
+        icao_code = copy.icao_code;
+
+        use_appch_prefix = copy.use_appch_prefix;
+        appch_prefix_db = copy.appch_prefix_db;
+        rwy_db = copy.rwy_db;
+        n_arinc_legs_used = copy.n_arinc_legs_used;
+
+        for(int i = 0; i < n_arinc_legs_used; i++)
+        {
+            arinc_legs[i] = copy.arinc_legs[i];
+        }
+
+        sid_db = copy.sid_db;
+        star_db = copy.star_db;
+        appch_db = copy.appch_db;
+
+        sid_per_rwy = copy.sid_per_rwy;
+        star_per_rwy = copy.star_per_rwy;
+    }
+
     std::vector<std::string> Airport::get_rwys()
     {
         std::vector<std::string> out;
