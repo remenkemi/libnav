@@ -624,7 +624,7 @@ namespace libnav
 
     Airport::Airport(std::string icao, std::shared_ptr<ArptDB> arpt_db, 
         std::shared_ptr<NavaidDB> navaid_db, std::string cifp_path,
-        std::string postfix, bool use_pr, appr_pref_db_t pr_db)
+        std::string postfix, bool use_pr, appr_pref_db_t pr_db, arinc_leg_t* leg_ptr)
     {
         use_appch_prefix = use_pr;
         appch_prefix_db = pr_db;
@@ -632,7 +632,17 @@ namespace libnav
         icao_code = icao;
         err_code = DbErr::ERR_NONE;
 
-        arinc_legs = new arinc_leg_t[N_FLT_LEG_CACHE_SZ];
+        self_alloc = false;
+        if(leg_ptr == nullptr)
+        {
+            arinc_legs = new arinc_leg_t[N_FLT_LEG_CACHE_SZ];
+            self_alloc = true;
+        }
+        else
+        {
+            arinc_legs = leg_ptr;
+        }
+        
         n_arinc_legs_used = 0;
 
         if(arinc_legs == nullptr)
@@ -645,8 +655,7 @@ namespace libnav
         }
     }
 
-    Airport::Airport(Airport& copy): appch_prefix_db(), rwy_db(),
-        arinc_legs(new arinc_leg_t[N_FLT_LEG_CACHE_SZ]), 
+    Airport::Airport(Airport& copy, arinc_leg_t* leg_ptr): appch_prefix_db(), rwy_db(), 
         sid_db(), star_db(), appch_db(), sid_per_rwy(), star_per_rwy()
     {
         assert(flt_leg_strings.size() == 0); // Make sure the other airport isn't being updated
@@ -658,6 +667,17 @@ namespace libnav
         appch_prefix_db = copy.appch_prefix_db;
         rwy_db = copy.rwy_db;
         n_arinc_legs_used = copy.n_arinc_legs_used;
+
+        self_alloc = false;
+        if(leg_ptr == nullptr)
+        {
+            arinc_legs = new arinc_leg_t[N_FLT_LEG_CACHE_SZ];
+            self_alloc = true;
+        }
+        else
+        {
+            arinc_legs = leg_ptr;
+        }
 
         for(int i = 0; i < n_arinc_legs_used; i++)
         {
@@ -754,7 +774,7 @@ namespace libnav
 
     Airport::~Airport()
     {
-        if(arinc_legs != nullptr)
+        if(arinc_legs != nullptr && self_alloc)
         {
             delete[] arinc_legs;
         }
