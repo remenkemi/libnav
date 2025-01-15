@@ -22,5 +22,5 @@ jobs:
     
     - name: build
       run: |
-        cmake ..
+        cmake
         make
